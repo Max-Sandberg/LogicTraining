@@ -18,7 +18,27 @@ var myGameArea = {
 }
 
 function updateGameArea() {
-	// Do shit!
+	drawGate(200, 200);
+}
+
+function drawLine(x1, y1, x2, y2){
+	ctx = myGameArea.context;
+	ctx.beginPath();
+	ctx.moveTo(x1,y1);
+	ctx.lineTo(x2,y2);
+	ctx.stroke();
+}
+
+function drawGate(x, y) {
+	ctx = myGameArea.context;
+	sc = 20;	// Scale
+	// Input wires
+	drawLine(x, y+sc, x+(2*sc), y+sc);
+	drawLine(x, y+(3*sc), x+(2*sc), y+(3*sc));
+	// Output wire
+	drawLine(x+(6*sc), y+(2*sc), x+(8*sc), y+(2*sc));
+	ctx.rect(x+(2*sc), y, (4*sc), (4*sc));
+	ctx.stroke();
 }
 
 function everyinterval(n) {
