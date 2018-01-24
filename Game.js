@@ -17,6 +17,37 @@ var myGameArea = {
     }
 }
 
+var circuit = {
+	columns : [{
+		type : "wires",
+		signals : [0, 1, 1, 0]
+	}, {
+		type : "gates",
+		gates : [{
+			inputs : [[1, 0], [1, 1]]
+		}, {
+			inputs : [[1, 2], [1, 3]]
+		}]
+	}, {
+		type : "wires",
+		signals : [0]
+	}, {
+		type : "gates",
+		gates : [{
+			inputs : [[3, 1], [2, 1]]
+		}, {
+			inputs : [[2, 1], [2, 2]]
+		}]
+	}, {
+		type : "wires"
+	}, {
+		type : "gates",
+		gates : [{
+			inputs : [[4, 1], [4, 2]]
+		}]
+	}]
+}
+
 function updateGameArea() {
 	drawGate(200, 200);
 }
