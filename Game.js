@@ -10,8 +10,11 @@ var myGameArea = {
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
+
+		drawCircuit();
+
         this.interval = setInterval(updateGameArea, 20);
-        },
+    },
     clear : function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
@@ -49,7 +52,7 @@ var circuit = {
 }
 
 function updateGameArea() {
-	drawGate(200, 200);
+
 }
 
 function drawLine(x1, y1, x2, y2){
@@ -60,16 +63,50 @@ function drawLine(x1, y1, x2, y2){
 	ctx.stroke();
 }
 
-function drawGate(x, y) {
+// Draws an input signal. Height 1, Width 2. (sc = 1/2)
+function drawSignal(x, y, sig, sc) {
 	ctx = myGameArea.context;
-	sc = 20;	// Scale
+	ctx.font = "26px Arial";
+	ctx.fillText(sig, x+32, y+30);
+	drawLine(x+54, y+20, x+80, y+20);
+}
+
+//Draws a logic gate. Height 2, Width 4. (sc = 1/2)
+function drawGate(x, y, sc) {
+	ctx = myGameArea.context;
 	// Input wires
 	drawLine(x, y+sc, x+(2*sc), y+sc);
 	drawLine(x, y+(3*sc), x+(2*sc), y+(3*sc));
 	// Output wire
 	drawLine(x+(6*sc), y+(2*sc), x+(8*sc), y+(2*sc));
-	ctx.rect(x+(2*sc), y, (4*sc), (4*sc));
+	ctx.rect(x+(2*sc), y, 4*sc, 4*sc);
 	ctx.stroke();
+}
+
+// Draws the whole circuit.
+function drawCircuit() {
+	var startx = 100;
+	var starty = 100;
+	var x = startx;
+
+	for (i = 0; i < circuit.columns.length; i++){
+		var column = circuit.columns[i];
+		console.log("Drawing column " + i + ", type " + column.type + ".");
+		if ((column.type == "wires") && (typeof(column.signals) != "undefined")) {
+			var y = starty;
+			for (j = 0; j < column.signals.length; j++) {
+				drawSignal(x, y, column.signals[j], 20);
+				y = (j % 2 == 1) ? y + 120 : y + 40;
+			}
+		} else if (column.type == "gates") {
+			var y = starty;
+			for (j = 0; j < column.gates.length; j++) {
+				drawGate(x, y, 20);
+				y = y + 160;
+			}
+		}
+		x = (column.type == "wires") ? x + 80 : x + 160;
+	}
 }
 
 function everyinterval(n) {
