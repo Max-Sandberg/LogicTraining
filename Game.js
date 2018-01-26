@@ -23,31 +23,32 @@ var myGameArea = {
 var circuit = {
 	columns : [{
 		type : "wires",
-		signals : [0, 1, 1, 0]
+		signals : [,,0, 1,,, 1, 0,,,]
 	}, {
 		type : "gates",
-		gates : [{
-			inputs : [[1, 0], [1, 1]]
-		}, {
-			inputs : [[1, 2], [1, 3]]
-		}]
+		gates : [,{
+			inputs : ["sig", "sig"]
+		},,{
+			inputs : ["sig", "sig"]
+		},,]
 	}, {
 		type : "wires",
-		signals : [0]
+		signals : [,,0,,,,,,,,]
 	}, {
 		type : "gates",
-		gates : [{
-			inputs : [[3, 1], [2, 1]]
-		}, {
-			inputs : [[2, 1], [2, 2]]
-		}]
+		gates : [,{
+			inputs : ["sig", [2, 1]]
+		},,{
+			inputs : [[2, 1], [2, 3]]
+		},,]
 	}, {
-		type : "wires"
+		type : "wires",
+		signals: []
 	}, {
 		type : "gates",
-		gates : [{
+		gates : [,,{
 			inputs : [[4, 1], [4, 2]]
-		}]
+		},,,]
 	}]
 }
 
@@ -92,17 +93,21 @@ function drawCircuit() {
 	for (i = 0; i < circuit.columns.length; i++){
 		var column = circuit.columns[i];
 		console.log("Drawing column " + i + ", type " + column.type + ".");
-		if ((column.type == "wires") && (typeof(column.signals) != "undefined")) {
+		if (column.type == "wires") {
 			var y = starty;
 			for (j = 0; j < column.signals.length; j++) {
-				drawSignal(x, y, column.signals[j], 20);
-				y = (j % 2 == 1) ? y + 120 : y + 40;
+				if (typeof(column.signals[j]) != "undefined"){
+					drawSignal(x, y, column.signals[j], 20);
+				}
+				y += 40;
 			}
 		} else if (column.type == "gates") {
 			var y = starty;
 			for (j = 0; j < column.gates.length; j++) {
-				drawGate(x, y, 20);
-				y = y + 160;
+				if (typeof(column.gates[j]) != "undefined"){
+					drawGate(x, y, 20);
+				}
+				y = y + 80;
 			}
 		}
 		x = (column.type == "wires") ? x + 80 : x + 160;
