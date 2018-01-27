@@ -1,3 +1,5 @@
+var SC = 20; // Scale
+
 function startGame() {
     myGameArea.start();
 }
@@ -64,23 +66,23 @@ function drawLine(x1, y1, x2, y2){
 	ctx.stroke();
 }
 
-// Draws an input signal. Height 1, Width 2. (sc = 1/2)
-function drawSignal(x, y, sig, sc) {
+// Draws an input signal. Height 2, Width 4.
+function drawSignal(x, y, sig) {
 	ctx = myGameArea.context;
 	ctx.font = "26px Arial";
-	ctx.fillText(sig, x+32, y+30);
-	drawLine(x+54, y+20, x+80, y+20);
+	ctx.fillText(sig, x+(2*SC)-8, y+SC+10);
+	drawLine(x+(2*SC)+14, y+SC, x+(4*SC), y+SC);
 }
 
-//Draws a logic gate. Height 2, Width 4. (sc = 1/2)
-function drawGate(x, y, sc) {
+//Draws a logic gate. Height 4, Width 8.
+function drawGate(x, y) {
 	ctx = myGameArea.context;
 	// Input wires
-	drawLine(x, y+sc, x+(2*sc), y+sc);
-	drawLine(x, y+(3*sc), x+(2*sc), y+(3*sc));
+	drawLine(x, y+SC, x+(2*SC), y+SC);
+	drawLine(x, y+(3*SC), x+(2*SC), y+(3*SC));
 	// Output wire
-	drawLine(x+(6*sc), y+(2*sc), x+(8*sc), y+(2*sc));
-	ctx.rect(x+(2*sc), y, 4*sc, 4*sc);
+	drawLine(x+(6*SC), y+(2*SC), x+(8*SC), y+(2*SC));
+	ctx.rect(x+(2*SC), y, 4*SC, 4*SC);
 	ctx.stroke();
 }
 
@@ -97,20 +99,20 @@ function drawCircuit() {
 			var y = starty;
 			for (j = 0; j < column.signals.length; j++) {
 				if (typeof(column.signals[j]) != "undefined"){
-					drawSignal(x, y, column.signals[j], 20);
+					drawSignal(x, y, column.signals[j]);
 				}
-				y += 40;
+				y += (2*SC);
 			}
 		} else if (column.type == "gates") {
 			var y = starty;
 			for (j = 0; j < column.gates.length; j++) {
 				if (typeof(column.gates[j]) != "undefined"){
-					drawGate(x, y, 20);
+					drawGate(x, y);
 				}
-				y = y + 80;
+				y += (4*SC);
 			}
 		}
-		x = (column.type == "wires") ? x + 80 : x + 160;
+		x = (column.type == "wires") ? x + (4*SC) : x + (8*SC);
 	}
 }
 
