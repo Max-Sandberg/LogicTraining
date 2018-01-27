@@ -35,13 +35,13 @@ var circuit = {
 		},,]
 	}, {
 		type : "wires",
-		signals : [,,0,,,,,,,,]
+		signals : [,,1,,,,,,,,]
 	}, {
 		type : "gates",
 		gates : [,{
-			inputs : ["sig", [2, 1]]
+			inputs : ["sig", [1, 1]]
 		},,{
-			inputs : [[2, 1], [2, 3]]
+			inputs : [[1, 1], [1, 3]]
 		},,]
 	}, {
 		type : "wires",
@@ -49,7 +49,7 @@ var circuit = {
 	}, {
 		type : "gates",
 		gates : [,,{
-			inputs : [[4, 1], [4, 2]]
+			inputs : [[3, 1], [3, 3]]
 		},,,]
 	}]
 }
@@ -74,7 +74,7 @@ function drawSignal(x, y, sig) {
 	drawLine(x+(2*SC)+14, y+SC, x+(4*SC), y+SC);
 }
 
-//Draws a logic gate. Height 4, Width 8.
+// Draws a logic gate. Height 4, Width 8.
 function drawGate(x, y) {
 	ctx = myGameArea.context;
 	// Input wires
@@ -86,26 +86,66 @@ function drawGate(x, y) {
 	ctx.stroke();
 }
 
+// Draws the wires column. Width 4.
+function drawWires(colIdx, startx, starty) {
+	var y = starty;
+	var clmn = circuit.columns[colIdx];
+	// Draw signals.
+	for (var i = 0; i < clmn.signals.length; i++) {
+		if (typeof(clmn.signals[i]) != "undefined"){
+			drawSignal(startx, y, clmn.signals[i]);
+		}
+		y += (2*SC);
+	}
+	// Draw wires.
+	if (colIdx != 0) {
+		var prevClmn = circuit.columns[colIdx - 1];
+		var nextClmn = circuit.columns[colIdx + 1];
+		for (var i = 0; i < prevClmn.gates.length; i++){
+			if (typeof(prevClmn.gates[i]) != "undefined"){
+				// Output wire from the previous column we need to connect somewhere
+				var outputY = starty + (2*SC) + (i*4*SC);
+				var inputsY = []; // The inputs we need to connect this output to
+				for (var j = 0; j < nextClmn.gates.length; j++){
+					if (typeof(nextClmn.gates[j]) != "undefined"){
+						var nextGate = nextClmn.gates[j];
+						for (var k = 0; k < 2; k++){
+							if ((nextGate.inputs[k][0] == colIdx-1) && (nextGate.inputs[k][1] == i)){
+								inputsY.push(starty + (j*4*SC) + (k*2*SC) + SC);
+							}
+						}
+					}
+				}
+				var closestDist = 9999;
+				var closestIndx = -1;
+				for (var j = 0; j < inputsY.length; j++){
+					if (Math.abs(outputY - inputsY[j]) < closestDist){
+						closestDist = Math.abs(outputY - inputsY[j]);
+						closestIndx = j;
+					}
+				}
+				var inputY = inputsY[closestIndx];
+				drawLine(startx, outputY, startx, inputY);
+				drawLine(startx, inputY, startx + (4*SC), inputY);
+			}
+		}
+	}
+}
+
 // Draws the whole circuit.
 function drawCircuit() {
 	var startx = 100;
 	var starty = 100;
 	var x = startx;
 
-	for (i = 0; i < circuit.columns.length; i++){
+	for (var i = 0; i < circuit.columns.length; i++){
 		var column = circuit.columns[i];
 		console.log("Drawing column " + i + ", type " + column.type + ".");
 		if (column.type == "wires") {
-			var y = starty;
-			for (j = 0; j < column.signals.length; j++) {
-				if (typeof(column.signals[j]) != "undefined"){
-					drawSignal(x, y, column.signals[j]);
-				}
-				y += (2*SC);
-			}
+			drawWires(i, x, starty);
 		} else if (column.type == "gates") {
 			var y = starty;
-			for (j = 0; j < column.gates.length; j++) {
+			for (var j = 0; j < column.gates.length; j++) {
 				if (typeof(column.gates[j]) != "undefined"){
 					drawGate(x, y);
 				}
