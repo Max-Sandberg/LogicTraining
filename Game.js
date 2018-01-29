@@ -1,4 +1,5 @@
 var SC = 20; // Scale
+var frame
 
 function startGame() {
     myGameArea.start();
@@ -35,11 +36,13 @@ var circuit = {
 		},,]
 	}, {
 		type : "wires",
-		signals : [,,1,,,,,,,,]
+		signals : []
+		// signals : [,,1,,,,,,,,]
 	}, {
 		type : "gates",
 		gates : [,{
-			inputs : ["sig", [1, 1]]
+			// inputs : ["sig", [1, 1]]
+			inputs : [[1, 1], [1, 3]]
 		},,{
 			inputs : [[1, 1], [1, 3]]
 		},,]
@@ -55,14 +58,24 @@ var circuit = {
 }
 
 function updateGameArea() {
-
+	var startx = 2000;
+	myGameArea.clear();
+	myGameArea.frameNo += 1;
+	drawCircuit(startx - myGameArea.frameNo);
 }
 
-function drawLine(x1, y1, x2, y2){
+function drawLine(x1, y1, x2, y2, live){
 	ctx = myGameArea.context;
 	ctx.beginPath();
 	ctx.moveTo(x1,y1);
 	ctx.lineTo(x2,y2);
+	if (live){
+		ctx.strokeStyle="#00bfff";
+		ctx.lineWidth = 3;
+	} else {
+		ctx.strokeStyle="#000000";
+		ctx.lineWidth = 1;
+	}
 	ctx.stroke();
 }
 
@@ -71,17 +84,18 @@ function drawSignal(x, y, sig) {
 	ctx = myGameArea.context;
 	ctx.font = "26px Arial";
 	ctx.fillText(sig, x+(2*SC)-8, y+SC+10);
-	drawLine(x+(2*SC)+14, y+SC, x+(4*SC), y+SC);
+	var live = (sig == 1);
+	drawLine(x+(2*SC)+14, y+SC, x+(4*SC), y+SC, live);
 }
 
 // Draws a logic gate. Height 4, Width 8.
 function drawGate(x, y) {
 	ctx = myGameArea.context;
 	// Input wires
-	drawLine(x, y+SC, x+(2*SC), y+SC);
-	drawLine(x, y+(3*SC), x+(2*SC), y+(3*SC));
+	drawLine(x, y+SC, x+(2*SC), y+SC, false);
+	drawLine(x, y+(3*SC), x+(2*SC), y+(3*SC), false);
 	// Output wire
-	drawLine(x+(6*SC), y+(2*SC), x+(8*SC), y+(2*SC));
+	drawLine(x+(6*SC), y+(2*SC), x+(8*SC), y+(2*SC), false);
 	ctx.rect(x+(2*SC), y, 4*SC, 4*SC);
 	ctx.stroke();
 }
@@ -101,11 +115,13 @@ function drawWires(colIdx, startx, starty) {
 	if (colIdx != 0) {
 		var prevClmn = circuit.columns[colIdx - 1];
 		var nextClmn = circuit.columns[colIdx + 1];
+		var verticals = [];
 		for (var i = 0; i < prevClmn.gates.length; i++){
 			if (typeof(prevClmn.gates[i]) != "undefined"){
 				// Output wire from the previous column we need to connect somewhere
 				var outputY = starty + (2*SC) + (i*4*SC);
 				var inputsY = []; // The inputs we need to connect this output to
+
 				for (var j = 0; j < nextClmn.gates.length; j++){
 					if (typeof(nextClmn.gates[j]) != "undefined"){
 						var nextGate = nextClmn.gates[j];
@@ -116,6 +132,7 @@ function drawWires(colIdx, startx, starty) {
 						}
 					}
 				}
+
 				var closestDist = 9999;
 				var closestIndx = -1;
 				for (var j = 0; j < inputsY.length; j++){
@@ -124,17 +141,29 @@ function drawWires(colIdx, startx, starty) {
 						closestIndx = j;
 					}
 				}
+
+				for (var j = 0; j < inputsY.length; j++){
+					if (j != closestIndx){
+						verticals.push([inputsY[closestIndx], inputsY[j]]);
+					}
+				}
+
 				var inputY = inputsY[closestIndx];
-				drawLine(startx, outputY, startx, inputY);
-				drawLine(startx, inputY, startx + (4*SC), inputY);
+				drawLine(startx, outputY, startx, inputY, false);
+				drawLine(startx, inputY, startx + (4*SC), inputY, false);
 			}
+		}
+
+		for (var i = 0; i < verticals.length; i++){
+			var x = startx + ((i+1)*((4*SC)/(verticals.length+1)));
+			drawLine(x, verticals[i][0], x, verticals[i][1], false);
+			drawLine(x, verticals[i][1], startx + (4*SC), verticals[i][1], false);
 		}
 	}
 }
 
 // Draws the whole circuit.
-function drawCircuit() {
-	var startx = 100;
+function drawCircuit(startx) {
 	var starty = 100;
 	var x = startx;
 
