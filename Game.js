@@ -1,5 +1,4 @@
-var SC = 20; // Scale
-var frame
+var SC = 30; // Scale
 
 function startGame() {
     myGameArea.start();
@@ -8,25 +7,35 @@ function startGame() {
 var myGameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
-        this.canvas.width = window.innerWidth * 0.9;
-        this.canvas.height = window.innerHeight * 0.9;
+        this.canvas.width = window.innerWidth*0.97;
+        this.canvas.height = window.innerHeight*0.97;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
 
-		drawCircuit();
+		var x = (myGameArea.canvas.width / 2) - (14.5*SC);
+		drawCircuit(x);
+		drawMenuItems();
+
+		var ctx = myGameArea.context;
+		ctx.beginPath();
+		ctx.strokeStyle="#666666"; //hail satan?
+		ctx.rect(1, (SC*6), myGameArea.canvas.width-2, myGameArea.canvas.height-((SC*6)+1));
+		ctx.stroke();
+		ctx.closePath();
 
         this.interval = setInterval(updateGameArea, 20);
     },
     clear : function() {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.context.clearRect(2, (SC*6)+2, this.canvas.width-4, this.canvas.height-((SC*6)+4));
     }
 }
 
 var circuit = {
 	columns : [{
 		type : "wires",
-		signals : [,,0, 1,,, 1, 0,,,]
+		signals : [,,0, 1,,, 1, 0,,,],
+		gate : 0
 	}, {
 		type : "gates",
 		gates : [,{
@@ -42,9 +51,11 @@ var circuit = {
 		type : "gates",
 		gates : [,{
 			// inputs : ["sig", [1, 1]]
-			inputs : [[1, 1], [1, 3]]
+			inputs : [[1, 1], [1, 3]],
+			gate : 0
 		},,{
-			inputs : [[1, 1], [1, 3]]
+			inputs : [[1, 1], [1, 3]],
+			gate : 0
 		},,]
 	}, {
 		type : "wires",
@@ -52,16 +63,21 @@ var circuit = {
 	}, {
 		type : "gates",
 		gates : [,,{
-			inputs : [[3, 1], [3, 3]]
+			inputs : [[3, 1], [3, 3]],
+			gate : 0
 		},,,]
 	}]
 }
+
+var gatesEnum = Object.freeze({"and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6});
 
 function updateGameArea() {
 	var startx = 2000;
 	myGameArea.clear();
 	myGameArea.frameNo += 1;
-	drawCircuit(startx - myGameArea.frameNo);
+	//drawCircuit(startx - (2 * myGameArea.frameNo));
+	var x = (myGameArea.canvas.width / 2) - (14.5*SC);
+	drawCircuit(x);
 }
 
 function drawLine(x1, y1, x2, y2, live){
@@ -88,16 +104,20 @@ function drawSignal(x, y, sig) {
 	drawLine(x+(2*SC)+14, y+SC, x+(4*SC), y+SC, live);
 }
 
-// Draws a logic gate. Height 4, Width 8.
+// Draws a logic gate. Height 4, Width 6.
 function drawGate(x, y) {
 	ctx = myGameArea.context;
 	// Input wires
-	drawLine(x, y+SC, x+(2*SC), y+SC, false);
-	drawLine(x, y+(3*SC), x+(2*SC), y+(3*SC), false);
+	//drawLine(x, y+SC, x+(2*SC), y+SC, false);
+	//drawLine(x, y+(3*SC), x+(2*SC), y+(3*SC), false);
 	// Output wire
-	drawLine(x+(6*SC), y+(2*SC), x+(8*SC), y+(2*SC), false);
-	ctx.rect(x+(2*SC), y, 4*SC, 4*SC);
+	drawLine(x+(4*SC), y+(2*SC), x+(6*SC), y+(2*SC), false);
+	ctx.setLineDash([5, 3]);
+	ctx.strokeStyle="#666666"; //hail satan?
+	ctx.rect(x, y, 4*SC, 4*SC);
 	ctx.stroke();
+	ctx.setLineDash([]);
+	ctx.strokeStyle="#000000";
 }
 
 // Draws the wires column. Width 4.
@@ -164,7 +184,7 @@ function drawWires(colIdx, startx, starty) {
 
 // Draws the whole circuit.
 function drawCircuit(startx) {
-	var starty = 100;
+	var starty = 240;
 	var x = startx;
 
 	for (var i = 0; i < circuit.columns.length; i++){
@@ -181,11 +201,202 @@ function drawCircuit(startx) {
 				y += (4*SC);
 			}
 		}
-		x = (column.type == "wires") ? x + (4*SC) : x + (8*SC);
+		x = (column.type == "wires") ? x + (4*SC) : x + (6*SC);
 	}
+}
+
+function drawMenuItems(){
+	var ctx = myGameArea.context;
+	ctx.beginPath();
+	ctx.strokeStyle="#666666"; //hail satan?
+	ctx.rect(1, 1, myGameArea.canvas.width-2, (SC*6));
+	ctx.stroke();
+	ctx.closePath();
+
+	var x = (myGameArea.canvas.width / 2) - (14.5*SC);
+	var y = SC;
+	ctx.beginPath();
+	//ctx.setLineDash([5, 3]);
+	ctx.rect(x, y, 4*SC, 4*SC);
+	ctx.rect(x+(5*SC), y, 4*SC, 4*SC);
+	ctx.rect(x+(10*SC), y, 4*SC, 4*SC);
+	ctx.rect(x+(15*SC), y, 4*SC, 4*SC);
+	ctx.rect(x+(20*SC), y, 4*SC, 4*SC);
+	ctx.rect(x+(25*SC), y, 4*SC, 4*SC);
+	ctx.stroke();
+	ctx.closePath();
+
+	drawAND(x, y);
+	drawNAND(x+(5*SC), y);
+	drawOR(x+(10*SC), y);
+	drawNOR(x+(15*SC), y);
+	drawXOR(x+(20*SC), y);
+	drawXNOR(x+(25*SC), y);
 }
 
 function everyinterval(n) {
     if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
     return false;
+}
+
+function drawAND(x, y){
+	ctx.beginPath();
+	ctx.setLineDash([]);
+	ctx.strokeStyle="#000000";
+	ctx.lineWidth = 2;
+	ctx.moveTo(x+(1.6*SC), y+(3.6*SC));
+	ctx.lineTo(x+(0.5*SC), y+(3.6*SC));
+	ctx.lineTo(x+(0.5*SC), y+(0.4*SC));
+	ctx.lineTo(x+(1.6*SC), y+(0.4*SC));
+	ctx.stroke();
+	ctx.closePath();
+
+	ctx.beginPath();
+	ctx.strokeStyle="#000000";
+	ctx.lineWidth = 1.5;
+	ctx.moveTo(x+(1.6*SC), y+(0.4*SC));
+	ctx.bezierCurveTo(x+(4.1*SC), y+(0.4*SC), x+(4.1*SC), y+(3.6*SC), x+(1.6*SC), y+(3.6*SC));
+	ctx.stroke();
+	ctx.closePath();
+
+	drawLine(x, y+SC, x+(0.5*SC), y+SC);
+	drawLine(x, y+(3*SC), x+(0.5*SC), y+(3*SC));
+	drawLine(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+}
+
+function drawNAND(x, y){
+	ctx.beginPath();
+	ctx.setLineDash([]);
+	ctx.strokeStyle="#000000";
+	ctx.lineWidth = 2;
+	ctx.moveTo(x+(1.4*SC), y+(3.6*SC));
+	ctx.lineTo(x+(0.5*SC), y+(3.6*SC));
+	ctx.lineTo(x+(0.5*SC), y+(0.4*SC));
+	ctx.lineTo(x+(1.4*SC), y+(0.4*SC));
+	ctx.stroke();
+	ctx.closePath();
+
+	ctx.beginPath();
+	ctx.strokeStyle="#000000";
+	ctx.lineWidth = 1.5;
+	ctx.moveTo(x+(1.4*SC), y+(0.4*SC));
+	ctx.bezierCurveTo(x+(3.9*SC), y+(0.4*SC), x+(3.9*SC), y+(3.6*SC), x+(1.4*SC), y+(3.6*SC));
+	ctx.stroke();
+	ctx.closePath();
+
+	ctx.beginPath();
+	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
+	ctx.stroke();
+
+	drawLine(x, y+SC, x+(0.5*SC), y+SC);
+	drawLine(x, y+(3*SC), x+(0.5*SC), y+(3*SC));
+	drawLine(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+}
+
+function drawOR(x, y){
+	ctx.beginPath();
+	ctx.strokeStyle="#000000";
+	ctx.lineWidth = 1.5;
+	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
+	ctx.bezierCurveTo(x+(1.2*SC), y+(1*SC), x+(1.2*SC), y+(3*SC), x+(0.4*SC), y+(3.6*SC));
+	ctx.stroke();
+	ctx.closePath();
+
+	ctx.beginPath();
+	ctx.strokeStyle="#000000";
+	ctx.lineWidth = 1.5;
+	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
+	ctx.quadraticCurveTo(x+(3*SC), y+(0.4*SC), x+(3.5*SC), y+(2*SC));
+	ctx.moveTo(x+(0.4*SC), y+(3.6*SC));
+	ctx.quadraticCurveTo(x+(3*SC), y+(3.6*SC), x+(3.5*SC), y+(2*SC));
+	ctx.stroke();
+	ctx.closePath();
+
+	drawLine(x, y+SC, x+(0.8*SC), y+SC);
+	drawLine(x, y+(3*SC), x+(0.8*SC), y+(3*SC));
+	drawLine(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+}
+
+function drawNOR(x, y){
+	ctx.beginPath();
+	ctx.strokeStyle="#000000";
+	ctx.lineWidth = 1.5;
+	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
+	ctx.bezierCurveTo(x+(1.2*SC), y+(1*SC), x+(1.2*SC), y+(3*SC), x+(0.4*SC), y+(3.6*SC));
+	ctx.stroke();
+	ctx.closePath();
+
+	ctx.beginPath();
+	ctx.strokeStyle="#000000";
+	ctx.lineWidth = 1.5;
+	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
+	ctx.quadraticCurveTo(x+(2.75*SC), y+(0.4*SC), x+(3.25*SC), y+(2*SC));
+	ctx.moveTo(x+(0.4*SC), y+(3.6*SC));
+	ctx.quadraticCurveTo(x+(2.75*SC), y+(3.6*SC), x+(3.25*SC), y+(2*SC));
+	ctx.stroke();
+	ctx.closePath();
+
+	ctx.beginPath();
+	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
+	ctx.stroke();
+
+	drawLine(x, y+SC, x+(0.8*SC), y+SC);
+	drawLine(x, y+(3*SC), x+(0.8*SC), y+(3*SC));
+	drawLine(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+}
+
+function drawXOR(x, y){
+	ctx.beginPath();
+	ctx.strokeStyle="#000000";
+	ctx.lineWidth = 1.5;
+	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
+	ctx.bezierCurveTo(x+(1.1*SC), y+(1*SC), x+(1.1*SC), y+(3*SC), x+(0.3*SC), y+(3.6*SC));
+	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
+	ctx.bezierCurveTo(x+(1.4*SC), y+(1*SC), x+(1.4*SC), y+(3*SC), x+(0.6*SC), y+(3.6*SC));
+	ctx.stroke();
+	ctx.closePath();
+
+	ctx.beginPath();
+	ctx.strokeStyle="#000000";
+	ctx.lineWidth = 1.5;
+	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
+	ctx.quadraticCurveTo(x+(3*SC), y+(0.4*SC), x+(3.5*SC), y+(2*SC));
+	ctx.moveTo(x+(0.6*SC), y+(3.6*SC));
+	ctx.quadraticCurveTo(x+(3*SC), y+(3.6*SC), x+(3.5*SC), y+(2*SC));
+	ctx.stroke();
+	ctx.closePath();
+
+	drawLine(x, y+SC, x+(0.7*SC), y+SC);
+	drawLine(x, y+(3*SC), x+(0.7*SC), y+(3*SC));
+	drawLine(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+}
+
+function drawXNOR(x, y){
+	ctx.beginPath();
+	ctx.strokeStyle="#000000";
+	ctx.lineWidth = 1.5;
+	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
+	ctx.bezierCurveTo(x+(1.1*SC), y+(1*SC), x+(1.1*SC), y+(3*SC), x+(0.3*SC), y+(3.6*SC));
+	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
+	ctx.bezierCurveTo(x+(1.4*SC), y+(1*SC), x+(1.4*SC), y+(3*SC), x+(0.6*SC), y+(3.6*SC));
+	ctx.stroke();
+	ctx.closePath();
+
+	ctx.beginPath();
+	ctx.strokeStyle="#000000";
+	ctx.lineWidth = 1.5;
+	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
+	ctx.quadraticCurveTo(x+(2.75*SC), y+(0.4*SC), x+(3.25*SC), y+(2*SC));
+	ctx.moveTo(x+(0.6*SC), y+(3.6*SC));
+	ctx.quadraticCurveTo(x+(2.75*SC), y+(3.6*SC), x+(3.25*SC), y+(2*SC));
+	ctx.stroke();
+	ctx.closePath();
+
+	ctx.beginPath();
+	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
+	ctx.stroke();
+
+	drawLine(x, y+SC, x+(0.7*SC), y+SC);
+	drawLine(x, y+(3*SC), x+(0.7*SC), y+(3*SC));
+	drawLine(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC));
 }
