@@ -1,17 +1,28 @@
 var SC = 25; // Scale
 var frameNo = 0;
-var cvs, ctx, cvs2, ctx2;
+var cvs1, ctx1, cvs2, ctx2;
 var gatesEnum = Object.freeze({"and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6});
+var draggedGate = 0;
 
 function startGame() {
 	// Create the main canvas
-	cvs = document.createElement("canvas");
-	ctx = cvs.getContext("2d");
-	cvs.width = window.innerWidth*0.97;
-	cvs.height = window.innerHeight*0.97;
-	document.body.insertBefore(cvs, document.body.childNodes[0]);
+	cvs1 = document.createElement("canvas");
+	ctx1 = cvs1.getContext("2d");
+	cvs1.width = window.innerWidth-15;
+	cvs1.height = window.innerHeight-15;
+	cvs1.style = "position: absolute; left: 5; top: 5; z-index: 0; background-color: #f1f1f1; border:0px solid #d3d3d3;";
+	document.body.insertBefore(cvs1, document.body.childNodes[0]);
 
-	// TODO - Create the layer 2 canvas
+	// Create the layer 2 canvas
+	cvs2 = document.createElement("canvas");
+	ctx2 = cvs2.getContext("2d");
+	cvs2.width = window.innerWidth-15;
+	cvs2.height = window.innerHeight-15;
+	cvs2.style = "position: absolute; left: 5; top: 5; z-index: 1;";
+	cvs2.onmousedown = testmousedown;
+	cvs2.onmouseup = testmouseup;
+	cvs2.onmousemove = testmousemove;
+	document.body.insertBefore(cvs2, document.body.childNodes[0]);
 
 	drawMenuBar();
 	prepareGameArea();
@@ -19,47 +30,95 @@ function startGame() {
 	setInterval(updateGameArea, 20);
 }
 
+function testmousedown(){
+	console.log("mousedown");
+	var x = event.clientX - 5;
+	var y = event.clientY - 5;
+
+	var startX = (cvs1.width/2) - (14.5*SC);
+	for (var i = 1; i < 7; i++){
+		if ((y > SC) && (y < (5*SC)) && (x > startX+((i-1)*5*SC)) && (x < startX+((i-1)*5*SC)+(4*SC))){
+			draggedGate = i;
+		}
+	}
+}
+
+function testmouseup(){
+	console.log("mouseup");
+	draggedGate = 0;
+	ctx2.clearRect(0, 0, cvs2.width, cvs2.height);
+}
+
+function testmousemove(){
+	console.log("mousemove");
+	if (draggedGate != 0){
+		var x = event.clientX - 5;
+		var y = event.clientY - 5;
+		ctx2.clearRect(0, 0, cvs2.width, cvs2.height);
+		switch(draggedGate){
+			case gatesEnum.and:
+				drawAND(x-(2*SC), y-(2*SC), ctx2);
+				break;
+			case gatesEnum.nand:
+				drawNAND(x-(2*SC), y-(2*SC), ctx2);
+				break;
+			case gatesEnum.or:
+				drawOR(x-(2*SC), y-(2*SC), ctx2);
+				break;
+			case gatesEnum.nor:
+				drawNOR(x-(2*SC), y-(2*SC), ctx2);
+				break;
+			case gatesEnum.xor:
+				drawXOR(x-(2*SC), y-(2*SC), ctx2);
+				break;
+			case gatesEnum.xnor:
+				drawXNOR(x-(2*SC), y-(2*SC), ctx2);
+				break;
+		}
+	}
+}
+
 function drawMenuBar(){
 	// Draw outer box
-	ctx.beginPath();
-	ctx.strokeStyle="#666666"; //hail satan?
-	ctx.rect(1, 1, cvs.width-2, (SC*6));
-	ctx.stroke();
-	ctx.closePath();
+	ctx1.beginPath();
+	ctx1.strokeStyle="#666666"; //hail satan?
+	ctx1.rect(1, 1, cvs1.width-2, (SC*6));
+	ctx1.stroke();
+	ctx1.closePath();
 
 	// Draw box for each gate
-	var x = (cvs.width / 2) - (14.5*SC);
+	var x = (cvs1.width / 2) - (14.5*SC);
 	var y = SC;
-	ctx.beginPath();
-	ctx.rect(x, y, 4*SC, 4*SC);
-	ctx.rect(x+(5*SC), y, 4*SC, 4*SC);
-	ctx.rect(x+(10*SC), y, 4*SC, 4*SC);
-	ctx.rect(x+(15*SC), y, 4*SC, 4*SC);
-	ctx.rect(x+(20*SC), y, 4*SC, 4*SC);
-	ctx.rect(x+(25*SC), y, 4*SC, 4*SC);
-	ctx.stroke();
-	ctx.closePath();
+	ctx1.beginPath();
+	ctx1.rect(x, y, 4*SC, 4*SC);
+	ctx1.rect(x+(5*SC), y, 4*SC, 4*SC);
+	ctx1.rect(x+(10*SC), y, 4*SC, 4*SC);
+	ctx1.rect(x+(15*SC), y, 4*SC, 4*SC);
+	ctx1.rect(x+(20*SC), y, 4*SC, 4*SC);
+	ctx1.rect(x+(25*SC), y, 4*SC, 4*SC);
+	ctx1.stroke();
+	ctx1.closePath();
 
 	// Draw all the gates
-	drawAND(x, y);
-	drawNAND(x+(5*SC), y);
-	drawOR(x+(10*SC), y);
-	drawNOR(x+(15*SC), y);
-	drawXOR(x+(20*SC), y);
-	drawXNOR(x+(25*SC), y);
+	drawAND(x, y, ctx1);
+	drawNAND(x+(5*SC), y, ctx1);
+	drawOR(x+(10*SC), y, ctx1);
+	drawNOR(x+(15*SC), y, ctx1);
+	drawXOR(x+(20*SC), y, ctx1);
+	drawXNOR(x+(25*SC), y, ctx1);
 }
 
 function prepareGameArea(){
 	// Draw box around the game area
-	ctx.beginPath();
-	ctx.strokeStyle="#666666";
-	ctx.rect(1, (SC*6), cvs.width-2, cvs.height-(SC*6)-2);
-	ctx.stroke();
-	ctx.closePath();
+	ctx1.beginPath();
+	ctx1.strokeStyle="#666666";
+	ctx1.rect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-2);
+	ctx1.stroke();
+	ctx1.closePath();
 }
 
 function clearGameArea(){
-	ctx.clearRect(2, (SC*6)+2, cvs.width-4, cvs.height-(SC*6)-6);
+	ctx1.clearRect(2, (SC*6)+2, cvs1.width-4, cvs1.height-(SC*6)-6);
 }
 
 function updateGameArea() {
@@ -67,13 +126,13 @@ function updateGameArea() {
 	frameNo += 1;
 	//var startx = 2000;
 	//drawCircuit(startx - (2 * myGameArea.frameNo));
-	//var x = (cvs.width / 2) - (14.5*SC);
+	//var x = (cvs1.width / 2) - (14.5*SC);
 	drawCircuit(circuit1, 20);
 	drawCircuit(circuit2, 620);
 	drawCircuit(circuit3, 1220);
 }
 
-function drawWire(x1, y1, x2, y2, live){
+function drawWire(x1, y1, x2, y2, live, ctx){
 	ctx.beginPath();
 	ctx.moveTo(x1,y1);
 	ctx.lineTo(x2,y2);
@@ -85,21 +144,17 @@ function drawWire(x1, y1, x2, y2, live){
 		ctx.lineWidth = 1;
 	}
 	ctx.stroke();
+	ctx.closePath();
 }
 
 // Draws a logic gate. Height 4, Width 6.
 function drawGate(x, y) {
-	// Input wires
-	//drawWire(x, y+SC, x+(2*SC), y+SC, false);
-	//drawWire(x, y+(3*SC), x+(2*SC), y+(3*SC), false);
-	// Output wire
-	//drawWire(x+(4*SC), y+(2*SC), x+(6*SC), y+(2*SC), false);
-	ctx.setLineDash([5, 3]);
-	ctx.strokeStyle="#666666";
-	ctx.rect(x, y, 4*SC, 4*SC);
-	ctx.stroke();
-	ctx.setLineDash([]);
-	ctx.strokeStyle="#000000";
+	ctx1.setLineDash([5, 3]);
+	ctx1.strokeStyle="#666666";
+	ctx1.rect(x, y, 4*SC, 4*SC);
+	ctx1.stroke();
+	ctx1.setLineDash([]);
+	ctx1.strokeStyle="#000000";
 }
 
 // Draws the whole circuit.
@@ -110,7 +165,7 @@ function drawCircuit(circuit, startx) {
 	for (var i = 0; i < circuit.columns.length; i++){
 		var column = circuit.columns[i];
 		if (column.type == "wires") {
-			drawWires(circuit, i, x, starty);
+			drawWires(circuit, i, x, starty, ctx1);
 		} else if (column.type == "gates") {
 			var y = starty;
 			for (var j = 0; j < column.gates.length; j++) {

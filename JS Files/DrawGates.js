@@ -1,8 +1,8 @@
-function drawAND(x, y){
+function drawAND(x, y, ctx){
 	ctx.beginPath();
 	ctx.setLineDash([]);
 	ctx.strokeStyle="#000000";
-	ctx.lineWidth = 2;
+	ctx.lineWidth = 1.5;
 	ctx.moveTo(x+(1.6*SC), y+(3.6*SC));
 	ctx.lineTo(x+(0.5*SC), y+(3.6*SC));
 	ctx.lineTo(x+(0.5*SC), y+(0.4*SC));
@@ -18,16 +18,16 @@ function drawAND(x, y){
 	ctx.stroke();
 	ctx.closePath();
 
-	drawWire(x, y+SC, x+(0.5*SC), y+SC);
-	drawWire(x, y+(3*SC), x+(0.5*SC), y+(3*SC));
-	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+	drawWire(x, y+SC, x+(0.5*SC), y+SC, false, ctx);
+	drawWire(x, y+(3*SC), x+(0.5*SC), y+(3*SC), false, ctx);
+	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), false, ctx);
 }
 
-function drawNAND(x, y){
+function drawNAND(x, y, ctx){
 	ctx.beginPath();
 	ctx.setLineDash([]);
 	ctx.strokeStyle="#000000";
-	ctx.lineWidth = 2;
+	ctx.lineWidth = 1.5;
 	ctx.moveTo(x+(1.4*SC), y+(3.6*SC));
 	ctx.lineTo(x+(0.5*SC), y+(3.6*SC));
 	ctx.lineTo(x+(0.5*SC), y+(0.4*SC));
@@ -47,12 +47,12 @@ function drawNAND(x, y){
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
 	ctx.stroke();
 
-	drawWire(x, y+SC, x+(0.5*SC), y+SC);
-	drawWire(x, y+(3*SC), x+(0.5*SC), y+(3*SC));
-	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+	drawWire(x, y+SC, x+(0.5*SC), y+SC, false, ctx);
+	drawWire(x, y+(3*SC), x+(0.5*SC), y+(3*SC), false, ctx);
+	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), false, ctx);
 }
 
-function drawOR(x, y){
+function drawOR(x, y, ctx){
 	ctx.beginPath();
 	ctx.strokeStyle="#000000";
 	ctx.lineWidth = 1.5;
@@ -71,12 +71,12 @@ function drawOR(x, y){
 	ctx.stroke();
 	ctx.closePath();
 
-	drawWire(x, y+SC, x+(0.8*SC), y+SC);
-	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC));
-	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+	drawWire(x, y+SC, x+(0.8*SC), y+SC, false, ctx);
+	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC), false, ctx);
+	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), false, ctx);
 }
 
-function drawNOR(x, y){
+function drawNOR(x, y, ctx){
 	ctx.beginPath();
 	ctx.strokeStyle="#000000";
 	ctx.lineWidth = 1.5;
@@ -99,12 +99,12 @@ function drawNOR(x, y){
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
 	ctx.stroke();
 
-	drawWire(x, y+SC, x+(0.8*SC), y+SC);
-	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC));
-	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+	drawWire(x, y+SC, x+(0.8*SC), y+SC, false, ctx);
+	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC), false, ctx);
+	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), false, ctx);
 }
 
-function drawXOR(x, y){
+function drawXOR(x, y, ctx){
 	ctx.beginPath();
 	ctx.strokeStyle="#000000";
 	ctx.lineWidth = 1.5;
@@ -125,12 +125,12 @@ function drawXOR(x, y){
 	ctx.stroke();
 	ctx.closePath();
 
-	drawWire(x, y+SC, x+(0.7*SC), y+SC);
-	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC));
-	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+	drawWire(x, y+SC, x+(0.7*SC), y+SC, false, ctx);
+	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), false, ctx);
+	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), false, ctx);
 }
 
-function drawXNOR(x, y){
+function drawXNOR(x, y, ctx){
 	ctx.beginPath();
 	ctx.strokeStyle="#000000";
 	ctx.lineWidth = 1.5;
@@ -155,7 +155,7 @@ function drawXNOR(x, y){
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
 	ctx.stroke();
 
-	drawWire(x, y+SC, x+(0.7*SC), y+SC);
-	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC));
-	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+	drawWire(x, y+SC, x+(0.7*SC), y+SC, false, ctx);
+	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), false, ctx);
+	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), false, ctx);
 }
