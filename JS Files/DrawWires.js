@@ -21,10 +21,12 @@ For all other items in verticals {
 // Draws the wires column. Width 4.
 function drawWires(circuit, colIdx, startx, starty) {
 	// Draw signals.
+	var hasSignals = false;
 	var clmn = circuit.columns[colIdx];
 	for (var i = 0; i < clmn.signals.length; i++) {
 		if (typeof(clmn.signals[i]) != "undefined"){
 			drawSignal(startx, starty+(i*2*SC), clmn.signals[i]);
+			hasSignals = true;
 		}
 	}
 
@@ -32,7 +34,7 @@ function drawWires(circuit, colIdx, startx, starty) {
 		// Find which output goes to which inputs and which of those inputs are closest.
 		var wireGroups = findWireGroups(circuit, colIdx, starty);
 		// Find the coordinates of all the vertical lines to draw.
-		var verticals = findVerticals(wireGroups, startx);
+		var verticals = findVerticals(wireGroups, startx, hasSignals);
 
 		for (var i = 0; i < verticals.length; i++){
 			var v = verticals[i];
@@ -157,7 +159,7 @@ function findWireGroups(circuit, colIdx, starty){
 	return wireGroups;
 }
 
-function findVerticals(wireGroups, startx){
+function findVerticals(wireGroups, startx, hasSignals){
 	var verticals = [];
 	var tempArr = [];
 
@@ -176,12 +178,14 @@ function findVerticals(wireGroups, startx){
 		}
 	}
 
-	var x = startx+((4*SC)/(tempArr.length+2));
+	var gap = (4*SC)/(tempArr.length+2);
+	gap = hasSignals ? gap/2 : gap;
+	var x = startx+gap;
 	for (var i = 0; i < verticals.length; i++){
 		verticals[i].x = x;
 	}
 	for (var j = 0; j < tempArr.length; j++){
-		x = startx+((j+2)*((4*SC)/(tempArr.length+2)));
+		x = startx+((j+2)*gap);
 		tempArr[j].x = x;
 	}
 
