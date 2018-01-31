@@ -18,9 +18,9 @@ function drawAND(x, y){
 	ctx.stroke();
 	ctx.closePath();
 
-	drawLine(x, y+SC, x+(0.5*SC), y+SC);
-	drawLine(x, y+(3*SC), x+(0.5*SC), y+(3*SC));
-	drawLine(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+	drawWire(x, y+SC, x+(0.5*SC), y+SC);
+	drawWire(x, y+(3*SC), x+(0.5*SC), y+(3*SC));
+	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC));
 }
 
 function drawNAND(x, y){
@@ -47,9 +47,9 @@ function drawNAND(x, y){
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
 	ctx.stroke();
 
-	drawLine(x, y+SC, x+(0.5*SC), y+SC);
-	drawLine(x, y+(3*SC), x+(0.5*SC), y+(3*SC));
-	drawLine(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+	drawWire(x, y+SC, x+(0.5*SC), y+SC);
+	drawWire(x, y+(3*SC), x+(0.5*SC), y+(3*SC));
+	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC));
 }
 
 function drawOR(x, y){
@@ -71,9 +71,9 @@ function drawOR(x, y){
 	ctx.stroke();
 	ctx.closePath();
 
-	drawLine(x, y+SC, x+(0.8*SC), y+SC);
-	drawLine(x, y+(3*SC), x+(0.8*SC), y+(3*SC));
-	drawLine(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+	drawWire(x, y+SC, x+(0.8*SC), y+SC);
+	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC));
+	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC));
 }
 
 function drawNOR(x, y){
@@ -99,9 +99,9 @@ function drawNOR(x, y){
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
 	ctx.stroke();
 
-	drawLine(x, y+SC, x+(0.8*SC), y+SC);
-	drawLine(x, y+(3*SC), x+(0.8*SC), y+(3*SC));
-	drawLine(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+	drawWire(x, y+SC, x+(0.8*SC), y+SC);
+	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC));
+	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC));
 }
 
 function drawXOR(x, y){
@@ -125,9 +125,9 @@ function drawXOR(x, y){
 	ctx.stroke();
 	ctx.closePath();
 
-	drawLine(x, y+SC, x+(0.7*SC), y+SC);
-	drawLine(x, y+(3*SC), x+(0.7*SC), y+(3*SC));
-	drawLine(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+	drawWire(x, y+SC, x+(0.7*SC), y+SC);
+	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC));
+	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC));
 }
 
 function drawXNOR(x, y){
@@ -155,7 +155,7 @@ function drawXNOR(x, y){
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
 	ctx.stroke();
 
-	drawLine(x, y+SC, x+(0.7*SC), y+SC);
-	drawLine(x, y+(3*SC), x+(0.7*SC), y+(3*SC));
-	drawLine(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC));
+	drawWire(x, y+SC, x+(0.7*SC), y+SC);
+	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC));
+	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC));
 }
