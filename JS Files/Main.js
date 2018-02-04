@@ -58,6 +58,7 @@ function handleMouseUp(){
 		var circuit = circuits[gateIdx[0]];
 		var gate = circuit.gateSections[gateIdx[1]][gateIdx[2]];
 		gate.type = draggedGate;
+		updateCircuitValues(gateIdx);
 	}
 
 	draggedGate = 0;
@@ -70,6 +71,57 @@ function handleMouseMove(){
 	if (draggedGate != 0){
 		drawDraggedGate();
 	}
+}
+
+// Recalculates and updates a gate's output, and does the same for future connected gates.
+function updateCircuitValues(gateIdx){
+	var live = updateGateOutput(gateIdx);
+
+
+}
+
+// Recalculates the output of a particular gate
+function updateGateOutput(gateIdx){
+	var gate = circuits[gateIdx[0]].gateSections[gateIdx[1]][gateIdx[2]];
+
+	switch (gate.type){
+		case gatesEnum.and:
+			gate.outputVal = (gate.inputs[0].val && gate.inputs[1].val);
+			break;
+		case gatesEnum.nand:
+			gate.outputVal = !(gate.inputs[0].val && gate.inputs[1].val);
+			break;
+		case gatesEnum.or:
+			gate.outputVal = (gate.inputs[0].val || gate.inputs[1].val);
+			break;
+		case gatesEnum.nor:
+			gate.outputVal = !(gate.inputs[0].val || gate.inputs[1].val);
+			break;
+		case gatesEnum.xor:
+			gate.outputVal = ((gate.inputs[0].val || gate.inputs[1].val)
+							  && !(gate.inputs[0].val && gate.inputs[1].val));
+			break;
+		case gatesEnum.xnor:
+			gate.outputVal = !((gate.inputs[0].val || gate.inputs[1].val)
+						  && !(gate.inputs[0].val && gate.inputs[1].val));
+			break;
+	}
+
+	var circuit = circuits[gateIdx[0]];
+	var wireSection = circuit.wireSections[gateIdx[1]+1];
+	var wireGroup = wireSection[gateIdx[2]];
+	wireGroup.live = gate.outputVal;
+
+	var gate = circuit.gateSections[gateIdx[1]][gateIdx[2]];
+	for (var i = 0; i < gate.nextGates.length; i++){
+		var nextGateIdx = gate.nextGates[i];
+		var nextGate = circuit.gateSections[nextGateIdx[0]][nextGateIdx[1]];
+		for (var j = 0; j < gate.nextGates[i][2].length; j++){
+			nextGate.inputs[gate.nextGates[i][2][j]].val = gate.outputVal;
+		}
+	}
+
+	return gate.outputVal;
 }
 
 function drawDraggedGate(){
@@ -87,22 +139,22 @@ function drawDraggedGate(){
 	ctx2.clearRect(0, 0, cvs2.width, cvs2.height);
 	switch(draggedGate){
 		case gatesEnum.and:
-			drawAND(x-(2*SC), y-(2*SC), ctx2);
+			drawAND(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
 			break;
 		case gatesEnum.nand:
-			drawNAND(x-(2*SC), y-(2*SC), ctx2);
+			drawNAND(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
 			break;
 		case gatesEnum.or:
-			drawOR(x-(2*SC), y-(2*SC), ctx2);
+			drawOR(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
 			break;
 		case gatesEnum.nor:
-			drawNOR(x-(2*SC), y-(2*SC), ctx2);
+			drawNOR(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
 			break;
 		case gatesEnum.xor:
-			drawXOR(x-(2*SC), y-(2*SC), ctx2);
+			drawXOR(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
 			break;
 		case gatesEnum.xnor:
-			drawXNOR(x-(2*SC), y-(2*SC), ctx2);
+			drawXNOR(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
 			break;
 	}
 }
@@ -155,12 +207,12 @@ function drawMenuBar(){
 	ctx1.closePath();
 
 	// Draw all the gates
-	drawAND(x, y, ctx1);
-	drawNAND(x+(5*SC), y, ctx1);
-	drawOR(x+(10*SC), y, ctx1);
-	drawNOR(x+(15*SC), y, ctx1);
-	drawXOR(x+(20*SC), y, ctx1);
-	drawXNOR(x+(25*SC), y, ctx1);
+	drawAND(x, y, 0, 0, 0, ctx1);
+	drawNAND(x+(5*SC), y, 0, 0, 0, ctx1);
+	drawOR(x+(10*SC), y, 0, 0, 0, ctx1);
+	drawNOR(x+(15*SC), y, 0, 0, 0, ctx1);
+	drawXOR(x+(20*SC), y, 0, 0, 0, ctx1);
+	drawXNOR(x+(25*SC), y, 0, 0, 0, ctx1);
 }
 
 function prepareGameArea(){
@@ -181,11 +233,20 @@ function prepareGameArea(){
 }
 
 function clearGameArea(){
-	ctx1.clearRect(2, (SC*6)+2, cvs1.width-4, cvs1.height-(SC*6)-6);
+	ctx1.clearRect(2, (SC*6), cvs1.width-4, cvs1.height-(SC*6)-4);
 }
 
 function updateGameArea() {
 	clearGameArea();
+
+	// Draw box around the game area
+	ctx1.beginPath();
+	ctx1.strokeStyle="#666666";
+	ctx1.rect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-2);
+	ctx1.stroke();
+	ctx1.closePath();
+
+	// Increase frameNo and move circuits
 	frameNo += 1;
 	for (var i = 0; i < circuits.length; i++){
 		drawCircuit(circuits[i], ctx1);
@@ -200,41 +261,46 @@ function drawWire(x1, y1, x2, y2, live, ctx){
 	if (live){
 		ctx.strokeStyle="#00bfff";
 		ctx.lineWidth = 3;
+		ctx.stroke();
+		ctx.strokeStyle="#000000";
+		ctx.lineWidth = 1;
 	} else {
 		ctx.strokeStyle="#000000";
 		ctx.lineWidth = 1;
+		ctx.stroke();
 	}
-	ctx.stroke();
 	ctx.closePath();
 }
 
 // Draws a logic gate. Height 4, Width 6.
 function drawGate(x, y, type, input1, input2, output, ctx) {
+	ctx.beginPath();
 	ctx.setLineDash([5, 3]);
 	ctx.strokeStyle="#666666";
 	ctx.rect(x, y, 4*SC, 4*SC);
 	ctx.stroke();
+	ctx.closePath();
 	ctx.setLineDash([]);
 	ctx.strokeStyle="#000000";
 
 	switch (type){
 		case gatesEnum.and:
-			drawAND(x, y, ctx);
+			drawAND(x, y, input1, input2, output, ctx);
 			break;
 		case gatesEnum.nand:
-			drawNAND(x, y, ctx);
+			drawNAND(x, y, input1, input2, output, ctx);
 			break;
 		case gatesEnum.or:
-			drawOR(x, y, ctx);
+			drawOR(x, y, input1, input2, output, ctx);
 			break;
 		case gatesEnum.nor:
-			drawNOR(x, y, ctx);
+			drawNOR(x, y, input1, input2, output, ctx);
 			break;
 		case gatesEnum.xor:
-			drawXOR(x, y, ctx);
+			drawXOR(x, y, input1, input2, output, ctx);
 			break;
 		case gatesEnum.xnor:
-			drawXNOR(x, y, ctx);
+			drawXNOR(x, y, input1, input2, output, ctx);
 			break;
 	}
 }
