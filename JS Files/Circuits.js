@@ -1,111 +1,211 @@
 var circuit1 = {
-	columns : [{
-		type : "wires",
-		signals : [,,0, 1,,, 1, 0,,,],
-		gate : 0
-	}, {
-		type : "gates",
-		gates : [,{
-			inputs : ["sig", "sig"]
-		},,{
-			inputs : ["sig", "sig"]
-		},,]
-	}, {
-		type : "wires",
-		signals : []
-		// signals : [,,1,,,,,,,,]
-	}, {
-		type : "gates",
-		gates : [,{
-			// inputs : ["sig", [1, 1]]
-			inputs : [1, 3],
-			gate : 0
-		},,{
-			inputs : [1, 3],
-			gate : 0
-		},,]
-	}, {
-		type : "wires",
-		signals: []
-	}, {
-		type : "gates",
-		gates : [,,{
-			inputs : [1, 3],
-			gate : 0
-		},,,]
-	}]
+	startx : null,
+	starty : null,
+	gateSections : [
+		[{
+			inputs : [{
+				type : "signal",
+				val : 0
+			}, {
+				type : "signal",
+				val : 1
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : [[1, 0, [0]], [1, 1, [0]]]
+		}, {
+			inputs : [{
+				type : "signal",
+				val : 1
+			}, {
+				type : "signal",
+				val : 0
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : [[1, 1, [1]], [1, 0, [1]]]
+		}],
+		[{
+			inputs : [{
+				type : "gate",
+				gate : [0, 0],
+				val : 0
+			}, {
+				type : "gate",
+				gate : [0, 1],
+				val : 0
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : [[2, 0, [0]]]
+		}, {
+			inputs : [{
+				type : "gate",
+				gate : [0, 0],
+				val : 0
+			}, {
+				type : "gate",
+				gate : [0, 1],
+				val : 0
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : [[2, 0, [1]]]
+		}],
+		[{
+			inputs : [{
+				type : "gate",
+				gate : [2, 0],
+				val : 0
+			}, {
+				type : "gate",
+				gate : [2, 1],
+				val : 0
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : []
+		}]
+	]
 }
 
 var circuit2 = {
-	columns : [{
-		type : "wires",
-		signals : [,,0, 1,,, 1, 0,,,],
-		gate : 0
-	}, {
-		type : "gates",
-		gates : [,{
-			inputs : ["sig", "sig"]
-		},,{
-			inputs : ["sig", "sig"]
-		},,]
-	}, {
-		type : "wires",
-		signals : []
-		// signals : [,,1,,,,,,,,]
-	}, {
-		type : "gates",
-		gates : [,{
-			// inputs : ["sig", [1, 1]]
-			inputs : [1, 1],
-			gate : 0
-		},,{
-			inputs : [1, 3],
-			gate : 0
-		},,]
-	}, {
-		type : "wires",
-		signals: []
-	}, {
-		type : "gates",
-		gates : [,,{
-			inputs : [1, 3],
-			gate : 0
-		},,,]
-	}]
+	startx : null,
+	starty : null,
+	gateSections : [
+		[{
+			inputs : [{
+				type : "signal",
+				val : 0
+			}, {
+				type : "signal",
+				val : 1
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : [[1, 0, [1]], [1, 1, [0]]]
+		}, {
+			inputs : [{
+				type : "signal",
+				val : 1
+			}, {
+				type : "signal",
+				val : 0
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : [[1, 1, [1]]]
+		}],
+		[{
+			inputs : [{
+				type : "signal",
+				val : 1
+			}, {
+				type : "gate",
+				gate : [0, 0],
+				val : 0
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : [[2, 0, [0]]]
+		}, {
+			inputs : [{
+				type : "gate",
+				gate : [0, 0],
+				val : 0
+			}, {
+				type : "gate",
+				gate : [0, 1],
+				val : 1
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : [[2, 0, [1]]]
+		}],
+		[{
+			inputs : [{
+				type : "gate",
+				gate : [2, 0],
+				val : 0
+			}, {
+				type : "gate",
+				gate : [2, 1],
+				val : 0
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : []
+		}]
+	]
 }
 
 var circuit3 = {
-	columns : [{
-		type : "wires",
-		signals : [,,0, 1,,, 1, 0,,,],
-		gate : 0
-	}, {
-		type : "gates",
-		gates : [,{
-			inputs : ["sig", "sig"]
-		},,{
-			inputs : ["sig", "sig"]
-		},,]
-	}, {
-		type : "wires",
-		signals : [,,1,0,,,,,,,]
-	}, {
-		type : "gates",
-		gates : [,{
-			inputs : ["sig", "sig"],
-			gate : 0
-		},,{
-			inputs : [1, 3],
-			gate : 0
-		},,]
-	}, {
-		type : "wires",
-		signals: []
-	}, {
-		type : "gates",
-		gates : [,,{
-			inputs : [1, 3],
-			gate : 0
-		},,,]
-	}]
+	startx : null,
+	starty : null,
+	gateSections : [
+		[{
+			inputs : [{
+				type : "signal",
+				val : 0
+			}, {
+				type : "signal",
+				val : 1
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : [[1, 0, [0]], [1, 0, [1]], [1, 1, [0]]]
+		}, {
+			inputs : [{
+				type : "signal",
+				val : 1
+			}, {
+				type : "signal",
+				val : 0
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : [[1, 1, [1]]]
+		}],
+		[{
+			inputs : [{
+				type : "gate",
+				gate : [0, 0],
+				val : 0
+			}, {
+				type : "gate",
+				gate : [0, 0],
+				val : 0
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : [[2, 0, [0]]]
+		}, {
+			inputs : [{
+				type : "gate",
+				gate : [0, 0],
+				val : 0
+			}, {
+				type : "gate",
+				gate : [0, 1],
+				val : 1
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : [[2, 0, [1]]]
+		}],
+		[{
+			inputs : [{
+				type : "gate",
+				gate : [2, 0],
+				val : 0
+			}, {
+				type : "gate",
+				gate : [2, 1],
+				val : 0
+			}],
+			type : 0,
+			outputVal : 0,
+			nextGates : []
+		}]
+	]
 }

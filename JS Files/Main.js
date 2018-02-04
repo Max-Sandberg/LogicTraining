@@ -1,7 +1,7 @@
 var SC = 25; // Scale
 var frameNo = 0;
 var cvs1, ctx1, cvs2, ctx2;
-var gatesEnum = Object.freeze({"and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6});
+var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7});
 var draggedGate = 0;
 
 function startGame() {
@@ -19,9 +19,9 @@ function startGame() {
 	cvs2.width = window.innerWidth-15;
 	cvs2.height = window.innerHeight-15;
 	cvs2.style = "position: absolute; left: 5; top: 5; z-index: 1;";
-	cvs2.onmousedown = testmousedown;
-	cvs2.onmouseup = testmouseup;
-	cvs2.onmousemove = testmousemove;
+	cvs2.onmousedown = handleMouseDown;
+	cvs2.onmouseup = handleMouseUp;
+	cvs2.onmousemove = handleMouseMove;
 	document.body.insertBefore(cvs2, document.body.childNodes[0]);
 
 	drawMenuBar();
@@ -30,27 +30,27 @@ function startGame() {
 	setInterval(updateGameArea, 20);
 }
 
-function testmousedown(){
-	console.log("mousedown");
-	var x = event.clientX - 5;
+function handleMouseDown(){
 	var y = event.clientY - 5;
 
-	var startX = (cvs1.width/2) - (14.5*SC);
-	for (var i = 1; i < 7; i++){
-		if ((y > SC) && (y < (5*SC)) && (x > startX+((i-1)*5*SC)) && (x < startX+((i-1)*5*SC)+(4*SC))){
-			draggedGate = i;
+	if ((y > SC) && (y < (5*SC))){
+		var x = event.clientX - 5;
+		var startX = (cvs1.width/2) - (14.5*SC);
+		for (var i = 1; i < 7; i++){
+			// See if the mouse position is in the boundaries of one of the gates in the menu bar.
+			if ((x > startX+((i-1)*5*SC)) && (x < startX+((i-1)*5*SC)+(4*SC))){
+				draggedGate = i;
+			}
 		}
 	}
 }
 
-function testmouseup(){
-	console.log("mouseup");
+function handleMouseUp(){
 	draggedGate = 0;
 	ctx2.clearRect(0, 0, cvs2.width, cvs2.height);
 }
 
-function testmousemove(){
-	console.log("mousemove");
+function handleMouseMove(){
 	if (draggedGate != 0){
 		var x = event.clientX - 5;
 		var y = event.clientY - 5;
@@ -115,6 +115,20 @@ function prepareGameArea(){
 	ctx1.rect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-2);
 	ctx1.stroke();
 	ctx1.closePath();
+
+	// Find out how to draw all the circuits
+	findGatePositions(circuit1);
+	findGatePositions(circuit2);
+	findGatePositions(circuit3);
+	makeWires(circuit1);
+	makeWires(circuit2);
+	makeWires(circuit3);
+	circuit1.startx = 50;
+	circuit1.starty = 300;
+	circuit2.startx = 650;
+	circuit2.starty = 300;
+	circuit3.startx = 1250;
+	circuit3.starty = 300;
 }
 
 function clearGameArea(){
@@ -124,18 +138,17 @@ function clearGameArea(){
 function updateGameArea() {
 	clearGameArea();
 	frameNo += 1;
-	//var startx = 2000;
-	//drawCircuit(startx - (2 * myGameArea.frameNo));
-	//var x = (cvs1.width / 2) - (14.5*SC);
-	drawCircuit(circuit1, 20);
-	drawCircuit(circuit2, 620);
-	drawCircuit(circuit3, 1220);
+	drawCircuit(circuit1, ctx1);
+	drawCircuit(circuit2, ctx1);
+	drawCircuit(circuit3, ctx1);
+	//circuit1.startx = circuit1.startx - 1;
+	//circuit2.startx = circuit2.startx - 1;
 }
 
 function drawWire(x1, y1, x2, y2, live, ctx){
 	ctx.beginPath();
-	ctx.moveTo(x1,y1);
-	ctx.lineTo(x2,y2);
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
 	if (live){
 		ctx.strokeStyle="#00bfff";
 		ctx.lineWidth = 3;
@@ -148,36 +161,57 @@ function drawWire(x1, y1, x2, y2, live, ctx){
 }
 
 // Draws a logic gate. Height 4, Width 6.
-function drawGate(x, y) {
-	ctx1.setLineDash([5, 3]);
-	ctx1.strokeStyle="#666666";
-	ctx1.rect(x, y, 4*SC, 4*SC);
-	ctx1.stroke();
-	ctx1.setLineDash([]);
-	ctx1.strokeStyle="#000000";
+function drawGate(x, y, type, input1, input2, output, ctx) {
+	ctx.setLineDash([5, 3]);
+	ctx.strokeStyle="#666666";
+	ctx.rect(x, y, 4*SC, 4*SC);
+	ctx.stroke();
+	ctx.setLineDash([]);
+	ctx.strokeStyle="#000000";
+
+	switch (type){
+		case gatesEnum.and:
+			drawAND(x, y, ctx);
+			break;
+		case gatesEnum.nand:
+			drawNAND(x, y, ctx);
+			break;
+		case gatesEnum.or:
+			drawOR(x, y, ctx);
+			break;
+		case gatesEnum.nor:
+			drawNOR(x, y, ctx);
+			break;
+		case gatesEnum.xor:
+			drawXOR(x, y, ctx);
+			break;
+		case gatesEnum.xnor:
+			drawXNOR(x, y, ctx);
+			break;
+	}
 }
 
 // Draws the whole circuit.
-function drawCircuit(circuit, startx) {
-	var starty = 240;
-	var x = startx;
+function drawCircuit(circuit, ctx) {
+	drawWires(circuit, ctx);
+	drawGates(circuit, ctx);
 
-	for (var i = 0; i < circuit.columns.length; i++){
-		var column = circuit.columns[i];
-		if (column.type == "wires") {
-			drawWires(circuit, i, x, starty, ctx1);
-		} else if (column.type == "gates") {
-			var y = starty;
-			for (var j = 0; j < column.gates.length; j++) {
-				if (typeof(column.gates[j]) != "undefined"){
-					drawGate(x, y);
-				}
-				y += (4*SC);
-			}
-		}
-		//x = (column.type == "wires") ? x + (4*SC) : x + (6*SC);
-		x += (4*SC);
-	}
+	// for (var i = 0; i < circuit.columns.length; i++){
+	// 	var column = circuit.columns[i];
+	// 	if (column.type == "wires") {
+	// 		drawWires(circuit, i, x, starty, ctx1);
+	// 	} else if (column.type == "gates") {
+	// 		var y = starty;
+	// 		for (var j = 0; j < column.gates.length; j++) {
+	// 			if (typeof(column.gates[j]) != "undefined"){
+	// 				drawGate(x, y);
+	// 			}
+	// 			y += (4*SC);
+	// 		}
+	// 	}
+	// 	//x = (column.type == "wires") ? x + (4*SC) : x + (6*SC);
+	// 	x += (4*SC);
+	// }
 }
 
 function everyinterval(n) {
