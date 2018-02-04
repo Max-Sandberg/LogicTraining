@@ -3,6 +3,8 @@ var frameNo = 0;
 var cvs1, ctx1, cvs2, ctx2;
 var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7});
 var draggedGate = 0;
+var intervalId;
+var mousex, mousey;
 
 function startGame() {
 	// Create the main canvas
@@ -27,14 +29,14 @@ function startGame() {
 	drawMenuBar();
 	prepareGameArea();
 
-	setInterval(updateGameArea, 20);
+	setInterval(updateGameArea, 10);
 }
 
 function handleMouseDown(){
-	var y = event.clientY - 5;
+	var y = event.clientY-5;
 
 	if ((y > SC) && (y < (5*SC))){
-		var x = event.clientX - 5;
+		var x = event.clientX-5;
 		var startX = (cvs1.width/2) - (14.5*SC);
 		for (var i = 1; i < 7; i++){
 			// See if the mouse position is in the boundaries of one of the gates in the menu bar.
@@ -43,39 +45,92 @@ function handleMouseDown(){
 			}
 		}
 	}
+
+	intervalId = setInterval(drawDraggedGate, 10);
 }
 
 function handleMouseUp(){
+	clearInterval(intervalId);
+	intervalId = undefined;
+
+	var gateIdx = getSelectedGate(mousex, mousey);
+	if (gateIdx != null){
+		var circuit = circuits[gateIdx[0]];
+		var gate = circuit.gateSections[gateIdx[1]][gateIdx[2]];
+		gate.type = draggedGate;
+	}
+
 	draggedGate = 0;
 	ctx2.clearRect(0, 0, cvs2.width, cvs2.height);
 }
 
 function handleMouseMove(){
+	mousex = event.clientX-5;
+	mousey = event.clientY-5;
 	if (draggedGate != 0){
-		var x = event.clientX - 5;
-		var y = event.clientY - 5;
-		ctx2.clearRect(0, 0, cvs2.width, cvs2.height);
-		switch(draggedGate){
-			case gatesEnum.and:
-				drawAND(x-(2*SC), y-(2*SC), ctx2);
-				break;
-			case gatesEnum.nand:
-				drawNAND(x-(2*SC), y-(2*SC), ctx2);
-				break;
-			case gatesEnum.or:
-				drawOR(x-(2*SC), y-(2*SC), ctx2);
-				break;
-			case gatesEnum.nor:
-				drawNOR(x-(2*SC), y-(2*SC), ctx2);
-				break;
-			case gatesEnum.xor:
-				drawXOR(x-(2*SC), y-(2*SC), ctx2);
-				break;
-			case gatesEnum.xnor:
-				drawXNOR(x-(2*SC), y-(2*SC), ctx2);
-				break;
+		drawDraggedGate();
+	}
+}
+
+function drawDraggedGate(){
+	var x = mousex;
+	var y = mousey;
+	var gateIdx = getSelectedGate(x, y);
+
+	if (gateIdx != null){
+		var circuit = circuits[gateIdx[0]];
+		var gate = circuit.gateSections[gateIdx[1]][gateIdx[2]];
+		x = circuit.startx + gate.xOffset + (2*SC);
+		y = circuit.starty + gate.yOffset + (2*SC);
+	}
+
+	ctx2.clearRect(0, 0, cvs2.width, cvs2.height);
+	switch(draggedGate){
+		case gatesEnum.and:
+			drawAND(x-(2*SC), y-(2*SC), ctx2);
+			break;
+		case gatesEnum.nand:
+			drawNAND(x-(2*SC), y-(2*SC), ctx2);
+			break;
+		case gatesEnum.or:
+			drawOR(x-(2*SC), y-(2*SC), ctx2);
+			break;
+		case gatesEnum.nor:
+			drawNOR(x-(2*SC), y-(2*SC), ctx2);
+			break;
+		case gatesEnum.xor:
+			drawXOR(x-(2*SC), y-(2*SC), ctx2);
+			break;
+		case gatesEnum.xnor:
+			drawXNOR(x-(2*SC), y-(2*SC), ctx2);
+			break;
+	}
+}
+
+function getSelectedGate(x, y){
+	if (y > 300 && y < 300 + (20*SC)){
+		// In y range of circuit
+		for (var i = 0; i < circuits.length; i++){
+			if ((x > circuits[i].startx) && (x < circuits[i].startx+circuits[i].width)){
+				// In x and y range of circuit
+				var circuit = circuits[i];
+				for (var j = 0; j < circuit.gateSections.length; j++){
+					var section = circuit.gateSections[j];
+					if ((x > circuit.startx + section[0].xOffset) && (x < circuit.startx + section[0].xOffset + (4*SC))){
+						// In x range of gate section
+						for (var k = 0; k < section.length; k++){
+							var gate = section[k];
+							if ((y > circuit.starty + gate.yOffset) && (y < circuit.starty + gate.yOffset + (4*SC))){
+								// In x and y range of gate
+								return [i, j, k];
+							}
+						}
+					}
+				}
+			}
 		}
 	}
+	return null;
 }
 
 function drawMenuBar(){
@@ -117,18 +172,12 @@ function prepareGameArea(){
 	ctx1.closePath();
 
 	// Find out how to draw all the circuits
-	findGatePositions(circuit1);
-	findGatePositions(circuit2);
-	findGatePositions(circuit3);
-	makeWires(circuit1);
-	makeWires(circuit2);
-	makeWires(circuit3);
-	circuit1.startx = 50;
-	circuit1.starty = 300;
-	circuit2.startx = 650;
-	circuit2.starty = 300;
-	circuit3.startx = 1250;
-	circuit3.starty = 300;
+	for (var i = 0; i < circuits.length; i++){
+		findGatePositions(circuits[i]);
+		makeWires(circuits[i]);
+		circuits[i].startx = (i == 0) ? cvs1.width+50 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
+		circuits[i].starty = 300;
+	}
 }
 
 function clearGameArea(){
@@ -138,11 +187,10 @@ function clearGameArea(){
 function updateGameArea() {
 	clearGameArea();
 	frameNo += 1;
-	drawCircuit(circuit1, ctx1);
-	drawCircuit(circuit2, ctx1);
-	drawCircuit(circuit3, ctx1);
-	//circuit1.startx = circuit1.startx - 1;
-	//circuit2.startx = circuit2.startx - 1;
+	for (var i = 0; i < circuits.length; i++){
+		drawCircuit(circuits[i], ctx1);
+		circuits[i].startx = circuits[i].startx - 1;
+	}
 }
 
 function drawWire(x1, y1, x2, y2, live, ctx){

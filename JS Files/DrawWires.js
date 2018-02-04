@@ -29,6 +29,7 @@ function findGatePositions(circuit){
 								 (cols[i].length == 1) ? (8*SC) : 0;
 		}
 	}
+	circuit.width = (cols.length*8*SC) + (4*SC);
 }
 
 // Add a wireSections property to the circuit object, which details the positions of each wire and which gate output they originate from.

@@ -1,4 +1,5 @@
-var circuit1 = {
+var circuits = [
+{
 	startx : null,
 	starty : null,
 	gateSections : [
@@ -67,9 +68,8 @@ var circuit1 = {
 			nextGates : []
 		}]
 	]
-}
-
-var circuit2 = {
+},
+{
 	startx : null,
 	starty : null,
 	gateSections : [
@@ -137,9 +137,8 @@ var circuit2 = {
 			nextGates : []
 		}]
 	]
-}
-
-var circuit3 = {
+},
+{
 	startx : null,
 	starty : null,
 	gateSections : [
@@ -208,4 +207,4 @@ var circuit3 = {
 			nextGates : []
 		}]
 	]
-}
+}];
