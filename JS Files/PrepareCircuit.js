@@ -13,6 +13,7 @@ function findGatePositions(circuit){
 			cols[i][j].yOffset = (cols[i].length == 3) ? (j*8*SC) :
 								 (cols[i].length == 2) ? (j*8*SC) + (4*SC) :
 								 (cols[i].length == 1) ? (8*SC) : 0;
+			cols[i][j].invis = false;
 		}
 	}
 	circuit.width = (cols.length*8*SC) + (4*SC);

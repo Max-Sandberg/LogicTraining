@@ -3,6 +3,7 @@ var frameNo = 0;
 var cvs1, ctx1, cvs2, ctx2;
 var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7});
 var draggedGate = 0;
+var selectedGate = null;
 var intervalId;
 var mousex, mousey;
 var pause = false;
@@ -38,51 +39,66 @@ function startGame() {
 	setInterval(updateGameArea, 10);
 }
 
-// Recalculates and updates a gate's output, and does the same for future connected gates.
+// Updates the values in a circuit after a particular gate has changed.
 function updateCircuitValues(gateIdx){
-	var live = updateGateOutput(gateIdx);
+	var gateSections = circuits[gateIdx[0]].gateSections,
+		gate = gateSections[gateIdx[1]][gateIdx[2]],
+		oldOutput = gate.outputVal,
+		newOutput = updateGateOutput(gateIdx);
 
-
+	// If the output of the updated gate changed, update future gates too.
+	if (oldOutput != newOutput){
+		for (var i = gateIdx[1] + 1; i < gateSections.length; i++){
+			for (var j = 0; j < gateSections[i].length; j++){
+				updateGateOutput([gateIdx[0],i,j]);
+			}
+		}
+	}
 }
 
 // Recalculates the output of a particular gate
 function updateGateOutput(gateIdx){
-	var gate = circuits[gateIdx[0]].gateSections[gateIdx[1]][gateIdx[2]];
+	var gate = circuits[gateIdx[0]].gateSections[gateIdx[1]][gateIdx[2]],
+		oldOutput = gate.outputVal,
+		newOutput;
 
 	switch (gate.type){
 		case gatesEnum.and:
-			gate.outputVal = (gate.inputs[0].val && gate.inputs[1].val);
+			newOutput = (gate.inputs[0].val && gate.inputs[1].val);
 			break;
 		case gatesEnum.nand:
-			gate.outputVal = !(gate.inputs[0].val && gate.inputs[1].val);
+			newOutput = !(gate.inputs[0].val && gate.inputs[1].val);
 			break;
 		case gatesEnum.or:
-			gate.outputVal = (gate.inputs[0].val || gate.inputs[1].val);
+			newOutput = (gate.inputs[0].val || gate.inputs[1].val);
 			break;
 		case gatesEnum.nor:
-			gate.outputVal = !(gate.inputs[0].val || gate.inputs[1].val);
+			newOutput = !(gate.inputs[0].val || gate.inputs[1].val);
 			break;
 		case gatesEnum.xor:
-			gate.outputVal = ((gate.inputs[0].val || gate.inputs[1].val)
+			newOutput = ((gate.inputs[0].val || gate.inputs[1].val)
 							  && !(gate.inputs[0].val && gate.inputs[1].val));
 			break;
 		case gatesEnum.xnor:
-			gate.outputVal = !((gate.inputs[0].val || gate.inputs[1].val)
+			newOutput = !((gate.inputs[0].val || gate.inputs[1].val)
 						  && !(gate.inputs[0].val && gate.inputs[1].val));
 			break;
 	}
 
-	var circuit = circuits[gateIdx[0]];
-	var wireSection = circuit.wireSections[gateIdx[1]+1];
-	var wireGroup = wireSection[gateIdx[2]];
-	wireGroup.live = gate.outputVal;
+	if (oldOutput != newOutput){
+		var circuit = circuits[gateIdx[0]],
+			wireGroup = circuit.wireSections[gateIdx[1]+1][gateIdx[2]],
+			gate = circuit.gateSections[gateIdx[1]][gateIdx[2]];
 
-	var gate = circuit.gateSections[gateIdx[1]][gateIdx[2]];
-	for (var i = 0; i < gate.nextGates.length; i++){
-		var nextGateIdx = gate.nextGates[i];
-		var nextGate = circuit.gateSections[nextGateIdx[0]][nextGateIdx[1]];
-		for (var j = 0; j < gate.nextGates[i][2].length; j++){
-			nextGate.inputs[gate.nextGates[i][2][j]].val = gate.outputVal;
+		gate.outputVal = newOutput;
+		wireGroup.live = newOutput;
+
+		for (var i = 0; i < gate.nextGates.length; i++){
+			var nextGateIdx = gate.nextGates[i],
+				nextGate = circuit.gateSections[nextGateIdx[0]][nextGateIdx[1]];
+			for (var j = 0; j < gate.nextGates[i][2].length; j++){
+				nextGate.inputs[gate.nextGates[i][2][j]].val = newOutput;
+			}
 		}
 	}
 
@@ -176,10 +192,12 @@ function updateGameArea() {
 	ctx1.closePath();
 
 	// Increase frameNo and move circuits
-	frameNo += 1;
 	for (var i = 0; i < circuits.length; i++){
 		drawCircuit(circuits[i], ctx1);
-		if (!pause){circuits[i].startx = circuits[i].startx - 1;}
+		if (!pause){
+			circuits[i].startx--;
+			frameNo++;
+		}
 	}
 }
 

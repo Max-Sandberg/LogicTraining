@@ -3,11 +3,12 @@ function drawGates(circuit, ctx){
 	for (var i = 0; i < circuit.gateSections.length; i++){
 		var section = circuit.gateSections[i];
 		for (var j = 0; j < section.length; j++){
-			var gate = section[j];
+			var gate = section[j],
+				type = (gate.invis) ? 0 : gate.type;
 			drawGate(
 				circuit.startx+gate.xOffset,
 				circuit.starty+gate.yOffset,
-				gate.type,
+				type,
 				gate.inputs[0].val,
 				gate.inputs[1].val,
 				gate.outputVal,
@@ -19,16 +20,31 @@ function drawGates(circuit, ctx){
 
 // Draws the currently selected gate at the position of the mouse cursor, or snapped to a nearby gate.
 function drawDraggedGate(){
-	var x = mousex;
-	var y = mousey;
-	var gateIdx = getSelectedGate(x, y);
+	var x = mousex,
+		y = mousey,
+		gateIdx = getSelectedGate(x, y);
 
-	// If the mouse isn't currently over a gate, draw at the mouse position. Otherwise, draw in the gate.
-	if (gateIdx != null){
-		var circuit = circuits[gateIdx[0]];
-		var gate = circuit.gateSections[gateIdx[1]][gateIdx[2]];
+	// If the mouse is no longer over the previously selected gate, make that gate visible again.
+	if ((selectedGate != null) && (gateIdx == null)){
+		circuits[selectedGate[0]].gateSections[selectedGate[1]][selectedGate[2]].invis = false;
+		selectedGate = null;
+	}
+	// If the mouse isn't currently over a gate, draw at the mouse position. Otherwise, draw in the gate, and set that gate to be invisible.
+	else if (gateIdx != null){
+		var circuit = circuits[gateIdx[0]],
+			gate = circuit.gateSections[gateIdx[1]][gateIdx[2]];
 		x = circuit.startx + gate.xOffset + (2*SC);
 		y = circuit.starty + gate.yOffset + (2*SC);
+		// If the mouse has just moved into a new gate, set that gate to invisible.
+		if (selectedGate == null){
+			gate.invis = true;
+			selectedGate = gateIdx;
+		}
+	}
+
+	// If the mouse isn't currently over a gate, draw at the mouse position. Otherwise, draw in the gate, and set that gate to be invisible.
+	if (gateIdx != null){
+
 	}
 
 	// Clear the canvas and draw the correct gate.
