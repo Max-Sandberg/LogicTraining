@@ -1,3 +1,61 @@
+// Draws all the gate sections of a circuit.
+function drawGates(circuit, ctx){
+	for (var i = 0; i < circuit.gateSections.length; i++){
+		var section = circuit.gateSections[i];
+		for (var j = 0; j < section.length; j++){
+			var gate = section[j];
+			drawGate(
+				circuit.startx+gate.xOffset,
+				circuit.starty+gate.yOffset,
+				gate.type,
+				gate.inputs[0].val,
+				gate.inputs[1].val,
+				gate.outputVal,
+				ctx
+			);
+		}
+	}
+}
+
+// Draws the currently selected gate at the position of the mouse cursor, or snapped to a nearby gate.
+function drawDraggedGate(){
+	var x = mousex;
+	var y = mousey;
+	var gateIdx = getSelectedGate(x, y);
+
+	// If the mouse isn't currently over a gate, draw at the mouse position. Otherwise, draw in the gate.
+	if (gateIdx != null){
+		var circuit = circuits[gateIdx[0]];
+		var gate = circuit.gateSections[gateIdx[1]][gateIdx[2]];
+		x = circuit.startx + gate.xOffset + (2*SC);
+		y = circuit.starty + gate.yOffset + (2*SC);
+	}
+
+	// Clear the canvas and draw the correct gate.
+	ctx2.clearRect(0, 0, cvs2.width, cvs2.height);
+	switch(draggedGate){
+		case gatesEnum.and:
+			drawAND(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
+			break;
+		case gatesEnum.nand:
+			drawNAND(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
+			break;
+		case gatesEnum.or:
+			drawOR(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
+			break;
+		case gatesEnum.nor:
+			drawNOR(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
+			break;
+		case gatesEnum.xor:
+			drawXOR(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
+			break;
+		case gatesEnum.xnor:
+			drawXNOR(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
+			break;
+	}
+}
+
+//#region - Functions to draw the specific gates.
 function drawAND(x, y, input1, input2, output, ctx){
 	ctx.beginPath();
 	ctx.setLineDash([]);
@@ -167,3 +225,4 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 }
+//#endregion
