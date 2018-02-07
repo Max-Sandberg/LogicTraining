@@ -1,18 +1,26 @@
 // Checks if the user clicked on a gate in the menu bar, and if so, set draggedGate to that gate.
 function handleMouseDown(){
-	var y = event.clientY-5;
 	draggedGate = 0;
 
 	// See if the mouse position is in the boundaries of one of the gates in the menu bar.
-	if ((y > SC) && (y < (5*SC))){
-		var x = event.clientX-5;
+	if ((mousey > SC) && (mousey < (5*SC))){
 		var startX = (cvs1.width/2) - (14.5*SC);
 		for (var i = 1; i < 7; i++){
-			if ((x > startX+((i-1)*5*SC)) && (x < startX+((i-1)*5*SC)+(4*SC))){
+			if ((mousex > startX+((i-1)*5*SC)) && (mousex < startX+((i-1)*5*SC)+(4*SC))){
 				// Sets draggedGate to the selected gate, and puts drawDraggedGate on an interval, so that it can be redrawn to snap to nearby gates even if the mouse doesn't move.
 				draggedGate = i;
 				intervalId = setInterval(drawDraggedGate, 10);
 			}
+		}
+	} else {
+		var gateIdx = getSelectedGate(mousex, mousey);
+		if (gateIdx != null){
+			// If the user clicked and dragged a gate in the circuit, remove that gate from the circuit.
+			var gate = getGate(gateIdx);
+			draggedGate = gate.type;
+			gate.type = 0;
+			updateCircuitValues(gateIdx);
+			intervalId = setInterval(drawDraggedGate, 10);
 		}
 	}
 }
@@ -29,8 +37,7 @@ function handleMouseUp(){
 		ctx2.clearRect(0, 0, cvs2.width, cvs2.height);
 
 		if (gateIdx != null){
-			var circuit = circuits[gateIdx[0]],
-				gate = circuit.gateSections[gateIdx[1]][gateIdx[2]];
+			var gate = getGate(gateIdx);
 			gate.invis = false;
 			if (gate.type != chosenGate){
 				gate.type = chosenGate;

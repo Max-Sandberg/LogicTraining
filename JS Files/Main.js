@@ -42,7 +42,7 @@ function startGame() {
 // Updates the values in a circuit after a particular gate has changed.
 function updateCircuitValues(gateIdx){
 	var gateSections = circuits[gateIdx[0]].gateSections,
-		gate = gateSections[gateIdx[1]][gateIdx[2]],
+		gate = getGate(gateIdx),
 		oldOutput = gate.outputVal,
 		newOutput = updateGateOutput(gateIdx);
 
@@ -58,51 +58,56 @@ function updateCircuitValues(gateIdx){
 
 // Recalculates the output of a particular gate
 function updateGateOutput(gateIdx){
-	var gate = circuits[gateIdx[0]].gateSections[gateIdx[1]][gateIdx[2]],
+	var circuit = circuits[gateIdx[0]],
+		gate = circuit.gateSections[gateIdx[1]][gateIdx[2]],
+		input1 = gate.inputs[0].val,
+		input2 = (gate.inputs.length > 1) ? gate.inputs[1].val : undefined,
 		oldOutput = gate.outputVal,
 		newOutput;
 
 	// If the gate is empty, or either input is inactive, the output is inactive.
-	if (gate.inputs[0].val == -1 || gate.inputs[1].val == -1 || gate.type == 0){
+	if (input1 == -1 || input2 == -1 || gate.type == 0){
 		newOutput = -1;
 	} else {
 		switch (gate.type){
 			case gatesEnum.and:
-				newOutput = (gate.inputs[0].val && gate.inputs[1].val) ? 1 : 0;
+				newOutput = (input1 && input2) ? 1 : 0;
 				break;
 			case gatesEnum.nand:
-				newOutput = !(gate.inputs[0].val && gate.inputs[1].val) ? 1 : 0;
+				newOutput = !(input1 && input2) ? 1 : 0;
 				break;
 			case gatesEnum.or:
-				newOutput = (gate.inputs[0].val || gate.inputs[1].val) ? 1 : 0;
+				newOutput = (input1 || input2) ? 1 : 0;
 				break;
 			case gatesEnum.nor:
-				newOutput = !(gate.inputs[0].val || gate.inputs[1].val) ? 1 : 0;
+				newOutput = !(input1 || input2) ? 1 : 0;
 				break;
 			case gatesEnum.xor:
-				newOutput = ((gate.inputs[0].val || gate.inputs[1].val)
-								  && !(gate.inputs[0].val && gate.inputs[1].val)) ? 1 : 0;
+				newOutput = ((input1 || input2) && !(input1 && input2)) ? 1 : 0;
 				break;
 			case gatesEnum.xnor:
-				newOutput = !((gate.inputs[0].val || gate.inputs[1].val)
-							  && !(gate.inputs[0].val && gate.inputs[1].val)) ? 1 : 0;
+				newOutput = !((input1 || input2) && !(input1 && input2)) ? 1 : 0;
+				break;
+			case gatesEnum.bulb:
+				newOutput = (input1 == 1) ? 1 : 0;
 				break;
 		}
 	}
 
+	// Update the wire section, and the input values of all the gates this one connects to.
 	if (oldOutput != newOutput){
-		var circuit = circuits[gateIdx[0]],
-			wireGroup = circuit.wireSections[gateIdx[1]+1][gateIdx[2]],
-			gate = circuit.gateSections[gateIdx[1]][gateIdx[2]];
-
 		gate.outputVal = newOutput;
-		wireGroup.live = newOutput;
 
-		for (var i = 0; i < gate.nextGates.length; i++){
-			var nextGateIdx = gate.nextGates[i],
-				nextGate = circuit.gateSections[nextGateIdx[0]][nextGateIdx[1]];
-			for (var j = 0; j < gate.nextGates[i][2].length; j++){
-				nextGate.inputs[gate.nextGates[i][2][j]].val = newOutput;
+		if (gate.type != gatesEnum.bulb){
+			// If there is another wire section after this one, update it's value.
+			circuit.wireSections[gateIdx[1]+1][gateIdx[2]].live = newOutput;
+
+			for (var i = 0; i < gate.nextGates.length; i++){
+				var nextGate = getGate(gate.nextGates[i].gateIdx),
+					nextGateInputs = gate.nextGates[i].inputs;
+				for (var j = 0; j < nextGateInputs.length; j++){
+					nextGate.inputs[nextGateInputs[j]].val = newOutput;
+				}
 			}
 		}
 	}
@@ -213,6 +218,10 @@ function updateGameArea() {
 function drawCircuit(circuit, ctx) {
 	drawWires(circuit, ctx);
 	drawGates(circuit, ctx);
+}
+
+function getGate(gateIdx){
+	return circuits[gateIdx[0]].gateSections[gateIdx[1]][gateIdx[2]];
 }
 
 function everyinterval(n) {

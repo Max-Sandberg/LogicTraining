@@ -9,12 +9,13 @@ function findGatePositions(circuit){
 	var cols = circuit.gateSections;
 	for (var i = 0; i < cols.length; i++){
 		for (var j = 0; j < cols[i].length; j++){
-			cols[i][j].xOffset = (4*SC) + (i*8*SC);
-			cols[i][j].yOffset = (cols[i].length == 3) ? (j*8*SC) :
-								 (cols[i].length == 2) ? (j*8*SC) + (4*SC) :
-								 (cols[i].length == 1) ? (8*SC) : 0;
-			cols[i][j].invis = false;
-			cols[i][j].outputVal = -1;
+			var gate = cols[i][j];
+			gate.xOffset = (4*SC) + (i*8*SC);
+			gate.yOffset = (cols[i].length == 3) ? (j*8*SC) :
+						   (cols[i].length == 2) ? (j*8*SC) + (4*SC) :
+						   (cols[i].length == 1) ? (8*SC) : 0;
+
+			gate.invis = false;
 		}
 	}
 	circuit.width = (cols.length*8*SC) + (4*SC);
@@ -26,7 +27,7 @@ function findWirePositions(circuit){
 		gateSections = circuit.gateSections;
 
 	// For each gate section...
-	for (var i = 0; i < gateSections.length; i++){
+	for (var i = 0; i < gateSections.length-1; i++){
 		// Initialise some basic variables.
 		var wireSection = [],
 			firstWireCol = [],
@@ -79,27 +80,30 @@ function findWirePositions(circuit){
 				inputsY = [];
 			// For each gate this output leads to...
 			for (var k = 0; k < gate.nextGates.length; k++){
-				var nextGate = gateSections[gate.nextGates[k][0]][gate.nextGates[k][1]];
+				var nextGate = getGate(gate.nextGates[k].gateIdx),
+					nextGateInputs = gate.nextGates[k].inputs;
 				// For each input in this gate that this output leads to (usually 1, but could be 2)...
-				for (var l = 0; l < gate.nextGates[k][2].length; l++){
-					// For each input this output leads to, we will need a vertical wire leading to that input's y position.
-					var wire = {};
-					wire.y2 = nextGate.yOffset + (gate.nextGates[k][2][l]*2*SC) + SC;
-					wire.gate = j;
+				for (var l = 0; l < nextGateInputs.length; l++){
+					if (nextGate.inputs.length != 1){
+						// For each input this output leads to, we will need a vertical wire leading to that input's y position.
+						var wire = {};
+						wire.y2 = nextGate.yOffset + (nextGateInputs[l]*2*SC) + SC;
+						wire.gate = j;
 
-					// Checks if there is already a wire in the first column from this group.
-					var firstColFree = true;
-					for (var m = 0; m < firstWireCol.length; m++){
-						if (firstWireCol[m].gate == wire.gate){
-							firstColFree = false;
+						// Checks if there is already a wire in the first column from this group.
+						var firstColFree = true;
+						for (var m = 0; m < firstWireCol.length; m++){
+							if (firstWireCol[m].gate == wire.gate){
+								firstColFree = false;
+							}
 						}
-					}
 
-					// If there is no wire from this group in the first column for this section, or if the gate this wire leads to is the same height as the gate we're starting from, use the first column. Else, create a new column for this wire.
-					if (firstColFree || (gate.yOffset == nextGate.yOffset)){
-						firstWireCol.push(wire);
-					} else {
-						wireCols.push([wire]);
+						// If there is no wire from this group in the first column for this section, or if the gate this wire leads to is the same height as the gate we're starting from, use the first column. Else, create a new column for this wire.
+						if (firstColFree || (gate.yOffset == nextGate.yOffset)){
+							firstWireCol.push(wire);
+						} else {
+							wireCols.push([wire]);
+						}
 					}
 				}
 			}

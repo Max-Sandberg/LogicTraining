@@ -9,8 +9,7 @@ function drawGates(circuit, ctx){
 				circuit.startx+gate.xOffset,
 				circuit.starty+gate.yOffset,
 				type,
-				gate.inputs[0].val,
-				gate.inputs[1].val,
+				gate.inputs,
 				gate.outputVal,
 				ctx
 			);
@@ -19,7 +18,7 @@ function drawGates(circuit, ctx){
 }
 
 // Draws a logic gate with a dotted line box around it.
-function drawGate(x, y, type, input1, input2, output, ctx) {
+function drawGate(x, y, type, inputs, output, ctx) {
 	ctx.beginPath();
 	ctx.setLineDash([5, 3]);
 	ctx.strokeStyle="#666666";
@@ -28,6 +27,12 @@ function drawGate(x, y, type, input1, input2, output, ctx) {
 	ctx.setLineDash([]);
 	ctx.strokeStyle="#000000";
 	ctx.closePath();
+
+	var input1, input2;
+	input1 = inputs[0].val;
+	if (inputs.length > 1){
+		input2 = inputs[1].val;
+	}
 
 	switch (type){
 		case gatesEnum.and:
@@ -48,6 +53,9 @@ function drawGate(x, y, type, input1, input2, output, ctx) {
 		case gatesEnum.xnor:
 			drawXNOR(x, y, input1, input2, output, ctx);
 			break;
+		case gatesEnum.bulb:
+			drawBulb(x, y, input1, ctx);
+			break;
 	}
 }
 
@@ -65,7 +73,7 @@ function drawDraggedGate(){
 	// If the mouse isn't currently over a gate, draw at the mouse position. Otherwise, draw in the gate, and set that gate to be invisible.
 	else if (gateIdx != null){
 		var circuit = circuits[gateIdx[0]],
-			gate = circuit.gateSections[gateIdx[1]][gateIdx[2]];
+			gate = getGate(gateIdx);
 		x = circuit.startx + gate.xOffset + (2*SC);
 		y = circuit.starty + gate.yOffset + (2*SC);
 		// If the mouse has just moved into a new gate, set that gate to invisible.
@@ -73,11 +81,6 @@ function drawDraggedGate(){
 			gate.invis = true;
 			selectedGate = gateIdx;
 		}
-	}
-
-	// If the mouse isn't currently over a gate, draw at the mouse position. Otherwise, draw in the gate, and set that gate to be invisible.
-	if (gateIdx != null){
-
 	}
 
 	// Clear the canvas and draw the correct gate.
@@ -269,4 +272,17 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 }
+
+function drawBulb(x, y, live, ctx){
+	ctx.beginPath();
+	ctx.rect(x+SC, y+SC, 2*SC, 2*SC);
+	if (live == 1){
+		ctx.fillStyle = "yellow";
+		ctx.fill();
+		ctx.fillStyle = "black";
+	}
+	ctx.stroke();
+	ctx.closePath();
+}
+
 //#endregion
