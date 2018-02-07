@@ -30,11 +30,11 @@ var circuits = [
 			inputs : [{
 				type : "gate",
 				gate : [0, 0],
-				val : 0
+				val : -1
 			}, {
 				type : "gate",
 				gate : [0, 1],
-				val : 0
+				val : -1
 			}],
 			type : 0,
 			outputVal : 0,
@@ -43,11 +43,11 @@ var circuits = [
 			inputs : [{
 				type : "gate",
 				gate : [0, 0],
-				val : 0
+				val : -1
 			}, {
 				type : "gate",
 				gate : [0, 1],
-				val : 0
+				val : -1
 			}],
 			type : 0,
 			outputVal : 0,
@@ -57,11 +57,11 @@ var circuits = [
 			inputs : [{
 				type : "gate",
 				gate : [2, 0],
-				val : 0
+				val : -1
 			}, {
 				type : "gate",
 				gate : [2, 1],
-				val : 0
+				val : -1
 			}],
 			type : 0,
 			outputVal : 0,
@@ -103,7 +103,7 @@ var circuits = [
 			}, {
 				type : "gate",
 				gate : [0, 0],
-				val : 0
+				val : -1
 			}],
 			type : 0,
 			outputVal : 0,
@@ -112,11 +112,11 @@ var circuits = [
 			inputs : [{
 				type : "gate",
 				gate : [0, 0],
-				val : 0
+				val : -1
 			}, {
 				type : "gate",
 				gate : [0, 1],
-				val : 1
+				val : -1
 			}],
 			type : 0,
 			outputVal : 0,
@@ -126,11 +126,11 @@ var circuits = [
 			inputs : [{
 				type : "gate",
 				gate : [2, 0],
-				val : 0
+				val : -1
 			}, {
 				type : "gate",
 				gate : [2, 1],
-				val : 0
+				val : -1
 			}],
 			type : 0,
 			outputVal : 0,
@@ -169,11 +169,11 @@ var circuits = [
 			inputs : [{
 				type : "gate",
 				gate : [0, 0],
-				val : 0
+				val : -1
 			}, {
 				type : "gate",
 				gate : [0, 0],
-				val : 0
+				val : -1
 			}],
 			type : 0,
 			outputVal : 0,
@@ -182,11 +182,11 @@ var circuits = [
 			inputs : [{
 				type : "gate",
 				gate : [0, 0],
-				val : 0
+				val : -1
 			}, {
 				type : "gate",
 				gate : [0, 1],
-				val : 1
+				val : -1
 			}],
 			type : 0,
 			outputVal : 0,
@@ -196,11 +196,11 @@ var circuits = [
 			inputs : [{
 				type : "gate",
 				gate : [2, 0],
-				val : 0
+				val : -1
 			}, {
 				type : "gate",
 				gate : [2, 1],
-				val : 0
+				val : -1
 			}],
 			type : 0,
 			outputVal : 0,

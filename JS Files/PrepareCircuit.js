@@ -14,6 +14,7 @@ function findGatePositions(circuit){
 								 (cols[i].length == 2) ? (j*8*SC) + (4*SC) :
 								 (cols[i].length == 1) ? (8*SC) : 0;
 			cols[i][j].invis = false;
+			cols[i][j].outputVal = -1;
 		}
 	}
 	circuit.width = (cols.length*8*SC) + (4*SC);
@@ -38,7 +39,7 @@ function findWirePositions(circuit){
 			var gate = gateSections[i][j],
 				group = {};
 			group.outputGate = [i, j];
-			group.live = gate.outputVal;
+			group.live = -1;
 			group.wires = [];
 			wireSection.push(group);
 		}

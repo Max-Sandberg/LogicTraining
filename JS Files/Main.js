@@ -62,27 +62,32 @@ function updateGateOutput(gateIdx){
 		oldOutput = gate.outputVal,
 		newOutput;
 
-	switch (gate.type){
-		case gatesEnum.and:
-			newOutput = (gate.inputs[0].val && gate.inputs[1].val);
-			break;
-		case gatesEnum.nand:
-			newOutput = !(gate.inputs[0].val && gate.inputs[1].val);
-			break;
-		case gatesEnum.or:
-			newOutput = (gate.inputs[0].val || gate.inputs[1].val);
-			break;
-		case gatesEnum.nor:
-			newOutput = !(gate.inputs[0].val || gate.inputs[1].val);
-			break;
-		case gatesEnum.xor:
-			newOutput = ((gate.inputs[0].val || gate.inputs[1].val)
-							  && !(gate.inputs[0].val && gate.inputs[1].val));
-			break;
-		case gatesEnum.xnor:
-			newOutput = !((gate.inputs[0].val || gate.inputs[1].val)
-						  && !(gate.inputs[0].val && gate.inputs[1].val));
-			break;
+	// If the gate is empty, or either input is inactive, the output is inactive.
+	if (gate.inputs[0].val == -1 || gate.inputs[1].val == -1 || gate.type == 0){
+		newOutput = -1;
+	} else {
+		switch (gate.type){
+			case gatesEnum.and:
+				newOutput = (gate.inputs[0].val && gate.inputs[1].val) ? 1 : 0;
+				break;
+			case gatesEnum.nand:
+				newOutput = !(gate.inputs[0].val && gate.inputs[1].val) ? 1 : 0;
+				break;
+			case gatesEnum.or:
+				newOutput = (gate.inputs[0].val || gate.inputs[1].val) ? 1 : 0;
+				break;
+			case gatesEnum.nor:
+				newOutput = !(gate.inputs[0].val || gate.inputs[1].val) ? 1 : 0;
+				break;
+			case gatesEnum.xor:
+				newOutput = ((gate.inputs[0].val || gate.inputs[1].val)
+								  && !(gate.inputs[0].val && gate.inputs[1].val)) ? 1 : 0;
+				break;
+			case gatesEnum.xnor:
+				newOutput = !((gate.inputs[0].val || gate.inputs[1].val)
+							  && !(gate.inputs[0].val && gate.inputs[1].val)) ? 1 : 0;
+				break;
+		}
 	}
 
 	if (oldOutput != newOutput){
@@ -134,9 +139,10 @@ function getSelectedGate(x, y){
 function drawMenuBar(){
 	// Draw outer box
 	ctx1.beginPath();
-	ctx1.strokeStyle="#666666"; //hail satan?
+	ctx1.strokeStyle="#666666";
 	ctx1.rect(1, 1, cvs1.width-2, (SC*6));
 	ctx1.stroke();
+	ctx1.strokeStyle="#000000";
 	ctx1.closePath();
 
 	// Draw box for each gate
@@ -167,6 +173,7 @@ function prepareGameArea(){
 	ctx1.strokeStyle="#666666";
 	ctx1.rect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-2);
 	ctx1.stroke();
+	ctx1.strokeStyle="#000000";
 	ctx1.closePath();
 
 	// Find out how to draw all the circuits
@@ -189,6 +196,7 @@ function updateGameArea() {
 	ctx1.strokeStyle="#666666";
 	ctx1.rect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-2);
 	ctx1.stroke();
+	ctx1.strokeStyle="#000000";
 	ctx1.closePath();
 
 	// Increase frameNo and move circuits
@@ -201,78 +209,10 @@ function updateGameArea() {
 	}
 }
 
-function drawWire(x1, y1, x2, y2, live, ctx){
-	ctx.beginPath();
-	ctx.moveTo(x1, y1);
-	ctx.lineTo(x2, y2);
-	if (live){
-		ctx.strokeStyle="#00bfff";
-		ctx.lineWidth = 3;
-		ctx.stroke();
-		ctx.strokeStyle="#000000";
-		ctx.lineWidth = 1;
-	} else {
-		ctx.strokeStyle="#000000";
-		ctx.lineWidth = 1;
-		ctx.stroke();
-	}
-	ctx.closePath();
-}
-
-// Draws a logic gate. Height 4, Width 6.
-function drawGate(x, y, type, input1, input2, output, ctx) {
-	ctx.beginPath();
-	ctx.setLineDash([5, 3]);
-	ctx.strokeStyle="#666666";
-	ctx.rect(x, y, 4*SC, 4*SC);
-	ctx.stroke();
-	ctx.closePath();
-	ctx.setLineDash([]);
-	ctx.strokeStyle="#000000";
-
-	switch (type){
-		case gatesEnum.and:
-			drawAND(x, y, input1, input2, output, ctx);
-			break;
-		case gatesEnum.nand:
-			drawNAND(x, y, input1, input2, output, ctx);
-			break;
-		case gatesEnum.or:
-			drawOR(x, y, input1, input2, output, ctx);
-			break;
-		case gatesEnum.nor:
-			drawNOR(x, y, input1, input2, output, ctx);
-			break;
-		case gatesEnum.xor:
-			drawXOR(x, y, input1, input2, output, ctx);
-			break;
-		case gatesEnum.xnor:
-			drawXNOR(x, y, input1, input2, output, ctx);
-			break;
-	}
-}
-
 // Draws the whole circuit.
 function drawCircuit(circuit, ctx) {
 	drawWires(circuit, ctx);
 	drawGates(circuit, ctx);
-
-	// for (var i = 0; i < circuit.columns.length; i++){
-	// 	var column = circuit.columns[i];
-	// 	if (column.type == "wires") {
-	// 		drawWires(circuit, i, x, starty, ctx1);
-	// 	} else if (column.type == "gates") {
-	// 		var y = starty;
-	// 		for (var j = 0; j < column.gates.length; j++) {
-	// 			if (typeof(column.gates[j]) != "undefined"){
-	// 				drawGate(x, y);
-	// 			}
-	// 			y += (4*SC);
-	// 		}
-	// 	}
-	// 	//x = (column.type == "wires") ? x + (4*SC) : x + (6*SC);
-	// 	x += (4*SC);
-	// }
 }
 
 function everyinterval(n) {
