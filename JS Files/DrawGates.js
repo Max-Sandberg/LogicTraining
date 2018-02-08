@@ -273,17 +273,20 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 }
 
-function drawBulb(x, y, live, ctx){
-	// ctx.beginPath();
-	// ctx.rect(x+SC, y+SC, 2*SC, 2*SC);
-	// if (live == 1){
-	// 	ctx.fillStyle = "yellow";
-	// 	ctx.fill();
-	// 	ctx.fillStyle = "black";
-	// }
-	// ctx.stroke();
-	// ctx.closePath();
+function drawStar(x, y, live, ctx){
+	ctx.font = 3*SC + "px FontAwesome";
+	if (live == 1){
+		ctx.fillStyle = "yellow";
+		ctx.fillText("\uF005", x+(0.65*SC), y+(3.1*SC));
+		ctx.fillStyle = "black";
+	}
+	ctx.lineWidth = 2;
+	ctx.strokeText("\uF005", x+(0.65*SC), y+(3.1*SC));
+	ctx.font = "26px Arial";
+	ctx.lineWidth = 1;
+}
 
+function drawBulb(x, y, live, ctx){
 	ctx.beginPath();
 	ctx.lineWidth = 2;
 	ctx.strokeStyle = "#000000";
@@ -327,7 +330,6 @@ function drawBulb(x, y, live, ctx){
 		ctx.beginPath();
 		ctx.lineWidth = 1;
 		ctx.strokeStyle = "#000000";
-		//ctx.strokeStyle = "#e6e600";
 
 		// Right side lines
 		ctx.moveTo(x+(3.1*SC), y+(1*SC));
