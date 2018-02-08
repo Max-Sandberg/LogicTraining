@@ -184,7 +184,8 @@ function prepareGameArea(){
 	// Find out how to draw all the circuits
 	for (var i = 0; i < circuits.length; i++){
 		prepareCircuit(circuits[i]);
-		circuits[i].startx = (i == 0) ? cvs1.width+50 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
+		// circuits[i].startx = (i == 0) ? cvs1.width+50 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
+		circuits[i].startx = (i == 0) ? 500 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
 		circuits[i].starty = 300;
 	}
 }

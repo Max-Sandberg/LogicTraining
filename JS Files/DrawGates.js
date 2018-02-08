@@ -274,15 +274,81 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 }
 
 function drawBulb(x, y, live, ctx){
+	// ctx.beginPath();
+	// ctx.rect(x+SC, y+SC, 2*SC, 2*SC);
+	// if (live == 1){
+	// 	ctx.fillStyle = "yellow";
+	// 	ctx.fill();
+	// 	ctx.fillStyle = "black";
+	// }
+	// ctx.stroke();
+	// ctx.closePath();
+
 	ctx.beginPath();
-	ctx.rect(x+SC, y+SC, 2*SC, 2*SC);
-	if (live == 1){
-		ctx.fillStyle = "yellow";
-		ctx.fill();
-		ctx.fillStyle = "black";
-	}
+	ctx.lineWidth = 2;
+	ctx.strokeStyle = "#000000";
+	ctx.arc(x+(2*SC), y+(1.6*SC), 1*SC, Math.PI, 0);
+	ctx.moveTo(x+(1*SC), y+(1.6*SC));
+	ctx.bezierCurveTo(x+(1*SC), y+(2.3*SC), x+(1.5*SC), y+(2.3*SC), x+(1.5*SC), y+(2.9*SC));
+	ctx.moveTo(x+(3*SC), y+(1.5*SC));
+	ctx.bezierCurveTo(x+(3*SC), y+(2.3*SC), x+(2.5*SC), y+(2.3*SC), x+(2.5*SC), y+(2.9*SC));
 	ctx.stroke();
 	ctx.closePath();
+
+	ctx.beginPath();
+	ctx.lineWidth = 4;
+	ctx.strokeStyle = "#000000";
+	ctx.fillStyle = "#cccccc";
+	ctx.rect(x+(1.4*SC)+1, y+(2.9*SC)+1, (1.2*SC)-2, (0.5*SC)-2);
+	ctx.stroke();
+	ctx.fill();
+	ctx.lineWidth = 2;
+	ctx.fillStyle = "#000000";
+	ctx.closePath();
+
+	if (live == 1){
+		ctx.beginPath();
+		ctx.fillStyle = "yellow";
+		ctx.arc(x+(2*SC), y+(1.6*SC), SC-1, 0, 2*Math.PI);
+		ctx.rect(x+(1.6*SC), y+(1.8*SC), 0.8*SC, SC+1);
+		ctx.fill();
+		ctx.fillStyle = "black";
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.strokeStyle = "yellow";
+		ctx.moveTo(x+(1*SC)+2, y+(1.6*SC));
+		ctx.bezierCurveTo(x+(1*SC)+2, y+(2.3*SC)-1, x+(1.5*SC)+2, y+(2.3*SC)-1, x+(1.5*SC)+2, y+(2.9*SC)-2);
+		ctx.moveTo(x+(3*SC)-2, y+(1.5*SC));
+		ctx.bezierCurveTo(x+(3*SC)-2, y+(2.3*SC)-1, x+(2.5*SC)-2, y+(2.3*SC)-1, x+(2.5*SC)-2, y+(2.9*SC)-2);
+		ctx.stroke();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.lineWidth = 1;
+		ctx.strokeStyle = "#000000";
+		//ctx.strokeStyle = "#e6e600";
+
+		// Right side lines
+		ctx.moveTo(x+(3.1*SC), y+(1*SC));
+		ctx.lineTo(x+(3.6*SC), y+(0.8*SC));
+		ctx.moveTo(x+(3.2*SC), y+(1.75*SC));
+		ctx.lineTo(x+(3.7*SC), y+(1.75*SC));
+		ctx.moveTo(x+(3.1*SC), y+(2.5*SC));
+		ctx.lineTo(x+(3.6*SC), y+(2.7*SC));
+
+		// Left side lines
+		ctx.moveTo(x+(0.9*SC), y+(1*SC));
+		ctx.lineTo(x+(0.4*SC), y+(0.8*SC));
+		ctx.moveTo(x+(0.8*SC), y+(1.75*SC));
+		ctx.lineTo(x+(0.3*SC), y+(1.75*SC));
+		ctx.moveTo(x+(0.9*SC), y+(2.5*SC));
+		ctx.lineTo(x+(0.4*SC), y+(2.7*SC));
+		ctx.stroke();
+		ctx.lineWidth = 1;
+		ctx.strokeStyle = "black";
+		ctx.closePath();
+	}
 }
 
 //#endregion
