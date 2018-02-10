@@ -13,7 +13,7 @@ function startGame() {
 	ctx1 = cvs1.getContext("2d");
 	cvs1.width = window.innerWidth-15;
 	cvs1.height = window.innerHeight-15;
-	cvs1.style = "position: absolute; left: 5; top: 5; z-index: 0; background-color: #f1f1f1; border:0px solid #d3d3d3;";
+	cvs1.style = "position: absolute; left: 5; top: 5; z-index: 0; background-color: #fafafa; border:0px solid #d3d3d3;";
 	document.body.insertBefore(cvs1, document.body.childNodes[0]);
 
 	// Create the layer 2 canvas
@@ -196,6 +196,14 @@ function clearGameArea(){
 function updateGameArea() {
 	clearGameArea();
 
+	// Draw and move circuits
+	for (var i = 0; i < circuits.length; i++){
+		drawCircuit(circuits[i], ctx1);
+		if (!pause){
+			circuits[i].startx--;
+		}
+	}
+
 	// Draw box around the game area
 	ctx1.beginPath();
 	ctx1.strokeStyle="#666666";
@@ -203,14 +211,6 @@ function updateGameArea() {
 	ctx1.stroke();
 	ctx1.strokeStyle="#000000";
 	ctx1.closePath();
-
-	// Move circuits
-	for (var i = 0; i < circuits.length; i++){
-		drawCircuit(circuits[i], ctx1);
-		if (!pause){
-			circuits[i].startx--;
-		}
-	}
 
 	checkWinOrLose();
 }

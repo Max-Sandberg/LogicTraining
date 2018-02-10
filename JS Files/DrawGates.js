@@ -122,22 +122,17 @@ function drawDraggedGate(){
 
 //#region - Functions to draw the specific gates.
 function drawAND(x, y, input1, input2, output, ctx){
-	ctx.beginPath();
 	ctx.lineWidth = 1.5;
-	ctx.moveTo(x+(1.6*SC), y+(3.6*SC));
-	ctx.lineTo(x+(0.5*SC), y+(3.6*SC));
-	ctx.lineTo(x+(0.5*SC), y+(0.4*SC));
-	ctx.lineTo(x+(1.6*SC), y+(0.4*SC));
-	ctx.stroke();
-	ctx.lineWidth = 1;
-	ctx.closePath();
+	ctx.fillStyle = "#ffffff";
 
 	ctx.beginPath();
-	ctx.lineWidth = 1.5;
-	ctx.moveTo(x+(1.6*SC), y+(0.4*SC));
+	ctx.moveTo(x+(0.5*SC), y+(0.4*SC));
+	ctx.lineTo(x+(1.6*SC), y+(0.4*SC));
 	ctx.bezierCurveTo(x+(4.1*SC), y+(0.4*SC), x+(4.1*SC), y+(3.6*SC), x+(1.6*SC), y+(3.6*SC));
+	ctx.lineTo(x+(0.5*SC), y+(3.6*SC));
+	ctx.lineTo(x+(0.5*SC), y+(0.4*SC));
+	ctx.fill();
 	ctx.stroke();
-	ctx.lineWidth = 1;
 	ctx.closePath();
 
 	drawWire(x, y+SC, x+(0.5*SC), y+SC, input1, ctx);
@@ -146,26 +141,22 @@ function drawAND(x, y, input1, input2, output, ctx){
 }
 
 function drawNAND(x, y, input1, input2, output, ctx){
-	ctx.beginPath();
 	ctx.lineWidth = 1.5;
-	ctx.moveTo(x+(1.4*SC), y+(3.6*SC));
-	ctx.lineTo(x+(0.5*SC), y+(3.6*SC));
-	ctx.lineTo(x+(0.5*SC), y+(0.4*SC));
-	ctx.lineTo(x+(1.4*SC), y+(0.4*SC));
-	ctx.stroke();
-	ctx.lineWidth = 1;
-	ctx.closePath();
+	ctx.fillStyle = "#ffffff";
 
 	ctx.beginPath();
-	ctx.lineWidth = 1.5;
-	ctx.moveTo(x+(1.4*SC), y+(0.4*SC));
+	ctx.moveTo(x+(0.5*SC), y+(0.4*SC));
+	ctx.lineTo(x+(1.4*SC), y+(0.4*SC));
 	ctx.bezierCurveTo(x+(3.9*SC), y+(0.4*SC), x+(3.9*SC), y+(3.6*SC), x+(1.4*SC), y+(3.6*SC));
+	ctx.lineTo(x+(0.5*SC), y+(3.6*SC));
+	ctx.lineTo(x+(0.5*SC), y+(0.4*SC));
+	ctx.fill();
 	ctx.stroke();
-	ctx.lineWidth = 1;
 	ctx.closePath();
 
 	ctx.beginPath();
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
+	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
 
@@ -175,22 +166,16 @@ function drawNAND(x, y, input1, input2, output, ctx){
 }
 
 function drawOR(x, y, input1, input2, output, ctx){
-	ctx.beginPath();
 	ctx.lineWidth = 1.5;
-	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
-	ctx.bezierCurveTo(x+(1.2*SC), y+(1*SC), x+(1.2*SC), y+(3*SC), x+(0.4*SC), y+(3.6*SC));
-	ctx.stroke();
-	ctx.lineWidth = 1;
-	ctx.closePath();
+	ctx.fillStyle = "#ffffff";
 
 	ctx.beginPath();
-	ctx.lineWidth = 1.5;
 	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
 	ctx.quadraticCurveTo(x+(3*SC), y+(0.4*SC), x+(3.5*SC), y+(2*SC));
-	ctx.moveTo(x+(0.4*SC), y+(3.6*SC));
-	ctx.quadraticCurveTo(x+(3*SC), y+(3.6*SC), x+(3.5*SC), y+(2*SC));
+	ctx.quadraticCurveTo(x+(3*SC), y+(3.6*SC), x+(0.4*SC), y+(3.6*SC));
+	ctx.bezierCurveTo(x+(1.2*SC), y+(3*SC), x+(1.2*SC), y+(1*SC), x+(0.4*SC), y+(0.4*SC));
+	ctx.fill();
 	ctx.stroke();
-	ctx.lineWidth = 1;
 	ctx.closePath();
 
 	drawWire(x, y+SC, x+(0.8*SC), y+SC, input1, ctx);
@@ -199,26 +184,21 @@ function drawOR(x, y, input1, input2, output, ctx){
 }
 
 function drawNOR(x, y, input1, input2, output, ctx){
-	ctx.beginPath();
 	ctx.lineWidth = 1.5;
-	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
-	ctx.bezierCurveTo(x+(1.2*SC), y+(1*SC), x+(1.2*SC), y+(3*SC), x+(0.4*SC), y+(3.6*SC));
-	ctx.stroke();
-	ctx.lineWidth = 1;
-	ctx.closePath();
+	ctx.fillStyle = "#ffffff";
 
 	ctx.beginPath();
-	ctx.lineWidth = 1.5;
 	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
 	ctx.quadraticCurveTo(x+(2.75*SC), y+(0.4*SC), x+(3.25*SC), y+(2*SC));
-	ctx.moveTo(x+(0.4*SC), y+(3.6*SC));
-	ctx.quadraticCurveTo(x+(2.75*SC), y+(3.6*SC), x+(3.25*SC), y+(2*SC));
+	ctx.quadraticCurveTo(x+(2.75*SC), y+(3.6*SC), x+(0.4*SC), y+(3.6*SC));
+	ctx.bezierCurveTo(x+(1.2*SC), y+(3*SC), x+(1.2*SC), y+(1*SC), x+(0.4*SC), y+(0.4*SC));
+	ctx.fill();
 	ctx.stroke();
-	ctx.lineWidth = 1;
 	ctx.closePath();
 
 	ctx.beginPath();
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
+	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
 
@@ -228,24 +208,22 @@ function drawNOR(x, y, input1, input2, output, ctx){
 }
 
 function drawXOR(x, y, input1, input2, output, ctx){
-	ctx.beginPath();
 	ctx.lineWidth = 1.5;
-	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
-	ctx.bezierCurveTo(x+(1.1*SC), y+(1*SC), x+(1.1*SC), y+(3*SC), x+(0.3*SC), y+(3.6*SC));
+	ctx.fillStyle = "#ffffff";
+
+	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
-	ctx.bezierCurveTo(x+(1.4*SC), y+(1*SC), x+(1.4*SC), y+(3*SC), x+(0.6*SC), y+(3.6*SC));
+	ctx.quadraticCurveTo(x+(3*SC), y+(0.4*SC), x+(3.5*SC), y+(2*SC));
+	ctx.quadraticCurveTo(x+(3*SC), y+(3.6*SC), x+(0.6*SC), y+(3.6*SC));
+	ctx.bezierCurveTo(x+(1.4*SC), y+(3*SC), x+(1.4*SC), y+(1*SC), x+(0.6*SC), y+(0.4*SC));
+	ctx.fill();
 	ctx.stroke();
-	ctx.lineWidth = 1;
 	ctx.closePath();
 
 	ctx.beginPath();
-	ctx.lineWidth = 1.5;
-	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
-	ctx.quadraticCurveTo(x+(3*SC), y+(0.4*SC), x+(3.5*SC), y+(2*SC));
-	ctx.moveTo(x+(0.6*SC), y+(3.6*SC));
-	ctx.quadraticCurveTo(x+(3*SC), y+(3.6*SC), x+(3.5*SC), y+(2*SC));
+	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
+	ctx.bezierCurveTo(x+(1.1*SC), y+(1*SC), x+(1.1*SC), y+(3*SC), x+(0.3*SC), y+(3.6*SC));
 	ctx.stroke();
-	ctx.lineWidth = 1;
 	ctx.closePath();
 
 	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
@@ -254,31 +232,28 @@ function drawXOR(x, y, input1, input2, output, ctx){
 }
 
 function drawXNOR(x, y, input1, input2, output, ctx){
-	ctx.beginPath();
 	ctx.lineWidth = 1.5;
-	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
-	ctx.bezierCurveTo(x+(1.1*SC), y+(1*SC), x+(1.1*SC), y+(3*SC), x+(0.3*SC), y+(3.6*SC));
-	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
-	ctx.bezierCurveTo(x+(1.4*SC), y+(1*SC), x+(1.4*SC), y+(3*SC), x+(0.6*SC), y+(3.6*SC));
-	ctx.stroke();
-	ctx.lineWidth = 1;
-	ctx.closePath();
+	ctx.fillStyle = "#ffffff";
 
 	ctx.beginPath();
-	ctx.lineWidth = 1.5;
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
 	ctx.quadraticCurveTo(x+(2.75*SC), y+(0.4*SC), x+(3.25*SC), y+(2*SC));
-	ctx.moveTo(x+(0.6*SC), y+(3.6*SC));
-	ctx.quadraticCurveTo(x+(2.75*SC), y+(3.6*SC), x+(3.25*SC), y+(2*SC));
+	ctx.quadraticCurveTo(x+(2.75*SC), y+(3.6*SC), x+(0.6*SC), y+(3.6*SC));
+	ctx.bezierCurveTo(x+(1.4*SC), y+(3*SC), x+(1.4*SC), y+(1*SC), x+(0.6*SC), y+(0.4*SC));
+	ctx.fill();
 	ctx.stroke();
-	ctx.lineWidth = 1;
 	ctx.closePath();
 
 	ctx.beginPath();
-	ctx.lineWidth = 1.5;
-	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
+	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
+	ctx.bezierCurveTo(x+(1.1*SC), y+(1*SC), x+(1.1*SC), y+(3*SC), x+(0.3*SC), y+(3.6*SC));
 	ctx.stroke();
-	ctx.lineWidth = 1;
+	ctx.closePath();
+
+	ctx.beginPath();
+	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
+	ctx.fill();
+	ctx.stroke();
 	ctx.closePath();
 
 	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
@@ -289,7 +264,7 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 function drawStar(x, y, live, ctx){
 	ctx.font = 3*SC + "px FontAwesome";
 	if (live == 1){
-		ctx.fillStyle = "yellow";
+		ctx.fillStyle = "#ffff00";
 		ctx.fillText("\uF005", x+(0.65*SC), y+(3.1*SC));
 		ctx.fillStyle = "black";
 	}
@@ -300,20 +275,20 @@ function drawStar(x, y, live, ctx){
 }
 
 function drawBulb(x, y, live, ctx){
-	ctx.beginPath();
 	ctx.lineWidth = 2;
-	ctx.strokeStyle = "#000000";
+	ctx.fillStyle = (live == 1) ? "#ffff00" : "#ffffff";
+
+	ctx.beginPath();
+	ctx.moveTo(x+(1.5*SC), y+(2.9*SC));
+	ctx.bezierCurveTo(x+(1.5*SC), y+(2.3*SC), x+(1*SC), y+(2.3*SC), x+(1*SC), y+(1.6*SC));
 	ctx.arc(x+(2*SC), y+(1.6*SC), 1*SC, Math.PI, 0);
-	ctx.moveTo(x+(1*SC), y+(1.6*SC));
-	ctx.bezierCurveTo(x+(1*SC), y+(2.3*SC), x+(1.5*SC), y+(2.3*SC), x+(1.5*SC), y+(2.9*SC));
-	ctx.moveTo(x+(3*SC), y+(1.5*SC));
 	ctx.bezierCurveTo(x+(3*SC), y+(2.3*SC), x+(2.5*SC), y+(2.3*SC), x+(2.5*SC), y+(2.9*SC));
+	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
 
 	ctx.beginPath();
 	ctx.lineWidth = 4;
-	ctx.strokeStyle = "#000000";
 	ctx.fillStyle = "#cccccc";
 	ctx.rect(x+(1.4*SC)+1, y+(2.9*SC)+1, (1.2*SC)-2, (0.5*SC)-2);
 	ctx.stroke();
@@ -324,25 +299,8 @@ function drawBulb(x, y, live, ctx){
 
 	if (live == 1){
 		ctx.beginPath();
-		ctx.fillStyle = "yellow";
-		ctx.arc(x+(2*SC), y+(1.6*SC), SC-1, 0, 2*Math.PI);
-		ctx.rect(x+(1.6*SC), y+(1.8*SC), 0.8*SC, SC+1);
-		ctx.fill();
-		ctx.fillStyle = "black";
-		ctx.closePath();
-
-		ctx.beginPath();
-		ctx.strokeStyle = "yellow";
-		ctx.moveTo(x+(1*SC)+2, y+(1.6*SC));
-		ctx.bezierCurveTo(x+(1*SC)+2, y+(2.3*SC)-1, x+(1.5*SC)+2, y+(2.3*SC)-1, x+(1.5*SC)+2, y+(2.9*SC)-2);
-		ctx.moveTo(x+(3*SC)-2, y+(1.5*SC));
-		ctx.bezierCurveTo(x+(3*SC)-2, y+(2.3*SC)-1, x+(2.5*SC)-2, y+(2.3*SC)-1, x+(2.5*SC)-2, y+(2.9*SC)-2);
-		ctx.stroke();
-		ctx.closePath();
-
-		ctx.beginPath();
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = "#000000";
+		ctx.lineWidth = 4;
+		ctx.strokeStyle = "#ffff00";
 
 		// Right side lines
 		ctx.moveTo(x+(3.1*SC), y+(1*SC));
@@ -359,9 +317,10 @@ function drawBulb(x, y, live, ctx){
 		ctx.lineTo(x+(0.3*SC), y+(1.75*SC));
 		ctx.moveTo(x+(0.9*SC), y+(2.5*SC));
 		ctx.lineTo(x+(0.4*SC), y+(2.7*SC));
+
 		ctx.stroke();
 		ctx.lineWidth = 1;
-		ctx.strokeStyle = "black";
+		ctx.strokeStyle = "#000000";
 		ctx.closePath();
 	}
 }
