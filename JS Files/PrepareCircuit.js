@@ -40,7 +40,7 @@ function findWirePositions(circuit){
 			var gate = gateSections[i][j],
 				group = {};
 			group.outputGate = [i, j];
-			group.live = -1;
+			group.live = gate.outputVal;
 			group.wires = [];
 			wireSection.push(group);
 		}

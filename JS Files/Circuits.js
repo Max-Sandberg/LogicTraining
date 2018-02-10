@@ -13,6 +13,7 @@ var circuits = [
 			}],
 			type : 0,
 			outputVal : -1,
+			fixed : 0,
 			nextGates : [{
 				gateIdx : [0, 1, 0],
 				inputs : [0]
@@ -28,8 +29,9 @@ var circuits = [
 				type : "signal",
 				val : 0
 			}],
-			type : 0,
-			outputVal : -1,
+			type : 1,
+			outputVal : 0,
+			fixed : 1,
 			nextGates : [{
 				gateIdx : [0, 1, 1],
 				inputs : [1]
@@ -46,10 +48,11 @@ var circuits = [
 			}, {
 				type : "gate",
 				gate : [0, 1],
-				val : -1
+				val : 0
 			}],
-			type : 0,
+			type : 3,
 			outputVal : -1,
+			fixed : 1,
 			nextGates : [{
 				gateIdx : [0, 2, 0],
 				inputs : [0]
@@ -62,10 +65,11 @@ var circuits = [
 			}, {
 				type : "gate",
 				gate : [0, 1],
-				val : -1
+				val : 0
 			}],
 			type : 0,
 			outputVal : -1,
+			fixed : 0,
 			nextGates : [{
 				gateIdx : [0, 2, 0],
 				inputs : [1]
@@ -81,8 +85,9 @@ var circuits = [
 				gate : [1, 1],
 				val : -1
 			}],
-			type : 0,
+			type : 6,
 			outputVal : -1,
+			fixed : 1,
 			nextGates : [{
 				gateIdx : [0, 3, 0],
 				inputs : [0]
@@ -96,6 +101,7 @@ var circuits = [
 			}],
 			type : 7,
 			outputVal : 0,
+			fixed : 1,
 			nextGates : []
 		}]
 	]
@@ -114,6 +120,7 @@ var circuits = [
 			}],
 			type : 0,
 			outputVal : -1,
+			fixed : 0,
 			nextGates : [{
 				gateIdx : [1, 1, 0],
 				inputs : [1]
@@ -131,6 +138,7 @@ var circuits = [
 			}],
 			type : 0,
 			outputVal : -1,
+			fixed : 0,
 			nextGates : [{
 				gateIdx : [1, 1, 1],
 				inputs : [1]
@@ -147,6 +155,7 @@ var circuits = [
 			}],
 			type : 0,
 			outputVal : -1,
+			fixed : 0,
 			nextGates : [{
 				gateIdx : [1, 2, 0],
 				inputs : [0]
@@ -163,6 +172,7 @@ var circuits = [
 			}],
 			type : 0,
 			outputVal : -1,
+			fixed : 0,
 			nextGates : [{
 				gateIdx : [1, 2, 0],
 				inputs : [1]
@@ -180,6 +190,7 @@ var circuits = [
 			}],
 			type : 0,
 			outputVal : -1,
+			fixed : 0,
 			nextGates : [{
 				gateIdx : [1, 3, 0],
 				inputs : [0]
@@ -193,6 +204,7 @@ var circuits = [
 			}],
 			type : 7,
 			outputVal : 0,
+			fixed : 1,
 			nextGates : []
 		}]
 	]
@@ -211,6 +223,7 @@ var circuits = [
 			}],
 			type : 0,
 			outputVal : -1,
+			fixed : 0,
 			nextGates : [{
 				gateIdx : [2, 1, 0],
 				inputs : [0, 1]
@@ -228,6 +241,7 @@ var circuits = [
 			}],
 			type : 0,
 			outputVal : -1,
+			fixed : 0,
 			nextGates : [{
 				gateIdx : [2, 1, 1],
 				inputs : [1]
@@ -245,6 +259,7 @@ var circuits = [
 			}],
 			type : 0,
 			outputVal : -1,
+			fixed : 0,
 			nextGates : [{
 				gateIdx : [2, 2, 0],
 				inputs : [0]
@@ -261,6 +276,7 @@ var circuits = [
 			}],
 			type : 0,
 			outputVal : -1,
+			fixed : 0,
 			nextGates : [{
 				gateIdx : [2, 2, 0],
 				inputs : [1]
@@ -278,6 +294,7 @@ var circuits = [
 			}],
 			type : 0,
 			outputVal : -1,
+			fixed : 0,
 			nextGates : [{
 				gateIdx : [2, 3, 0],
 				inputs : [0]
@@ -291,6 +308,7 @@ var circuits = [
 			}],
 			type : 7,
 			outputVal : 0,
+			fixed : 1,
 			nextGates : []
 		}]
 	]

@@ -1,10 +1,9 @@
 var SC = 20; // Scale
-var frameNo = 0;
 var cvs1, ctx1, cvs2, ctx2;
 var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7});
 var draggedGate = 0;
 var selectedGate = null;
-var intervalId;
+var drawDraggedIntervalId, updateIntervalId;
 var mousex, mousey;
 var pause = false;
 
@@ -35,8 +34,6 @@ function startGame() {
 		e = e || window.event;
 		pause = !pause;
 	};
-
-	setInterval(updateGameArea, 10);
 }
 
 // Updates the values in a circuit after a particular gate has changed.
@@ -184,10 +181,12 @@ function prepareGameArea(){
 	// Find out how to draw all the circuits
 	for (var i = 0; i < circuits.length; i++){
 		prepareCircuit(circuits[i]);
-		// circuits[i].startx = (i == 0) ? cvs1.width+50 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
-		circuits[i].startx = (i == 0) ? 500 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
-		circuits[i].starty = 300;
+		circuits[i].startx = (i == 0) ? cvs1.width+50 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
+		//circuits[i].startx = (i == 0) ? -600 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
+		circuits[i].starty = ((cvs1.height-(6*SC))/2)+(6*SC)-(10*SC);
 	}
+
+	updateIntervalId = setInterval(updateGameArea, 10);
 }
 
 function clearGameArea(){
@@ -205,27 +204,86 @@ function updateGameArea() {
 	ctx1.strokeStyle="#000000";
 	ctx1.closePath();
 
-	// Increase frameNo and move circuits
+	// Move circuits
 	for (var i = 0; i < circuits.length; i++){
 		drawCircuit(circuits[i], ctx1);
 		if (!pause){
 			circuits[i].startx--;
-			frameNo++;
+		}
+	}
+
+	checkWinOrLose();
+}
+
+// Checks if the game has been won or lost based on the state of the bulbs.
+function checkWinOrLose(){
+	var allBulbsLit = true,
+		gameState;
+
+	// Goes through every gate in all circuits. If any are unlit bulbs, set allBulbsLit to false. If any are unlit bulbs that have reached the edge of the screen, gameState is set to "lost".
+	for (var i = 0; i < circuits.length; i++){
+		for (var j = 0; j < circuits[i].gateSections.length; j++){
+			var gateSection = circuits[i].gateSections[j];
+			for (var k = 0; k < gateSection.length; k++){
+				var gate = gateSection[k];
+				if ((gate.type == gatesEnum.bulb) && (gate.outputVal != 1)){
+					allBulbsLit = false;
+					gameState = (circuits[i].startx + gate.xOffset < 0) ? "lost" : gameState;
+				}
+			}
+		}
+	}
+
+	// If all bulbs are lit, gameState is set to "won".
+	gameState = (allBulbsLit && !pause) ? "won" : gameState;
+
+	// If the game is won or lost, stop the game and display the relevant message.
+	if (gameState == "won" || gameState == "lost"){
+		// Cancel all the intervals and handlers
+		// draggedGate = 0;
+		// drawDraggedGate();
+		clearInterval(drawDraggedIntervalId);
+		clearInterval(updateIntervalId);
+		drawDraggedIntervalId = undefined;
+		updateIntervalId = undefined;
+		cvs2.onmousedown = undefined;
+		cvs2.onmouseup = undefined;
+		cvs2.onmousemove = undefined;
+
+		// Draw a partially transparent rectangle over the whole canvas to make it look faded out, and draw a box in the middle of the game area.
+		ctx2.fillStyle = "rgba(0, 0, 0, 0.2)";
+		ctx2.fillRect(0, 0, cvs2.width, cvs2.height);
+		ctx2.lineWidth = 1;
+		ctx2.fillStyle = "#eeeeee";
+		var rectX = (cvs1.width/2)-100,
+			rectY = ((cvs1.height-(6*SC))/2)+(6*SC)-50;
+		ctx2.rect(rectX, rectY, 200, 100);
+		ctx2.fill();
+		ctx2.stroke();
+		ctx2.fillStyle = "#000000";
+
+		// Write the relevant message in the box.
+		if (gameState == "lost"){
+			ctx2.font = "26px Arial";
+			ctx2.fillText("You lost...", rectX + 28, rectY + 60);
+			ctx2.font = "26px FontAwesome";
+			ctx2.fillText("\uF119", rectX + 152, rectY + 60);
+		} else if (gameState == "won"){
+			ctx2.font = "26px Arial";
+			ctx2.fillText("You win!", rectX + 36, rectY + 60);
+			ctx2.font = "26px FontAwesome";
+			ctx2.fillText("\uF118", rectX + 146, rectY + 60);
 		}
 	}
 }
 
 // Draws the whole circuit.
 function drawCircuit(circuit, ctx) {
-	drawWires(circuit, ctx);
 	drawGates(circuit, ctx);
+	drawWires(circuit, ctx);
 }
 
+// Get the gate object for a given gate index.
 function getGate(gateIdx){
 	return circuits[gateIdx[0]].gateSections[gateIdx[1]][gateIdx[2]];
-}
-
-function everyinterval(n) {
-    if ((frameNo / n) % 1 == 0) {return true;}
-    return false;
 }

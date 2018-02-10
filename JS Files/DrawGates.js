@@ -11,6 +11,7 @@ function drawGates(circuit, ctx){
 				type,
 				gate.inputs,
 				gate.outputVal,
+				gate.fixed,
 				ctx
 			);
 		}
@@ -18,12 +19,22 @@ function drawGates(circuit, ctx){
 }
 
 // Draws a logic gate with a dotted line box around it.
-function drawGate(x, y, type, inputs, output, ctx) {
+function drawGate(x, y, type, inputs, output, fixed, ctx) {
 	ctx.beginPath();
-	ctx.setLineDash([5, 3]);
-	ctx.strokeStyle="#666666";
+	if (fixed){
+		ctx.strokeStyle = "#666666";
+		ctx.lineWidth = 2;
+		ctx.fillStyle = "#e6e6e6";
+	} else {
+		ctx.strokeStyle = "#000000";
+		ctx.setLineDash([5, 3]);
+	}
 	ctx.rect(x, y, 4*SC, 4*SC);
 	ctx.stroke();
+	if (fixed){
+		ctx.fill();
+	}
+	ctx.lineWidth = 1;
 	ctx.setLineDash([]);
 	ctx.strokeStyle="#000000";
 	ctx.closePath();
@@ -70,16 +81,18 @@ function drawDraggedGate(){
 		circuits[selectedGate[0]].gateSections[selectedGate[1]][selectedGate[2]].invis = false;
 		selectedGate = null;
 	}
-	// If the mouse isn't currently over a gate, draw at the mouse position. Otherwise, draw in the gate, and set that gate to be invisible.
+	// If the mouse isn't currently over a non-fixed gate, draw at the mouse position. Otherwise, draw in the gate, and set that gate to be invisible.
 	else if (gateIdx != null){
-		var circuit = circuits[gateIdx[0]],
-			gate = getGate(gateIdx);
-		x = circuit.startx + gate.xOffset + (2*SC);
-		y = circuit.starty + gate.yOffset + (2*SC);
-		// If the mouse has just moved into a new gate, set that gate to invisible.
-		if (selectedGate == null){
-			gate.invis = true;
-			selectedGate = gateIdx;
+		var gate = getGate(gateIdx);
+		if (!gate.fixed){
+			var circuit = circuits[gateIdx[0]];
+			x = circuit.startx + gate.xOffset + (2*SC);
+			y = circuit.starty + gate.yOffset + (2*SC);
+			// If the mouse has just moved into a new gate, set that gate to invisible.
+			if (selectedGate == null){
+				gate.invis = true;
+				selectedGate = gateIdx;
+			}
 		}
 	}
 
