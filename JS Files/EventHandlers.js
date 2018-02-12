@@ -6,7 +6,7 @@ function handleMouseDown(){
 	if ((mousey > SC) && (mousey < (5*SC))){
 		var startX = (cvs1.width/2) - (14.5*SC);
 		for (var i = 1; i < 7; i++){
-			if ((mousex > startX+((i-1)*5*SC)) && (mousex < startX+((i-1)*5*SC)+(4*SC))){
+			if (allowedGates.includes(i) && (mousex > startX+((i-1)*5*SC)) && (mousex < startX+((i-1)*5*SC)+(4*SC))){
 				// Sets draggedGate to the selected gate, and puts drawDraggedGate on an interval, so that it can be redrawn to snap to nearby gates even if the mouse doesn't move.
 				draggedGate = i;
 				drawDraggedIntervalId = setInterval(drawDraggedGate, 10);

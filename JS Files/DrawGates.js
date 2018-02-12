@@ -261,19 +261,6 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 }
 
-function drawStar(x, y, live, ctx){
-	ctx.font = 3*SC + "px FontAwesome";
-	if (live == 1){
-		ctx.fillStyle = "#ffff00";
-		ctx.fillText("\uF005", x+(0.65*SC), y+(3.1*SC));
-		ctx.fillStyle = "black";
-	}
-	ctx.lineWidth = 2;
-	ctx.strokeText("\uF005", x+(0.65*SC), y+(3.1*SC));
-	ctx.font = "26px Arial";
-	ctx.lineWidth = 1;
-}
-
 function drawBulb(x, y, live, ctx){
 	ctx.lineWidth = 2;
 	ctx.fillStyle = (live == 1) ? "#ffff00" : "#ffffff";
@@ -325,4 +312,16 @@ function drawBulb(x, y, live, ctx){
 	}
 }
 
+function drawStar(x, y, live, ctx){
+	ctx.font = 3*SC + "px FontAwesome";
+	if (live == 1){
+		ctx.fillStyle = "#ffff00";
+		ctx.fillText("\uF005", x+(0.65*SC), y+(3.1*SC));
+		ctx.fillStyle = "black";
+	}
+	ctx.lineWidth = 2;
+	ctx.strokeText("\uF005", x+(0.65*SC), y+(3.1*SC));
+	ctx.font = "26px Arial";
+	ctx.lineWidth = 1;
+}
 //#endregion

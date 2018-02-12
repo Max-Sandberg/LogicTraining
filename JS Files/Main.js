@@ -1,6 +1,7 @@
 var SC = 20; // Scale
 var cvs1, ctx1, cvs2, ctx2;
 var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7});
+var allowedGates = [gatesEnum.and, gatesEnum.or];
 var draggedGate = 0;
 var selectedGate = null;
 var drawDraggedIntervalId, updateIntervalId;
@@ -13,7 +14,7 @@ function startGame() {
 	ctx1 = cvs1.getContext("2d");
 	cvs1.width = window.innerWidth-15;
 	cvs1.height = window.innerHeight-15;
-	cvs1.style = "position: absolute; left: 5; top: 5; z-index: 0; background-color: #fafafa; border:0px solid #d3d3d3;";
+	cvs1.style = "position: absolute; left: 5; top: 5; z-index: 0; background-color: #d8f3e6; border:0px solid #d3d3d3;";
 	document.body.insertBefore(cvs1, document.body.childNodes[0]);
 
 	// Create the layer 2 canvas
@@ -94,11 +95,10 @@ function updateGateOutput(gateIdx){
 	// Update the wire section, and the input values of all the gates this one connects to.
 	if (oldOutput != newOutput){
 		gate.outputVal = newOutput;
-
 		if (gate.type != gatesEnum.bulb){
 			// If there is another wire section after this one, update it's value.
 			circuit.wireSections[gateIdx[1]+1][gateIdx[2]].live = newOutput;
-
+			// Update the inputs of all gates this one connects to.
 			for (var i = 0; i < gate.nextGates.length; i++){
 				var nextGate = getGate(gate.nextGates[i].gateIdx),
 					nextGateInputs = gate.nextGates[i].inputs;
@@ -112,12 +112,13 @@ function updateGateOutput(gateIdx){
 	return gate.outputVal;
 }
 
+// Takes an x and y coordinate and looks to see if that point is within the boundaries of one of the gates in the circuits. If it is, that gate index is returned.
 function getSelectedGate(x, y){
 	if (y > 300 && y < 300 + (20*SC)){
-		// In y range of circuit
+		// In y range of the whole circuit
 		for (var i = 0; i < circuits.length; i++){
 			if ((x > circuits[i].startx) && (x < circuits[i].startx+circuits[i].width)){
-				// In x and y range of circuit
+				// In x range of the whole circuit
 				var circuit = circuits[i];
 				for (var j = 0; j < circuit.gateSections.length; j++){
 					var section = circuit.gateSections[j];
@@ -138,65 +139,96 @@ function getSelectedGate(x, y){
 	return null;
 }
 
+// Draws the menu bar at the top of the screen.
 function drawMenuBar(){
-	// Draw outer box
+	// Draw outer box.
 	ctx1.beginPath();
-	ctx1.strokeStyle="#666666";
+	ctx1.lineWidth = 2;
+	ctx1.strokeStyle = "#000000";
+	ctx1.fillStyle="#2a8958";
 	ctx1.rect(1, 1, cvs1.width-2, (SC*6));
+	ctx1.fill();
 	ctx1.stroke();
-	ctx1.strokeStyle="#000000";
 	ctx1.closePath();
 
-	// Draw box for each gate
-	var x = (cvs1.width / 2) - (14.5*SC);
+	// Draw box for each gate.
+	var x = Math.round((cvs1.width / 2) - (14.5*SC));
 	var y = SC;
 	ctx1.beginPath();
+	ctx1.lineWidth = 2;
+	ctx1.fillStyle = "#d8f3e6";
 	ctx1.rect(x, y, 4*SC, 4*SC);
 	ctx1.rect(x+(5*SC), y, 4*SC, 4*SC);
 	ctx1.rect(x+(10*SC), y, 4*SC, 4*SC);
 	ctx1.rect(x+(15*SC), y, 4*SC, 4*SC);
 	ctx1.rect(x+(20*SC), y, 4*SC, 4*SC);
 	ctx1.rect(x+(25*SC), y, 4*SC, 4*SC);
+	ctx1.fill();
 	ctx1.stroke();
 	ctx1.closePath();
 
-	// Draw all the gates
+	// Draw all the gates.
 	drawAND(x, y, 0, 0, 0, ctx1);
 	drawNAND(x+(5*SC), y, 0, 0, 0, ctx1);
 	drawOR(x+(10*SC), y, 0, 0, 0, ctx1);
 	drawNOR(x+(15*SC), y, 0, 0, 0, ctx1);
 	drawXOR(x+(20*SC), y, 0, 0, 0, ctx1);
 	drawXNOR(x+(25*SC), y, 0, 0, 0, ctx1);
+
+	// Draw a partially transparent grey box and a lock symbol on any locked gates.
+	for (var i = 1; i < 7; i++){
+		if (!allowedGates.includes(i)){
+			var gate = Object.keys(gatesEnum)[i];
+			console.log(gate + " gates not allowed.");
+
+			// Draw transparent grey box.
+			var startx = x+((i-1)*5*SC);
+			ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
+			ctx1.beginPath();
+			ctx1.rect(startx, y, 4*SC, 4*SC);
+			ctx1.fill();
+			ctx1.closePath();
+
+			// Draw lock icon.
+			ctx1.font = 2*SC + "px FontAwesome";
+			ctx1.fillStyle = "#000000";
+			ctx1.fillText("\uf023", startx+(1.45*SC), y+(2.85*SC));
+			ctx1.font = 2*SC + "px FontAwesome";
+			ctx1.fillStyle = "#ffffff";
+			ctx1.fillText("\uf023", startx+(1.3*SC), y+(2.7*SC));
+		}
+	}
 }
 
 function prepareGameArea(){
 	// Draw box around the game area
 	ctx1.beginPath();
-	ctx1.strokeStyle="#666666";
+	ctx1.strokeStyle="#000000";
 	ctx1.rect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-2);
 	ctx1.stroke();
-	ctx1.strokeStyle="#000000";
 	ctx1.closePath();
 
 	// Find out how to draw all the circuits
 	for (var i = 0; i < circuits.length; i++){
 		prepareCircuit(circuits[i]);
 		circuits[i].startx = (i == 0) ? cvs1.width+50 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
-		//circuits[i].startx = (i == 0) ? -600 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
+		//circuits[i].startx = (i == 0) ? -200 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
 		circuits[i].starty = ((cvs1.height-(6*SC))/2)+(6*SC)-(10*SC);
 	}
 
 	updateIntervalId = setInterval(updateGameArea, 10);
 }
 
+// Clears the game area of all drawings
 function clearGameArea(){
 	ctx1.clearRect(2, (SC*6), cvs1.width-4, cvs1.height-(SC*6)-4);
 }
 
+// Updates the game area. This function is called on an interval.
 function updateGameArea() {
 	clearGameArea();
 
-	// Draw and move circuits
+	// Draw and move the circuits.
 	for (var i = 0; i < circuits.length; i++){
 		drawCircuit(circuits[i], ctx1);
 		if (!pause){
@@ -204,12 +236,11 @@ function updateGameArea() {
 		}
 	}
 
-	// Draw box around the game area
+	// Draw box around game area.
 	ctx1.beginPath();
-	ctx1.strokeStyle="#666666";
+	ctx1.strokeStyle="#000000";
 	ctx1.rect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-2);
 	ctx1.stroke();
-	ctx1.strokeStyle="#000000";
 	ctx1.closePath();
 
 	checkWinOrLose();
@@ -267,12 +298,12 @@ function checkWinOrLose(){
 			ctx2.font = "26px Arial";
 			ctx2.fillText("You lost...", rectX + 28, rectY + 60);
 			ctx2.font = "26px FontAwesome";
-			ctx2.fillText("\uF119", rectX + 152, rectY + 60);
+			ctx2.fillText("\uf119", rectX + 152, rectY + 60);
 		} else if (gameState == "won"){
 			ctx2.font = "26px Arial";
 			ctx2.fillText("You win!", rectX + 36, rectY + 60);
 			ctx2.font = "26px FontAwesome";
-			ctx2.fillText("\uF118", rectX + 146, rectY + 60);
+			ctx2.fillText("\uf118", rectX + 146, rectY + 60);
 		}
 	}
 }
