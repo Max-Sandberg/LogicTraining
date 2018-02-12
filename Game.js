@@ -159,8 +159,8 @@ function updateGateOutput(gateIdx){
 }
 
 // Takes an x and y coordinate and looks to see if that point is within the boundaries of one of the gates in the circuits. If it is, that gate index is returned.
-function getSelectedGate(x, y){
-	if (y > 300 && y < 300 + (20*SC)){
+function getSelectedGate(x, y, tol){
+	if (y > 300-tol && y < 300+(20*SC)+tol){
 		// In y range of the whole circuit
 		for (var i = 0; i < circuits.length; i++){
 			if ((x > circuits[i].startx) && (x < circuits[i].startx+circuits[i].width)){
@@ -168,11 +168,11 @@ function getSelectedGate(x, y){
 				var circuit = circuits[i];
 				for (var j = 0; j < circuit.gateSections.length; j++){
 					var section = circuit.gateSections[j];
-					if ((x > circuit.startx + section[0].xOffset) && (x < circuit.startx + section[0].xOffset + (4*SC))){
+					if ((x > circuit.startx + section[0].xOffset - tol) && (x < circuit.startx + section[0].xOffset + (4*SC) + tol)){
 						// In x range of gate section
 						for (var k = 0; k < section.length; k++){
 							var gate = section[k];
-							if ((y > circuit.starty + gate.yOffset) && (y < circuit.starty + gate.yOffset + (4*SC))){
+							if ((y > circuit.starty + gate.yOffset - tol) && (y < circuit.starty + gate.yOffset + (4*SC) + tol)){
 								// In x and y range of gate
 								return [i, j, k];
 							}
@@ -368,6 +368,7 @@ function getGate(gateIdx){
 function prepareCircuit(circuit){
 	findGatePositions(circuit);
 	findWirePositions(circuit);
+	startWireAnimations(circuit);
 }
 
 // Finds the x and y positions of every gate in the circuit.
@@ -587,6 +588,13 @@ function findWirePositions(circuit){
 	// Assign the wireSections found to the circuit.
 	circuit.wireSections = wireSections;
 }
+
+function startWireAnimations(circuit){
+	for (var i = 0; i < circuit.wireSections.length; i++){
+		var section = circuit.wireSections[i];
+		
+	}
+}
 /*
 For each output in previous gates column {
 	- Find each input it goes to in the next gates column
@@ -741,7 +749,7 @@ function drawGate(x, y, type, inputs, output, fixed, ctx) {
 function drawDraggedGate(){
 	var x = mousex,
 		y = mousey,
-		gateIdx = getSelectedGate(x, y);
+		gateIdx = getSelectedGate(x, y, SC/2);
 
 	// If the mouse is no longer over the previously selected gate, make that gate visible again.
 	if ((selectedGate != null) && (gateIdx == null)){
@@ -1007,7 +1015,7 @@ function handleMouseDown(){
 			}
 		}
 	} else {
-		var gateIdx = getSelectedGate(mousex, mousey);
+		var gateIdx = getSelectedGate(mousex, mousey, 0);
 		if (gateIdx != null){
 			// If the user clicked and dragged a non-fixed gate in the circuit, remove that gate from the circuit.
 			var gate = getGate(gateIdx);
@@ -1024,7 +1032,7 @@ function handleMouseDown(){
 // Checks if the user is currently dragging a gate, and if they released the mouse over a non-fixed gate in a circuit. If so, update that gate's type and update the circuit's values.
 function handleMouseUp(){
 	if (draggedGate != 0){
-		var gateIdx = getSelectedGate(mousex, mousey),
+		var gateIdx = getSelectedGate(mousex, mousey, SC/2),
 			chosenGate = draggedGate;
 
 		clearInterval(drawDraggedIntervalId);
@@ -1046,8 +1054,8 @@ function handleMouseUp(){
 }
 
 function handleMouseMove(){
-	mousex = event.clientX-5;
-	mousey = event.clientY-5;
+	mousex = event.clientX-8;
+	mousey = event.clientY-8;
 	if (draggedGate != 0){
 		drawDraggedGate();
 	}
@@ -1083,8 +1091,8 @@ var circuits = [
 				type : "signal",
 				val : 0
 			}],
-			type : 1,
-			outputVal : 0,
+			type : 3,
+			outputVal : 1,
 			fixed : 1,
 			nextGates : [{
 				gateIdx : [0, 1, 1],
@@ -1102,7 +1110,7 @@ var circuits = [
 			}, {
 				type : "gate",
 				gate : [0, 1],
-				val : 0
+				val : 1
 			}],
 			type : 3,
 			outputVal : -1,
@@ -1119,7 +1127,7 @@ var circuits = [
 			}, {
 				type : "gate",
 				gate : [0, 1],
-				val : 0
+				val : 1
 			}],
 			type : 0,
 			outputVal : -1,

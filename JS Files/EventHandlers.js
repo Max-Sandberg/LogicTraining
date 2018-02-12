@@ -13,7 +13,7 @@ function handleMouseDown(){
 			}
 		}
 	} else {
-		var gateIdx = getSelectedGate(mousex, mousey);
+		var gateIdx = getSelectedGate(mousex, mousey, 0);
 		if (gateIdx != null){
 			// If the user clicked and dragged a non-fixed gate in the circuit, remove that gate from the circuit.
 			var gate = getGate(gateIdx);
@@ -30,7 +30,7 @@ function handleMouseDown(){
 // Checks if the user is currently dragging a gate, and if they released the mouse over a non-fixed gate in a circuit. If so, update that gate's type and update the circuit's values.
 function handleMouseUp(){
 	if (draggedGate != 0){
-		var gateIdx = getSelectedGate(mousex, mousey),
+		var gateIdx = getSelectedGate(mousex, mousey, SC/2),
 			chosenGate = draggedGate;
 
 		clearInterval(drawDraggedIntervalId);
@@ -52,8 +52,8 @@ function handleMouseUp(){
 }
 
 function handleMouseMove(){
-	mousex = event.clientX-5;
-	mousey = event.clientY-5;
+	mousex = event.clientX-8;
+	mousey = event.clientY-8;
 	if (draggedGate != 0){
 		drawDraggedGate();
 	}

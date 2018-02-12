@@ -29,8 +29,8 @@ var circuits = [
 				type : "signal",
 				val : 0
 			}],
-			type : 1,
-			outputVal : 0,
+			type : 3,
+			outputVal : 1,
 			fixed : 1,
 			nextGates : [{
 				gateIdx : [0, 1, 1],
@@ -48,7 +48,7 @@ var circuits = [
 			}, {
 				type : "gate",
 				gate : [0, 1],
-				val : 0
+				val : 1
 			}],
 			type : 3,
 			outputVal : -1,
@@ -65,7 +65,7 @@ var circuits = [
 			}, {
 				type : "gate",
 				gate : [0, 1],
-				val : 0
+				val : 1
 			}],
 			type : 0,
 			outputVal : -1,

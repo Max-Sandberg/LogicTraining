@@ -74,7 +74,7 @@ function drawGate(x, y, type, inputs, output, fixed, ctx) {
 function drawDraggedGate(){
 	var x = mousex,
 		y = mousey,
-		gateIdx = getSelectedGate(x, y);
+		gateIdx = getSelectedGate(x, y, SC/2);
 
 	// If the mouse is no longer over the previously selected gate, make that gate visible again.
 	if ((selectedGate != null) && (gateIdx == null)){

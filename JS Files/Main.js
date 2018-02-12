@@ -159,8 +159,8 @@ function updateGateOutput(gateIdx){
 }
 
 // Takes an x and y coordinate and looks to see if that point is within the boundaries of one of the gates in the circuits. If it is, that gate index is returned.
-function getSelectedGate(x, y){
-	if (y > 300 && y < 300 + (20*SC)){
+function getSelectedGate(x, y, tol){
+	if (y > 300-tol && y < 300+(20*SC)+tol){
 		// In y range of the whole circuit
 		for (var i = 0; i < circuits.length; i++){
 			if ((x > circuits[i].startx) && (x < circuits[i].startx+circuits[i].width)){
@@ -168,11 +168,11 @@ function getSelectedGate(x, y){
 				var circuit = circuits[i];
 				for (var j = 0; j < circuit.gateSections.length; j++){
 					var section = circuit.gateSections[j];
-					if ((x > circuit.startx + section[0].xOffset) && (x < circuit.startx + section[0].xOffset + (4*SC))){
+					if ((x > circuit.startx + section[0].xOffset - tol) && (x < circuit.startx + section[0].xOffset + (4*SC) + tol)){
 						// In x range of gate section
 						for (var k = 0; k < section.length; k++){
 							var gate = section[k];
-							if ((y > circuit.starty + gate.yOffset) && (y < circuit.starty + gate.yOffset + (4*SC))){
+							if ((y > circuit.starty + gate.yOffset - tol) && (y < circuit.starty + gate.yOffset + (4*SC) + tol)){
 								// In x and y range of gate
 								return [i, j, k];
 							}
