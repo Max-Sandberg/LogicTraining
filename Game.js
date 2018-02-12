@@ -37,6 +37,52 @@ function startGame() {
 	};
 }
 
+function start(){
+	ctx.font='48px fontawesome';
+	ctx.fillText('\uF064\uF065 \uF0a5',20,75);
+}
+
+// Waits for font awesome to load before continuing. This code is not mine - taken from https://stackoverflow.com/questions/35570801/how-to-draw-font-awesome-icons-onto-html-canvas
+function loadFontAwesome(callback,failAfterMS){
+	var c=document.createElement("canvas");
+	var cctx=c.getContext("2d");
+	var ccw,cch;
+	var fontsize=36;
+	var testCharacter='\uF047';
+	ccw=c.width=fontsize*1.5;
+	cch=c.height=fontsize*1.5;
+	cctx.font=fontsize+'px fontawesome';
+	cctx.textAlign='center';
+	cctx.textBaseline='middle';
+	var startCount=pixcount();
+	var t1=performance.now();
+	var failtime=t1+failAfterMS;
+	//
+	requestAnimationFrame(fontOnload);
+	//
+	function fontOnload(time){
+		var currentCount=pixcount();
+		if(time>failtime){
+			callback();
+		}else if(currentCount==startCount){
+			requestAnimationFrame(fontOnload);
+		}else{
+			callback();
+		}
+	}
+	//
+	function pixcount(){
+		cctx.clearRect(0,0,ccw,cch);
+		cctx.fillText(testCharacter,ccw/2,cch/2);
+		var data=cctx.getImageData(0,0,ccw,cch).data;
+		var count=0;
+		for(var i=3;i<data.length;i+=4){
+			if(data[i]>10){count++;}
+		}
+		return(count);
+	}
+}
+
 // Updates the values in a circuit after a particular gate has changed.
 function updateCircuitValues(gateIdx){
 	var gateSections = circuits[gateIdx[0]].gateSections,
@@ -192,10 +238,10 @@ function drawMenuBar(){
 			// Draw lock icon.
 			ctx1.font = 2*SC + "px FontAwesome";
 			ctx1.fillStyle = "#000000";
-			ctx1.fillText("\uf023", startx+(1.45*SC), y+(2.85*SC));
+			ctx1.fillText("\uf023", startx+(1.45*SC), y+(2.8*SC));
 			ctx1.font = 2*SC + "px FontAwesome";
 			ctx1.fillStyle = "#ffffff";
-			ctx1.fillText("\uf023", startx+(1.3*SC), y+(2.7*SC));
+			ctx1.fillText("\uf023", startx+(1.3*SC), y+(2.65*SC));
 		}
 	}
 }
