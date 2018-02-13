@@ -224,9 +224,6 @@ function drawMenuBar(){
 	// Draw a partially transparent grey box and a lock symbol on any locked gates.
 	for (var i = 1; i < 7; i++){
 		if (!allowedGates.includes(i)){
-			var gate = Object.keys(gatesEnum)[i];
-			console.log(gate + " gates not allowed.");
-
 			// Draw transparent grey box.
 			var startx = x+((i-1)*5*SC);
 			ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
@@ -358,6 +355,26 @@ function checkWinOrLose(){
 function drawCircuit(circuit, ctx) {
 	drawGates(circuit, ctx);
 	drawWires(circuit, ctx);
+	drawAnimations(circuit, ctx);
+}
+
+// Draws all the lightning animations on the live wires.
+function drawAnimations(circuit, ctx){
+	ctx.font = SC + "px FontAwesome";
+	ctx.fillStyle = "#00bfff";
+	for (var i = 0; i < circuit.wireSections.length; i++){
+		var section = circuit.wireSections[i];
+		for (var j = 0; j < section.length; j++){
+			var group = section[j];
+			for (var k = 0; k < group.wires.length; k++){
+				var wire = group.wires[k];
+				for (var l = 0; l < wire.animations.length; l++){
+					var anim = wire.animations[l];
+					ctx.fillText("\uf0e7", circuit.startx + anim[0], circuit.starty + anim[1]);
+				}
+			}
+		}
+	}
 }
 
 // Get the gate object for a given gate index.
@@ -589,11 +606,27 @@ function findWirePositions(circuit){
 	circuit.wireSections = wireSections;
 }
 
+// Finds all the live wires and starts their animation interval
 function startWireAnimations(circuit){
 	for (var i = 0; i < circuit.wireSections.length; i++){
 		var section = circuit.wireSections[i];
-		
+		for (var j = 0; j < section.length; j++){
+			var group = section[j];
+			for (var k = 0; k < group.wires.length; k++){
+				var wire = group.wires[k];
+				wire.animations = [];
+				if (((typeof(group.live) != "undefined") && (group.live == 1)) || (typeof(wire.live) != "undefined") && (wire.live == 1)){
+					wire.animationId = setWireInterval(wire, circuit);
+				}
+			}
+		}
 	}
+}
+
+function setWireInterval(wire, circuit){
+	var length = Math.abs(wire.x1 - wire.x2) + Math.abs(wire.y1 - wire.y2);
+	var interval = 50000 / length;
+	return setInterval(drawWireAnimation, interval, wire, circuit);
 }
 /*
 For each output in previous gates column {
@@ -672,6 +705,34 @@ function drawWire(x1, y1, x2, y2, live, ctx){
 function drawSignal(x, y, sig, ctx){
 	ctx.font = "26px Arial";
 	ctx.fillText(sig, x, y);
+}
+
+// Draws a lightning bolt for half a second at a random point along the wire.
+function drawWireAnimation(wire, circuit){
+	var xOffset, yOffset;
+	if (wire.x1 == wire.x2){
+		xOffset = wire.x1;
+		yOffset = Math.min(wire.y1, wire.y2) + Math.round((Math.random()*Math.abs(wire.y1 - wire.y2)));
+	}
+	else {
+		xOffset = Math.min(wire.x1, wire.x2) + Math.round((Math.random()*Math.abs(wire.x1 - wire.x2)));
+		yOffset = wire.y1;
+	}
+
+	setTimeout(startAnimation, Math.random()*1000)
+
+	function startAnimation(){
+		wire.animations.push([xOffset, yOffset]);
+		setTimeout(stopAnimation, 250);
+	}
+
+	function stopAnimation(){
+		for (var i = 0; i < wire.animations.length; i++){
+			if ((wire.animations[i][0] == xOffset) && (wire.animations[i][1] == yOffset)){
+				wire.animations.splice(i, 1);
+			}
+		}
+	}
 }
 // Draws all the gate sections of a circuit.
 function drawGates(circuit, ctx){

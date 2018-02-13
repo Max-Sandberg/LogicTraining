@@ -224,9 +224,6 @@ function drawMenuBar(){
 	// Draw a partially transparent grey box and a lock symbol on any locked gates.
 	for (var i = 1; i < 7; i++){
 		if (!allowedGates.includes(i)){
-			var gate = Object.keys(gatesEnum)[i];
-			console.log(gate + " gates not allowed.");
-
 			// Draw transparent grey box.
 			var startx = x+((i-1)*5*SC);
 			ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
@@ -358,6 +355,26 @@ function checkWinOrLose(){
 function drawCircuit(circuit, ctx) {
 	drawGates(circuit, ctx);
 	drawWires(circuit, ctx);
+	drawAnimations(circuit, ctx);
+}
+
+// Draws all the lightning animations on the live wires.
+function drawAnimations(circuit, ctx){
+	ctx.font = SC + "px FontAwesome";
+	ctx.fillStyle = "#00bfff";
+	for (var i = 0; i < circuit.wireSections.length; i++){
+		var section = circuit.wireSections[i];
+		for (var j = 0; j < section.length; j++){
+			var group = section[j];
+			for (var k = 0; k < group.wires.length; k++){
+				var wire = group.wires[k];
+				for (var l = 0; l < wire.animations.length; l++){
+					var anim = wire.animations[l];
+					ctx.fillText("\uf0e7", circuit.startx + anim[0], circuit.starty + anim[1]);
+				}
+			}
+		}
+	}
 }
 
 // Get the gate object for a given gate index.

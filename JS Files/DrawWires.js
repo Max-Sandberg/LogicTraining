@@ -76,3 +76,31 @@ function drawSignal(x, y, sig, ctx){
 	ctx.font = "26px Arial";
 	ctx.fillText(sig, x, y);
 }
+
+// Draws a lightning bolt for half a second at a random point along the wire.
+function drawWireAnimation(wire, circuit){
+	var xOffset, yOffset;
+	if (wire.x1 == wire.x2){
+		xOffset = wire.x1;
+		yOffset = Math.min(wire.y1, wire.y2) + Math.round((Math.random()*Math.abs(wire.y1 - wire.y2)));
+	}
+	else {
+		xOffset = Math.min(wire.x1, wire.x2) + Math.round((Math.random()*Math.abs(wire.x1 - wire.x2)));
+		yOffset = wire.y1;
+	}
+
+	setTimeout(startAnimation, Math.random()*1000)
+
+	function startAnimation(){
+		wire.animations.push([xOffset, yOffset]);
+		setTimeout(stopAnimation, 250);
+	}
+
+	function stopAnimation(){
+		for (var i = 0; i < wire.animations.length; i++){
+			if ((wire.animations[i][0] == xOffset) && (wire.animations[i][1] == yOffset)){
+				wire.animations.splice(i, 1);
+			}
+		}
+	}
+}
