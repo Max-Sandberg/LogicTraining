@@ -89,16 +89,59 @@ function drawWireAnimation(wire, circuit){
 		yOffset = wire.y1;
 	}
 
-	setTimeout(startAnimation, Math.random()*1000)
+	// Direction variable: 0 = up, 1 = down, 2 = left, 3 = right.
+	var direction = Math.round(Math.random());
+	direction = (wire.x1 == wire.x2) ? direction + 2 : direction;
+	var line1 = {}, line2 = {}, line3 = {};
+
+	if (direction == 0){
+		line1.x2 = xOffset - 3;
+		line1.y2 = yOffset - 3;
+		line2.x2 = xOffset + 3;
+		line2.y2 = yOffset - 9;
+		line3.x2 = xOffset;
+		line3.y2 = yOffset - 12;
+	} else if (direction == 1){
+		line1.x2 = xOffset + 3;
+		line1.y2 = yOffset + 3;
+		line2.x2 = xOffset - 3;
+		line2.y2 = yOffset + 9;
+		line3.x2 = xOffset;
+		line3.y2 = yOffset + 12;
+	} else if (direction == 2){
+		line1.x2 = xOffset - 3;
+		line1.y2 = yOffset - 3;
+		line2.x2 = xOffset - 9;
+		line2.y2 = yOffset + 3;
+		line3.x2 = xOffset - 12;
+		line3.y2 = yOffset;
+	} else if (direction == 3){
+		line1.x2 = xOffset + 3;
+		line1.y2 = yOffset + 3;
+		line2.x2 = xOffset + 9;
+		line2.y2 = yOffset - 3;
+		line3.x2 = xOffset + 12;
+		line3.y2 = yOffset;
+	}
+	line1.x1 = xOffset;
+	line1.y1 = yOffset;
+	line2.x1 = line1.x2;
+	line2.y1 = line1.y2;
+	line3.x1 = line2.x2;
+	line3.y1 = line2.y2;
+
+	var lightning = [line1, line2, line3];
+
+	setTimeout(startAnimation, Math.random()*500)
 
 	function startAnimation(){
-		wire.animations.push([xOffset, yOffset]);
+		wire.animations.push(lightning);
 		setTimeout(stopAnimation, 250);
 	}
 
 	function stopAnimation(){
 		for (var i = 0; i < wire.animations.length; i++){
-			if ((wire.animations[i][0] == xOffset) && (wire.animations[i][1] == yOffset)){
+			if ((wire.animations[i][0].x1 == xOffset) && (wire.animations[i][0].y1 == yOffset)){
 				wire.animations.splice(i, 1);
 			}
 		}

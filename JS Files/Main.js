@@ -142,8 +142,19 @@ function updateGateOutput(gateIdx){
 	if (oldOutput != newOutput){
 		gate.outputVal = newOutput;
 		if (gate.type != gatesEnum.bulb){
-			// If there is another wire section after this one, update it's value.
-			circuit.wireSections[gateIdx[1]+1][gateIdx[2]].live = newOutput;
+			// If there is a wire group coming out of this gate, update it's value, and enable/disable animations.
+			var wireGroup = circuit.wireSections[gateIdx[1]+1][gateIdx[2]];
+			wireGroup.live = newOutput;
+			for (var i = 0; i < wireGroup.wires.length; i++){
+				var wire = wireGroup.wires[i];
+				wire.animations = [];
+				if (newOutput == 1){
+					wire.animationId = setWireInterval(wire, circuit);
+				} else {
+					clearInterval(wire.animationId);
+					wire.animationId = undefined;
+				}
+			}
 			// Update the inputs of all gates this one connects to.
 			for (var i = 0; i < gate.nextGates.length; i++){
 				var nextGate = getGate(gate.nextGates[i].gateIdx),
@@ -276,6 +287,11 @@ function updateGameArea() {
 		drawCircuit(circuits[i], ctx1);
 		if (!pause){
 			circuits[i].startx--;
+			if (circuits[i].startx == cvs1.width){
+				startWireAnimations(circuits[i]);
+			} else if (circuits[i].startx + circuits[i].width == 0){
+				stopWireAnimations(circuits[i]);
+			}
 		}
 	}
 
@@ -369,12 +385,24 @@ function drawAnimations(circuit, ctx){
 			for (var k = 0; k < group.wires.length; k++){
 				var wire = group.wires[k];
 				for (var l = 0; l < wire.animations.length; l++){
-					var anim = wire.animations[l];
-					ctx.fillText("\uf0e7", circuit.startx + anim[0], circuit.starty + anim[1]);
+					var bolt = wire.animations[l];
+					drawBolt(bolt, circuit.startx, circuit.starty, ctx);
 				}
 			}
 		}
 	}
+}
+
+function drawBolt(bolt, xOffset, yOffset, ctx){
+	ctx.strokeStyle = "#00bfff";
+	ctx.lineWidth = 1;
+	ctx.beginPath();
+	for (var i = 0; i < bolt.length; i++){
+		ctx.moveTo(bolt[i].x1 + xOffset, bolt[i].y1 + yOffset);
+		ctx.lineTo(bolt[i].x2 + xOffset, bolt[i].y2 + yOffset);
+	}
+	ctx.stroke();
+	ctx.closePath();
 }
 
 // Get the gate object for a given gate index.

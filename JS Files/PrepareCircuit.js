@@ -2,7 +2,9 @@
 function prepareCircuit(circuit){
 	findGatePositions(circuit);
 	findWirePositions(circuit);
-	startWireAnimations(circuit);
+	if (circuit.startx < cvs1.width){
+		startWireAnimations(circuit);
+	}
 }
 
 // Finds the x and y positions of every gate in the circuit.
@@ -235,6 +237,20 @@ function startWireAnimations(circuit){
 				if (((typeof(group.live) != "undefined") && (group.live == 1)) || (typeof(wire.live) != "undefined") && (wire.live == 1)){
 					wire.animationId = setWireInterval(wire, circuit);
 				}
+			}
+		}
+	}
+}
+
+// Finds all the live wires and starts their animation interval
+function stopWireAnimations(circuit){
+	for (var i = 0; i < circuit.wireSections.length; i++){
+		var section = circuit.wireSections[i];
+		for (var j = 0; j < section.length; j++){
+			var group = section[j];
+			for (var k = 0; k < group.wires.length; k++){
+				var wire = group.wires[k];
+				wire.animations = [];
 			}
 		}
 	}

@@ -142,8 +142,19 @@ function updateGateOutput(gateIdx){
 	if (oldOutput != newOutput){
 		gate.outputVal = newOutput;
 		if (gate.type != gatesEnum.bulb){
-			// If there is another wire section after this one, update it's value.
-			circuit.wireSections[gateIdx[1]+1][gateIdx[2]].live = newOutput;
+			// If there is a wire group coming out of this gate, update it's value, and enable/disable animations.
+			var wireGroup = circuit.wireSections[gateIdx[1]+1][gateIdx[2]];
+			wireGroup.live = newOutput;
+			for (var i = 0; i < wireGroup.wires.length; i++){
+				var wire = wireGroup.wires[i];
+				wire.animations = [];
+				if (newOutput == 1){
+					wire.animationId = setWireInterval(wire, circuit);
+				} else {
+					clearInterval(wire.animationId);
+					wire.animationId = undefined;
+				}
+			}
 			// Update the inputs of all gates this one connects to.
 			for (var i = 0; i < gate.nextGates.length; i++){
 				var nextGate = getGate(gate.nextGates[i].gateIdx),
@@ -276,6 +287,11 @@ function updateGameArea() {
 		drawCircuit(circuits[i], ctx1);
 		if (!pause){
 			circuits[i].startx--;
+			if (circuits[i].startx == cvs1.width){
+				startWireAnimations(circuits[i]);
+			} else if (circuits[i].startx + circuits[i].width == 0){
+				stopWireAnimations(circuits[i]);
+			}
 		}
 	}
 
@@ -369,12 +385,24 @@ function drawAnimations(circuit, ctx){
 			for (var k = 0; k < group.wires.length; k++){
 				var wire = group.wires[k];
 				for (var l = 0; l < wire.animations.length; l++){
-					var anim = wire.animations[l];
-					ctx.fillText("\uf0e7", circuit.startx + anim[0], circuit.starty + anim[1]);
+					var bolt = wire.animations[l];
+					drawBolt(bolt, circuit.startx, circuit.starty, ctx);
 				}
 			}
 		}
 	}
+}
+
+function drawBolt(bolt, xOffset, yOffset, ctx){
+	ctx.strokeStyle = "#00bfff";
+	ctx.lineWidth = 1;
+	ctx.beginPath();
+	for (var i = 0; i < bolt.length; i++){
+		ctx.moveTo(bolt[i].x1 + xOffset, bolt[i].y1 + yOffset);
+		ctx.lineTo(bolt[i].x2 + xOffset, bolt[i].y2 + yOffset);
+	}
+	ctx.stroke();
+	ctx.closePath();
 }
 
 // Get the gate object for a given gate index.
@@ -385,7 +413,9 @@ function getGate(gateIdx){
 function prepareCircuit(circuit){
 	findGatePositions(circuit);
 	findWirePositions(circuit);
-	startWireAnimations(circuit);
+	if (circuit.startx < cvs1.width){
+		startWireAnimations(circuit);
+	}
 }
 
 // Finds the x and y positions of every gate in the circuit.
@@ -623,6 +653,20 @@ function startWireAnimations(circuit){
 	}
 }
 
+// Finds all the live wires and starts their animation interval
+function stopWireAnimations(circuit){
+	for (var i = 0; i < circuit.wireSections.length; i++){
+		var section = circuit.wireSections[i];
+		for (var j = 0; j < section.length; j++){
+			var group = section[j];
+			for (var k = 0; k < group.wires.length; k++){
+				var wire = group.wires[k];
+				wire.animations = [];
+			}
+		}
+	}
+}
+
 function setWireInterval(wire, circuit){
 	var length = Math.abs(wire.x1 - wire.x2) + Math.abs(wire.y1 - wire.y2);
 	var interval = 50000 / length;
@@ -719,16 +763,59 @@ function drawWireAnimation(wire, circuit){
 		yOffset = wire.y1;
 	}
 
-	setTimeout(startAnimation, Math.random()*1000)
+	// Direction variable: 0 = up, 1 = down, 2 = left, 3 = right.
+	var direction = Math.round(Math.random());
+	direction = (wire.x1 == wire.x2) ? direction + 2 : direction;
+	var line1 = {}, line2 = {}, line3 = {};
+
+	if (direction == 0){
+		line1.x2 = xOffset - 3;
+		line1.y2 = yOffset - 3;
+		line2.x2 = xOffset + 3;
+		line2.y2 = yOffset - 9;
+		line3.x2 = xOffset;
+		line3.y2 = yOffset - 12;
+	} else if (direction == 1){
+		line1.x2 = xOffset + 3;
+		line1.y2 = yOffset + 3;
+		line2.x2 = xOffset - 3;
+		line2.y2 = yOffset + 9;
+		line3.x2 = xOffset;
+		line3.y2 = yOffset + 12;
+	} else if (direction == 2){
+		line1.x2 = xOffset - 3;
+		line1.y2 = yOffset - 3;
+		line2.x2 = xOffset - 9;
+		line2.y2 = yOffset + 3;
+		line3.x2 = xOffset - 12;
+		line3.y2 = yOffset;
+	} else if (direction == 3){
+		line1.x2 = xOffset + 3;
+		line1.y2 = yOffset + 3;
+		line2.x2 = xOffset + 9;
+		line2.y2 = yOffset - 3;
+		line3.x2 = xOffset + 12;
+		line3.y2 = yOffset;
+	}
+	line1.x1 = xOffset;
+	line1.y1 = yOffset;
+	line2.x1 = line1.x2;
+	line2.y1 = line1.y2;
+	line3.x1 = line2.x2;
+	line3.y1 = line2.y2;
+
+	var lightning = [line1, line2, line3];
+
+	setTimeout(startAnimation, Math.random()*500)
 
 	function startAnimation(){
-		wire.animations.push([xOffset, yOffset]);
+		wire.animations.push(lightning);
 		setTimeout(stopAnimation, 250);
 	}
 
 	function stopAnimation(){
 		for (var i = 0; i < wire.animations.length; i++){
-			if ((wire.animations[i][0] == xOffset) && (wire.animations[i][1] == yOffset)){
+			if ((wire.animations[i][0].x1 == xOffset) && (wire.animations[i][0].y1 == yOffset)){
 				wire.animations.splice(i, 1);
 			}
 		}
