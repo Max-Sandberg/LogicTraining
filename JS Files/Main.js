@@ -1,33 +1,16 @@
 var SC = 20; // Scale
 var cvs1, ctx1, cvs2, ctx2;
+var circuits
 var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7});
 var allowedGates = [gatesEnum.and, gatesEnum.or];
 var draggedGate = 0;
 var selectedGate = null;
 var drawDraggedIntervalId, updateIntervalId;
 var mousex, mousey;
+var frameNo = 0;
 var pause = false;
 
 function startGame() {
-	// Create the main canvas
-	cvs1 = document.createElement("canvas");
-	ctx1 = cvs1.getContext("2d");
-	cvs1.width = window.innerWidth-15;
-	cvs1.height = window.innerHeight-15;
-	cvs1.style = "position: absolute; left: 5; top: 5; z-index: 0; background-color: #d8f3e6; border:0px solid #d3d3d3;";
-	document.body.insertBefore(cvs1, document.body.childNodes[0]);
-
-	// Create the layer 2 canvas
-	cvs2 = document.createElement("canvas");
-	ctx2 = cvs2.getContext("2d");
-	cvs2.width = window.innerWidth-15;
-	cvs2.height = window.innerHeight-15;
-	cvs2.style = "position: absolute; left: 5; top: 5; z-index: 1;";
-	cvs2.onmousedown = handleMouseDown;
-	cvs2.onmouseup = handleMouseUp;
-	cvs2.onmousemove = handleMouseMove;
-	document.body.insertBefore(cvs2, document.body.childNodes[0]);
-
 	drawMenuBar();
 	prepareGameArea();
 
@@ -37,10 +20,10 @@ function startGame() {
 	};
 }
 
-function start(){
-	ctx.font='48px fontawesome';
-	ctx.fillText('\uF064\uF065 \uF0a5',20,75);
-}
+// function start(){
+// 	ctx.font='48px fontawesome';
+// 	ctx.fillText('\uF064\uF065 \uF0a5',20,75);
+// }
 
 // Waits for font awesome to load before continuing. This code is not mine - taken from https://stackoverflow.com/questions/35570801/how-to-draw-font-awesome-icons-onto-html-canvas
 function loadFontAwesome(callback,failAfterMS){
@@ -198,6 +181,9 @@ function getSelectedGate(x, y, tol){
 
 // Draws the menu bar at the top of the screen.
 function drawMenuBar(){
+	// Clear the menu area.
+	ctx1.clearRect(1, 1, cvs1.width-2, (6*SC));
+
 	// Draw outer box.
 	ctx1.beginPath();
 	ctx1.lineWidth = 2;
@@ -286,6 +272,7 @@ function updateGameArea() {
 	for (var i = 0; i < circuits.length; i++){
 		drawCircuit(circuits[i], ctx1);
 		if (!pause){
+			frameNo++;
 			circuits[i].startx--;
 			if (circuits[i].startx == cvs1.width){
 				startWireAnimations(circuits[i]);
@@ -303,6 +290,10 @@ function updateGameArea() {
 	ctx1.closePath();
 
 	checkWinOrLose();
+
+	if (enableGateChanges && (frameNo % 1000 == 0)){
+		changeLockedGates();
+	}
 }
 
 // Checks if the game has been won or lost based on the state of the bulbs.
@@ -408,4 +399,53 @@ function drawBolt(bolt, xOffset, yOffset, ctx){
 // Get the gate object for a given gate index.
 function getGate(gateIdx){
 	return circuits[gateIdx[0]].gateSections[gateIdx[1]][gateIdx[2]];
+}
+
+function changeLockedGates(){
+	// Available gates will always consist of a single gate/!gate pair (e.g. AND/NAND, OR/NOR, XOR/XNOR) so that there is always a possible gate for every desired gate output, plus one other random gate.
+	var gate1, gate2, gate3 = -1;
+
+	// Choose a gate/!gate pair.
+	gate1 = (Math.floor(Math.random()*3) * 2) + 1; // 1, 3 or 5.
+	gate2 = gate1 + 1;
+	// Choose another random gate.
+	while ((gate3 == gate1) || (gate3 == gate2) || (gate3 == -1) || (gate3 == allowedGates[2])){
+		gate3 = Math.floor(Math.random()*6) + 1;
+	}
+
+	// Update the allowed gates and redraw the menu bar.
+	allowedGates = [gate1, gate2, gate3];
+	drawMenuBar();
+
+	// Display a "Gate change!" animation.
+	var frame = 0,
+		xOffset = Math.round(cvs1.width / 2) + (18*SC),
+		yOffset = SC;
+	var id = setInterval(animateGateChange, 10);
+
+	function animateGateChange(){
+		// Clear area we want to draw in.
+		ctx1.clearRect(xOffset, yOffset, (16*SC), (4*SC));
+
+		// Fill the background.
+		ctx1.beginPath();
+		ctx1.fillStyle = "#2a8958";
+		ctx1.rect(xOffset, yOffset, (16*SC), (4*SC));
+		ctx1.fill();
+		ctx1.closePath();
+
+		if (frame == 150){
+			clearInterval(id);
+		} else {
+			ctx1.font = "italic " + (2*SC) + "pt Impact";
+			ctx1.fillStyle = (frame < 100) ? "#B4D6C5" : "rgba(180, 214, 197, " + (150-frame)/50 + ")";
+			ctx1.fillText("GATE CHANGE!", xOffset+2, yOffset + (3*SC) + 2);
+			ctx1.fillStyle = (frame < 100) ? "#113723" : "rgba(17, 55, 35, " + (150-frame)/50 + ")";
+			ctx1.fillText("GATE CHANGE!", xOffset, yOffset + (3*SC));
+			frame++;
+		}
+	}
+
+
+
 }

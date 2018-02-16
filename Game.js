@@ -1,33 +1,16 @@
 var SC = 20; // Scale
 var cvs1, ctx1, cvs2, ctx2;
+var circuits
 var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7});
 var allowedGates = [gatesEnum.and, gatesEnum.or];
 var draggedGate = 0;
 var selectedGate = null;
 var drawDraggedIntervalId, updateIntervalId;
 var mousex, mousey;
+var frameNo = 0;
 var pause = false;
 
 function startGame() {
-	// Create the main canvas
-	cvs1 = document.createElement("canvas");
-	ctx1 = cvs1.getContext("2d");
-	cvs1.width = window.innerWidth-15;
-	cvs1.height = window.innerHeight-15;
-	cvs1.style = "position: absolute; left: 5; top: 5; z-index: 0; background-color: #d8f3e6; border:0px solid #d3d3d3;";
-	document.body.insertBefore(cvs1, document.body.childNodes[0]);
-
-	// Create the layer 2 canvas
-	cvs2 = document.createElement("canvas");
-	ctx2 = cvs2.getContext("2d");
-	cvs2.width = window.innerWidth-15;
-	cvs2.height = window.innerHeight-15;
-	cvs2.style = "position: absolute; left: 5; top: 5; z-index: 1;";
-	cvs2.onmousedown = handleMouseDown;
-	cvs2.onmouseup = handleMouseUp;
-	cvs2.onmousemove = handleMouseMove;
-	document.body.insertBefore(cvs2, document.body.childNodes[0]);
-
 	drawMenuBar();
 	prepareGameArea();
 
@@ -37,10 +20,10 @@ function startGame() {
 	};
 }
 
-function start(){
-	ctx.font='48px fontawesome';
-	ctx.fillText('\uF064\uF065 \uF0a5',20,75);
-}
+// function start(){
+// 	ctx.font='48px fontawesome';
+// 	ctx.fillText('\uF064\uF065 \uF0a5',20,75);
+// }
 
 // Waits for font awesome to load before continuing. This code is not mine - taken from https://stackoverflow.com/questions/35570801/how-to-draw-font-awesome-icons-onto-html-canvas
 function loadFontAwesome(callback,failAfterMS){
@@ -198,6 +181,9 @@ function getSelectedGate(x, y, tol){
 
 // Draws the menu bar at the top of the screen.
 function drawMenuBar(){
+	// Clear the menu area.
+	ctx1.clearRect(1, 1, cvs1.width-2, (6*SC));
+
 	// Draw outer box.
 	ctx1.beginPath();
 	ctx1.lineWidth = 2;
@@ -286,6 +272,7 @@ function updateGameArea() {
 	for (var i = 0; i < circuits.length; i++){
 		drawCircuit(circuits[i], ctx1);
 		if (!pause){
+			frameNo++;
 			circuits[i].startx--;
 			if (circuits[i].startx == cvs1.width){
 				startWireAnimations(circuits[i]);
@@ -303,6 +290,10 @@ function updateGameArea() {
 	ctx1.closePath();
 
 	checkWinOrLose();
+
+	if (enableGateChanges && (frameNo % 1000 == 0)){
+		changeLockedGates();
+	}
 }
 
 // Checks if the game has been won or lost based on the state of the bulbs.
@@ -408,6 +399,122 @@ function drawBolt(bolt, xOffset, yOffset, ctx){
 // Get the gate object for a given gate index.
 function getGate(gateIdx){
 	return circuits[gateIdx[0]].gateSections[gateIdx[1]][gateIdx[2]];
+}
+
+function changeLockedGates(){
+	// Available gates will always consist of a single gate/!gate pair (e.g. AND/NAND, OR/NOR, XOR/XNOR) so that there is always a possible gate for every desired gate output, plus one other random gate.
+	var gate1, gate2, gate3 = -1;
+
+	// Choose a gate/!gate pair.
+	gate1 = (Math.floor(Math.random()*3) * 2) + 1; // 1, 3 or 5.
+	gate2 = gate1 + 1;
+	// Choose another random gate.
+	while ((gate3 == gate1) || (gate3 == gate2) || (gate3 == -1) || (gate3 == allowedGates[2])){
+		gate3 = Math.floor(Math.random()*6) + 1;
+	}
+
+	// Update the allowed gates and redraw the menu bar.
+	allowedGates = [gate1, gate2, gate3];
+	drawMenuBar();
+
+	// Display a "Gate change!" animation.
+	var frame = 0,
+		xOffset = Math.round(cvs1.width / 2) + (18*SC),
+		yOffset = SC;
+	var id = setInterval(animateGateChange, 10);
+
+	function animateGateChange(){
+		// Clear area we want to draw in.
+		ctx1.clearRect(xOffset, yOffset, (16*SC), (4*SC));
+
+		// Fill the background.
+		ctx1.beginPath();
+		ctx1.fillStyle = "#2a8958";
+		ctx1.rect(xOffset, yOffset, (16*SC), (4*SC));
+		ctx1.fill();
+		ctx1.closePath();
+
+		if (frame == 150){
+			clearInterval(id);
+		} else {
+			ctx1.font = "italic " + (2*SC) + "pt Impact";
+			ctx1.fillStyle = (frame < 100) ? "#B4D6C5" : "rgba(180, 214, 197, " + (150-frame)/50 + ")";
+			ctx1.fillText("GATE CHANGE!", xOffset+2, yOffset + (3*SC) + 2);
+			ctx1.fillStyle = (frame < 100) ? "#113723" : "rgba(17, 55, 35, " + (150-frame)/50 + ")";
+			ctx1.fillText("GATE CHANGE!", xOffset, yOffset + (3*SC));
+			frame++;
+		}
+	}
+
+
+
+}
+function openMenu(){
+	// Create the main canvas
+	cvs1 = document.createElement("canvas");
+	ctx1 = cvs1.getContext("2d");
+	cvs1.width = window.innerWidth-15;
+	cvs1.height = window.innerHeight-15;
+	cvs1.style = "position: absolute; left: 5; top: 5; z-index: 0; background-color: #d8f3e6; border:0px solid #d3d3d3;";
+	document.body.insertBefore(cvs1, document.body.childNodes[0]);
+
+	// Create the layer 2 canvas
+	cvs2 = document.createElement("canvas");
+	ctx2 = cvs2.getContext("2d");
+	cvs2.width = window.innerWidth-15;
+	cvs2.height = window.innerHeight-15;
+	cvs2.style = "position: absolute; left: 5; top: 5; z-index: 1;";
+	cvs2.onmousedown = handleMouseDown;
+	cvs2.onmouseup = handleMouseUp;
+	cvs2.onmousemove = handleMouseMove;
+	document.body.insertBefore(cvs2, document.body.childNodes[0]);
+
+	// Draw a dark green box over the whole screen
+	drawMenu(ctx1);
+}
+
+function drawMenu(ctx){
+	// Draw dark green background
+	ctx.fillStyle = "#184e32";
+	ctx.beginPath();
+	ctx.rect(0, 0, cvs1.width, cvs1.height);
+	ctx.fill();
+	ctx.stroke();
+	ctx.closePath();
+
+	// Draw title
+	ctx.font = (3*SC) + "pt Impact";
+	ctx.fillStyle = "#FFFFFF";
+	ctx.fillText("Logic Training", (cvs1.width/2) - (11.5*SC) + 2, (cvs1.height/2) - (6*SC) + 2);
+	ctx.fillStyle = "#000000";
+	ctx.fillText("Logic Training", (cvs1.width/2) - (11.5*SC), (cvs1.height/2) - (6*SC));
+
+	drawLevels(ctx);
+}
+
+function drawLevels(ctx){
+	var startx, width, x, y;
+	y = (cvs1.height/2) - (2*SC);
+	width = (levels.length*6*SC) + ((levels.length-1)*3*SC);
+	startx = Math.round((cvs1.width/2) - (width/2));
+
+	for (var i = 0; i < levels.length; i++){
+		x = startx + (i*9*SC);
+		ctx.beginPath();
+		ctx.rect(x, y, 6*SC, 6*SC);
+		ctx.stroke();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.font = (0.8*SC) + "pt Impact";
+		ctx.fillText("LEVEL", x+(1.8*SC), y+(1.5*SC));
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.font = (0.8*SC) + "pt FontAwesome";
+		ctx.fillText("\uF005 \uF005 \uF005", x+(1.2*SC), y+(5.5*SC));
+		ctx.closePath();
+	}
 }
 // Prepares a circuit for drawing, by finding the positions of it's gates and wires.
 function prepareCircuit(circuit){
@@ -669,7 +776,7 @@ function stopWireAnimations(circuit){
 
 function setWireInterval(wire, circuit){
 	var length = Math.abs(wire.x1 - wire.x2) + Math.abs(wire.y1 - wire.y2);
-	var interval = 50000 / length;
+	var interval = 100000 / length;
 	return setInterval(drawWireAnimation, interval, wire, circuit);
 }
 /*
@@ -1208,318 +1315,333 @@ function handleMouseMove(){
 		drawDraggedGate();
 	}
 }
-var circuits = [
-{
-	startx : null,
-	starty : null,
-	gateSections : [
-		[{
-			inputs : [{
-				type : "signal",
-				val : 0
+var levels = [{
+	unlocked : true,
+	starsGained : 0,
+	allowedGates : [1, 2],
+	enableGateChanges : false,
+	circuits : [{
+		startx : null,
+		starty : null,
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : 0,
+				outputVal : -1,
+				fixed : 0,
+				nextGates : [{
+					gateIdx : [0, 1, 0],
+					inputs : [0]
+				}, {
+					gateIdx : [0, 1, 1],
+					inputs : [0]
+				}]
 			}, {
-				type : "signal",
-				val : 1
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : 3,
+				outputVal : 1,
+				fixed : 1,
+				nextGates : [{
+					gateIdx : [0, 1, 1],
+					inputs : [1]
+				}, {
+					gateIdx : [0, 1, 0],
+					inputs : [1]
+				}]
 			}],
-			type : 0,
-			outputVal : -1,
-			fixed : 0,
-			nextGates : [{
-				gateIdx : [0, 1, 0],
-				inputs : [0]
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+					val : -1
+				}, {
+					type : "gate",
+					gate : [0, 1],
+					val : 1
+				}],
+				type : 3,
+				outputVal : -1,
+				fixed : 1,
+				nextGates : [{
+					gateIdx : [0, 2, 0],
+					inputs : [0]
+				}]
 			}, {
-				gateIdx : [0, 1, 1],
-				inputs : [0]
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+					val : -1
+				}, {
+					type : "gate",
+					gate : [0, 1],
+					val : 1
+				}],
+				type : 0,
+				outputVal : -1,
+				fixed : 0,
+				nextGates : [{
+					gateIdx : [0, 2, 0],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+					val : -1
+				}, {
+					type : "gate",
+					gate : [1, 1],
+					val : -1
+				}],
+				type : 6,
+				outputVal : -1,
+				fixed : 1,
+				nextGates : [{
+					gateIdx : [0, 3, 0],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [2, 0],
+					val : -1
+				}],
+				type : 7,
+				outputVal : 0,
+				fixed : 1,
+				nextGates : []
 			}]
-		}, {
-			inputs : [{
-				type : "signal",
-				val : 1
+		]
+	}, {
+		startx : null,
+		starty : null,
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : 0,
+				outputVal : -1,
+				fixed : 0,
+				nextGates : [{
+					gateIdx : [1, 1, 0],
+					inputs : [1]
+				}, {
+					gateIdx : [1, 1, 1],
+					inputs : [0]
+				}]
 			}, {
-				type : "signal",
-				val : 0
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : 0,
+				outputVal : -1,
+				fixed : 0,
+				nextGates : [{
+					gateIdx : [1, 1, 1],
+					inputs : [1]
+				}]
 			}],
-			type : 3,
-			outputVal : 1,
-			fixed : 1,
-			nextGates : [{
-				gateIdx : [0, 1, 1],
-				inputs : [1]
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "gate",
+					gate : [0, 0],
+					val : -1
+				}],
+				type : 0,
+				outputVal : -1,
+				fixed : 0,
+				nextGates : [{
+					gateIdx : [1, 2, 0],
+					inputs : [0]
+				}]
 			}, {
-				gateIdx : [0, 1, 0],
-				inputs : [1]
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+					val : -1
+				}, {
+					type : "gate",
+					gate : [0, 1],
+					val : -1
+				}],
+				type : 0,
+				outputVal : -1,
+				fixed : 0,
+				nextGates : [{
+					gateIdx : [1, 2, 0],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+					val : -1
+				}, {
+					type : "gate",
+					gate : [1, 1],
+					val : -1
+				}],
+				type : 0,
+				outputVal : -1,
+				fixed : 0,
+				nextGates : [{
+					gateIdx : [1, 3, 0],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [2, 0],
+					val : -1
+				}],
+				type : 7,
+				outputVal : 0,
+				fixed : 1,
+				nextGates : []
 			}]
-		}],
-		[{
-			inputs : [{
-				type : "gate",
-				gate : [0, 0],
-				val : -1
+		]
+	}, {
+		startx : null,
+		starty : null,
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : 0,
+				outputVal : -1,
+				fixed : 0,
+				nextGates : [{
+					gateIdx : [2, 1, 0],
+					inputs : [0, 1]
+				}, {
+					gateIdx : [2, 1, 1],
+					inputs : [0]
+				}]
 			}, {
-				type : "gate",
-				gate : [0, 1],
-				val : 1
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : 2,
+				outputVal : 1,
+				fixed : 1,
+				nextGates : [{
+					gateIdx : [2, 1, 1],
+					inputs : [1]
+				}]
 			}],
-			type : 3,
-			outputVal : -1,
-			fixed : 1,
-			nextGates : [{
-				gateIdx : [0, 2, 0],
-				inputs : [0]
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+					val : -1
+				}, {
+					type : "gate",
+					gate : [0, 0],
+					val : -1
+				}],
+				type : 5,
+				outputVal : -1,
+				fixed : 1,
+				nextGates : [{
+					gateIdx : [2, 2, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+					val : -1
+				}, {
+					type : "gate",
+					gate : [0, 1],
+					val : 1
+				}],
+				type : 0,
+				outputVal : -1,
+				fixed : 0,
+				nextGates : [{
+					gateIdx : [2, 2, 0],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+					val : -1
+				}, {
+					type : "gate",
+					gate : [1, 1],
+					val : -1
+				}],
+				type : 6,
+				outputVal : -1,
+				fixed : 1,
+				nextGates : [{
+					gateIdx : [2, 3, 0],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [2, 0],
+					val : -1
+				}],
+				type : 7,
+				outputVal : 0,
+				fixed : 1,
+				nextGates : []
 			}]
-		}, {
-			inputs : [{
-				type : "gate",
-				gate : [0, 0],
-				val : -1
-			}, {
-				type : "gate",
-				gate : [0, 1],
-				val : 1
-			}],
-			type : 0,
-			outputVal : -1,
-			fixed : 0,
-			nextGates : [{
-				gateIdx : [0, 2, 0],
-				inputs : [1]
-			}]
-		}],
-		[{
-			inputs : [{
-				type : "gate",
-				gate : [1, 0],
-				val : -1
-			}, {
-				type : "gate",
-				gate : [1, 1],
-				val : -1
-			}],
-			type : 6,
-			outputVal : -1,
-			fixed : 1,
-			nextGates : [{
-				gateIdx : [0, 3, 0],
-				inputs : [0]
-			}]
-		}],
-		[{
-			inputs : [{
-				type : "gate",
-				gate : [2, 0],
-				val : -1
-			}],
-			type : 7,
-			outputVal : 0,
-			fixed : 1,
-			nextGates : []
-		}]
-	]
-},
-{
-	startx : null,
-	starty : null,
-	gateSections : [
-		[{
-			inputs : [{
-				type : "signal",
-				val : 0
-			}, {
-				type : "signal",
-				val : 1
-			}],
-			type : 0,
-			outputVal : -1,
-			fixed : 0,
-			nextGates : [{
-				gateIdx : [1, 1, 0],
-				inputs : [1]
-			}, {
-				gateIdx : [1, 1, 1],
-				inputs : [0]
-			}]
-		}, {
-			inputs : [{
-				type : "signal",
-				val : 1
-			}, {
-				type : "signal",
-				val : 0
-			}],
-			type : 0,
-			outputVal : -1,
-			fixed : 0,
-			nextGates : [{
-				gateIdx : [1, 1, 1],
-				inputs : [1]
-			}]
-		}],
-		[{
-			inputs : [{
-				type : "signal",
-				val : 1
-			}, {
-				type : "gate",
-				gate : [0, 0],
-				val : -1
-			}],
-			type : 0,
-			outputVal : -1,
-			fixed : 0,
-			nextGates : [{
-				gateIdx : [1, 2, 0],
-				inputs : [0]
-			}]
-		}, {
-			inputs : [{
-				type : "gate",
-				gate : [0, 0],
-				val : -1
-			}, {
-				type : "gate",
-				gate : [0, 1],
-				val : -1
-			}],
-			type : 0,
-			outputVal : -1,
-			fixed : 0,
-			nextGates : [{
-				gateIdx : [1, 2, 0],
-				inputs : [1]
-			}]
-		}],
-		[{
-			inputs : [{
-				type : "gate",
-				gate : [1, 0],
-				val : -1
-			}, {
-				type : "gate",
-				gate : [1, 1],
-				val : -1
-			}],
-			type : 0,
-			outputVal : -1,
-			fixed : 0,
-			nextGates : [{
-				gateIdx : [1, 3, 0],
-				inputs : [0]
-			}]
-		}],
-		[{
-			inputs : [{
-				type : "gate",
-				gate : [2, 0],
-				val : -1
-			}],
-			type : 7,
-			outputVal : 0,
-			fixed : 1,
-			nextGates : []
-		}]
-	]
-},
-{
-	startx : null,
-	starty : null,
-	gateSections : [
-		[{
-			inputs : [{
-				type : "signal",
-				val : 0
-			}, {
-				type : "signal",
-				val : 1
-			}],
-			type : 0,
-			outputVal : -1,
-			fixed : 0,
-			nextGates : [{
-				gateIdx : [2, 1, 0],
-				inputs : [0, 1]
-			}, {
-				gateIdx : [2, 1, 1],
-				inputs : [0]
-			}]
-		}, {
-			inputs : [{
-				type : "signal",
-				val : 1
-			}, {
-				type : "signal",
-				val : 0
-			}],
-			type : 2,
-			outputVal : 1,
-			fixed : 1,
-			nextGates : [{
-				gateIdx : [2, 1, 1],
-				inputs : [1]
-			}]
-		}],
-		[{
-			inputs : [{
-				type : "gate",
-				gate : [0, 0],
-				val : -1
-			}, {
-				type : "gate",
-				gate : [0, 0],
-				val : -1
-			}],
-			type : 5,
-			outputVal : -1,
-			fixed : 1,
-			nextGates : [{
-				gateIdx : [2, 2, 0],
-				inputs : [0]
-			}]
-		}, {
-			inputs : [{
-				type : "gate",
-				gate : [0, 0],
-				val : -1
-			}, {
-				type : "gate",
-				gate : [0, 1],
-				val : 1
-			}],
-			type : 0,
-			outputVal : -1,
-			fixed : 0,
-			nextGates : [{
-				gateIdx : [2, 2, 0],
-				inputs : [1]
-			}]
-		}],
-		[{
-			inputs : [{
-				type : "gate",
-				gate : [1, 0],
-				val : -1
-			}, {
-				type : "gate",
-				gate : [1, 1],
-				val : -1
-			}],
-			type : 6,
-			outputVal : -1,
-			fixed : 1,
-			nextGates : [{
-				gateIdx : [2, 3, 0],
-				inputs : [0]
-			}]
-		}],
-		[{
-			inputs : [{
-				type : "gate",
-				gate : [2, 0],
-				val : -1
-			}],
-			type : 7,
-			outputVal : 0,
-			fixed : 1,
-			nextGates : []
-		}]
-	]
-}];
+		]
+	}]
+}, {
+	unlocked : false,
+	starsGained : 1,
+	allowedGates : [1, 2],
+	enableGateChanges : false,
+	circuits : []
+}, {
+	unlocked : false,
+	starsGained : 2,
+	allowedGates : [1, 2],
+	enableGateChanges : false,
+	circuits : []
+}]

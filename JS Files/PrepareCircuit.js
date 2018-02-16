@@ -258,6 +258,6 @@ function stopWireAnimations(circuit){
 
 function setWireInterval(wire, circuit){
 	var length = Math.abs(wire.x1 - wire.x2) + Math.abs(wire.y1 - wire.y2);
-	var interval = 50000 / length;
+	var interval = 100000 / length;
 	return setInterval(drawWireAnimation, interval, wire, circuit);
 }
