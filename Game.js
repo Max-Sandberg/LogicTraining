@@ -1,8 +1,9 @@
 var SC = 20; // Scale
 var cvs1, ctx1, cvs2, ctx2;
 var circuits
-var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7});
-var allowedGates = [gatesEnum.and, gatesEnum.or];
+var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7, "star":8});
+var allowedGates;
+var enableGateChanges;
 var draggedGate = 0;
 var selectedGate = null;
 var drawDraggedIntervalId, updateIntervalId;
@@ -10,20 +11,25 @@ var mousex, mousey;
 var frameNo = 0;
 var pause = false;
 
-function startGame() {
+function startGame(level) {
+	// Assign event handlers.
+	cvs2.onmousedown = handleMouseDown;
+	cvs2.onmouseup = handleMouseUp;
+	cvs2.onmousemove = handleMouseMove;
+
+	circuits = levels[level].circuits;
+	enableGateChanges = levels[level].enableGateChanges;
+	allowedGates = levels[level].allowedGates;
+
 	drawMenuBar();
-	prepareGameArea();
+	prepareCircuits();
+	updateIntervalId = setInterval(updateGameArea, 10);
 
 	document.onkeypress = function (e) {
 		e = e || window.event;
 		pause = !pause;
 	};
 }
-
-// function start(){
-// 	ctx.font='48px fontawesome';
-// 	ctx.fillText('\uF064\uF065 \uF0a5',20,75);
-// }
 
 // Waits for font awesome to load before continuing. This code is not mine - taken from https://stackoverflow.com/questions/35570801/how-to-draw-font-awesome-icons-onto-html-canvas
 function loadFontAwesome(callback,failAfterMS){
@@ -69,12 +75,19 @@ function loadFontAwesome(callback,failAfterMS){
 // Updates the values in a circuit after a particular gate has changed.
 function updateCircuitValues(gateIdx){
 	var gateSections = circuits[gateIdx[0]].gateSections,
-		gate = getGate(gateIdx),
-		oldOutput = gate.outputVal,
-		newOutput = updateGateOutput(gateIdx);
+		section = gateSections[gateIdx[1]],
+		gate, oldOutput, newOutput, changed = false;
 
-	// If the output of the updated gate changed, update future gates too.
-	if (oldOutput != newOutput){
+	// Recalculate all the gates in the section that changed, keeping track of whether any outputs changed.
+	for (var i = 0; i < section.length; i++){
+		gate = section[i];
+		oldOutput = gate.outputVal;
+		newOutput = updateGateOutput([gateIdx[0], gateIdx[1], i]);
+		if (newOutput != oldOutput) { changed = true; }
+	}
+
+	// If the output of the updated gate changed, update all future gates too.
+	if (changed){
 		for (var i = gateIdx[1] + 1; i < gateSections.length; i++){
 			for (var j = 0; j < gateSections[i].length; j++){
 				updateGateOutput([gateIdx[0],i,j]);
@@ -116,6 +129,7 @@ function updateGateOutput(gateIdx){
 				newOutput = !((input1 || input2) && !(input1 && input2)) ? 1 : 0;
 				break;
 			case gatesEnum.bulb:
+			case gatesEnum.star:
 				newOutput = (input1 == 1) ? 1 : 0;
 				break;
 		}
@@ -124,13 +138,14 @@ function updateGateOutput(gateIdx){
 	// Update the wire section, and the input values of all the gates this one connects to.
 	if (oldOutput != newOutput){
 		gate.outputVal = newOutput;
-		if (gate.type != gatesEnum.bulb){
+		if (gate.type != gatesEnum.bulb && gate.type != gatesEnum.star){
 			// If there is a wire group coming out of this gate, update it's value, and enable/disable animations.
 			var wireGroup = circuit.wireSections[gateIdx[1]+1][gateIdx[2]];
 			wireGroup.live = newOutput;
 			for (var i = 0; i < wireGroup.wires.length; i++){
 				var wire = wireGroup.wires[i];
 				wire.animations = [];
+				wire.live = newOutput;
 				if (newOutput == 1){
 					wire.animationId = setWireInterval(wire, circuit);
 				} else {
@@ -154,7 +169,7 @@ function updateGateOutput(gateIdx){
 
 // Takes an x and y coordinate and looks to see if that point is within the boundaries of one of the gates in the circuits. If it is, that gate index is returned.
 function getSelectedGate(x, y, tol){
-	if (y > 300-tol && y < 300+(20*SC)+tol){
+	if (y > 6*SC){
 		// In y range of the whole circuit
 		for (var i = 0; i < circuits.length; i++){
 			if ((x > circuits[i].startx) && (x < circuits[i].startx+circuits[i].width)){
@@ -240,39 +255,21 @@ function drawMenuBar(){
 	}
 }
 
-function prepareGameArea(){
-	// Draw box around the game area
-	ctx1.beginPath();
-	ctx1.strokeStyle="#000000";
-	ctx1.rect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-2);
-	ctx1.stroke();
-	ctx1.closePath();
-
-	// Find out how to draw all the circuits
-	for (var i = 0; i < circuits.length; i++){
-		prepareCircuit(circuits[i]);
-		circuits[i].startx = (i == 0) ? cvs1.width+50 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
-		//circuits[i].startx = (i == 0) ? -200 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
-		circuits[i].starty = ((cvs1.height-(6*SC))/2)+(6*SC)-(10*SC);
-	}
-
-	updateIntervalId = setInterval(updateGameArea, 10);
-}
-
 // Clears the game area of all drawings
 function clearGameArea(){
-	ctx1.clearRect(2, (SC*6), cvs1.width-4, cvs1.height-(SC*6)-4);
+	ctx1.clearRect(2, (SC*6), cvs1.width-4, cvs1.height-(SC*6)-2);
 }
 
 // Updates the game area. This function is called on an interval.
 function updateGameArea() {
 	clearGameArea();
 
+	if (!pause) { frameNo++; }
+
 	// Draw and move the circuits.
 	for (var i = 0; i < circuits.length; i++){
 		drawCircuit(circuits[i], ctx1);
 		if (!pause){
-			frameNo++;
 			circuits[i].startx--;
 			if (circuits[i].startx == cvs1.width){
 				startWireAnimations(circuits[i]);
@@ -291,7 +288,7 @@ function updateGameArea() {
 
 	checkWinOrLose();
 
-	if (enableGateChanges && (frameNo % 1000 == 0)){
+	if (!pause && enableGateChanges && (frameNo % 1000 == 0)){
 		changeLockedGates();
 	}
 }
@@ -321,8 +318,6 @@ function checkWinOrLose(){
 	// If the game is won or lost, stop the game and display the relevant message.
 	if (gameState == "won" || gameState == "lost"){
 		// Cancel all the intervals and handlers
-		// draggedGate = 0;
-		// drawDraggedGate();
 		clearInterval(drawDraggedIntervalId);
 		clearInterval(updateIntervalId);
 		drawDraggedIntervalId = undefined;
@@ -331,31 +326,54 @@ function checkWinOrLose(){
 		cvs2.onmouseup = undefined;
 		cvs2.onmousemove = undefined;
 
-		// Draw a partially transparent rectangle over the whole canvas to make it look faded out, and draw a box in the middle of the game area.
+		// Draw a partially transparent rectangle over the whole canvas to make it look faded out. and draw a box in the middle of the game area.
 		ctx2.fillStyle = "rgba(0, 0, 0, 0.2)";
 		ctx2.fillRect(0, 0, cvs2.width, cvs2.height);
-		ctx2.lineWidth = 1;
-		ctx2.fillStyle = "#eeeeee";
-		var rectX = (cvs1.width/2)-100,
-			rectY = ((cvs1.height-(6*SC))/2)+(6*SC)-50;
-		ctx2.rect(rectX, rectY, 200, 100);
-		ctx2.fill();
-		ctx2.stroke();
-		ctx2.fillStyle = "#000000";
 
-		// Write the relevant message in the box.
+		// Display the win or lose message.
 		if (gameState == "lost"){
-			ctx2.font = "26px Arial";
-			ctx2.fillText("You lost...", rectX + 28, rectY + 60);
-			ctx2.font = "26px FontAwesome";
-			ctx2.fillText("\uf119", rectX + 152, rectY + 60);
-		} else if (gameState == "won"){
-			ctx2.font = "26px Arial";
-			ctx2.fillText("You win!", rectX + 36, rectY + 60);
-			ctx2.font = "26px FontAwesome";
-			ctx2.fillText("\uf118", rectX + 146, rectY + 60);
+			displayLoseMessage(ctx2);
+		} else {
+			displayWinMessage(ctx2);
 		}
 	}
+}
+
+// Display the "You Lost" message box.
+function displayLoseMessage(ctx){
+	// Draw the box.
+	ctx.lineWidth = 1;
+	ctx.fillStyle = "#eeeeee";
+	var rectX = (cvs1.width/2)-100,
+		rectY = ((cvs1.height-(6*SC))/2)+(6*SC)-50;
+	ctx.rect(rectX, rectY, 200, 100);
+	ctx.fill();
+	ctx.stroke();
+	ctx.fillStyle = "#000000";
+
+	// Write the "You Lost :(" message
+	ctx.font = "26px Arial";
+	ctx.fillText("You lost.", rectX + 32, rectY + 60);
+	ctx.font = "26px FontAwesome";
+	ctx.fillText("\uf119", rectX + 148, rectY + 60);
+}
+
+function displayWinMessage(ctx){
+	// Draw the box.
+	ctx.lineWidth = 1;
+	ctx.fillStyle = "#eeeeee";
+	var rectX = (cvs1.width/2)-100,
+		rectY = ((cvs1.height-(6*SC))/2)+(6*SC)-50;
+	ctx.rect(rectX, rectY, 200, 100);
+	ctx.fill();
+	ctx.stroke();
+	ctx.fillStyle = "#000000";
+
+	// Write the "You Won! :)" message
+	ctx.font = "26px Arial";
+	ctx.fillText("You win!", rectX + 32, rectY + 60);
+	ctx.font = "26px FontAwesome";
+	ctx.fillText("\uf118", rectX + 148, rectY + 60);
 }
 
 // Draws the whole circuit.
@@ -375,9 +393,11 @@ function drawAnimations(circuit, ctx){
 			var group = section[j];
 			for (var k = 0; k < group.wires.length; k++){
 				var wire = group.wires[k];
-				for (var l = 0; l < wire.animations.length; l++){
-					var bolt = wire.animations[l];
-					drawBolt(bolt, circuit.startx, circuit.starty, ctx);
+				if (typeof(wire.animations) != "undefined"){
+					for (var l = 0; l < wire.animations.length; l++){
+						var bolt = wire.animations[l];
+						drawBolt(bolt, circuit.startx, circuit.starty, ctx);
+					}
 				}
 			}
 		}
@@ -445,10 +465,9 @@ function changeLockedGates(){
 			frame++;
 		}
 	}
-
-
-
 }
+var selectedLevel = -1;
+
 function openMenu(){
 	// Create the main canvas
 	cvs1 = document.createElement("canvas");
@@ -464,9 +483,8 @@ function openMenu(){
 	cvs2.width = window.innerWidth-15;
 	cvs2.height = window.innerHeight-15;
 	cvs2.style = "position: absolute; left: 5; top: 5; z-index: 1;";
-	cvs2.onmousedown = handleMouseDown;
-	cvs2.onmouseup = handleMouseUp;
-	cvs2.onmousemove = handleMouseMove;
+	cvs2.onmousedown = handleMenuMouseDown;
+	cvs2.onmousemove = handleMenuMouseMove;
 	document.body.insertBefore(cvs2, document.body.childNodes[0]);
 
 	// Draw a dark green box over the whole screen
@@ -474,6 +492,9 @@ function openMenu(){
 }
 
 function drawMenu(ctx){
+	// Clear the area.
+	ctx.clearRect(0, 0, cvs1.width, cvs1.height);
+
 	// Draw dark green background
 	ctx.fillStyle = "#184e32";
 	ctx.beginPath();
@@ -492,6 +513,7 @@ function drawMenu(ctx){
 	drawLevels(ctx);
 }
 
+// Draws the icons for each level.
 function drawLevels(ctx){
 	var startx, width, x, y;
 	y = (cvs1.height/2) - (2*SC);
@@ -499,35 +521,123 @@ function drawLevels(ctx){
 	startx = Math.round((cvs1.width/2) - (width/2));
 
 	for (var i = 0; i < levels.length; i++){
+		var selected = (levels[i].unlocked && selectedLevel == i);
+
+		// Draw rectangle around the level.
 		x = startx + (i*9*SC);
 		ctx.beginPath();
+		ctx.fillStyle = (selected) ? "#7D9C8D" : "#5D8370";
+		ctx.lineWidth = (selected) ? 3 : 1;
+		ctx.strokeStyle = "#000000";
 		ctx.rect(x, y, 6*SC, 6*SC);
+		ctx.fill();
 		ctx.stroke();
+		ctx.lineWidth = 1;
 		ctx.closePath();
 
+		// Write the "LEVEL" text.
 		ctx.beginPath();
 		ctx.font = (0.8*SC) + "pt Impact";
+		ctx.fillStyle = "#000000";
 		ctx.fillText("LEVEL", x+(1.8*SC), y+(1.5*SC));
 		ctx.closePath();
 
+		// Draw the level number.
+		ctx.beginPath();
+		ctx.font = (2*SC) + "pt Impact";
+		ctx.fillStyle = "#000000";
+		ctx.fillText(i+1, x+(2.3*SC), y+(4.2*SC));
+		ctx.closePath();
+
+		// Draw the stars, filling in the ones which have been earned.
 		ctx.beginPath();
 		ctx.font = (0.8*SC) + "pt FontAwesome";
-		ctx.fillText("\uF005 \uF005 \uF005", x+(1.2*SC), y+(5.5*SC));
+		for (var j = 0; j < 3; j++){
+			if (j < levels[i].starsGained){
+				ctx.fillStyle = "#ffff00";
+				ctx.fillText("\uF005", x+(1.2*SC)+(j*25), y+(5.5*SC));
+			}
+			ctx.strokeStyle = "#000000";
+			ctx.strokeText("\uF005", x+(1.2*SC)+(j*25), y+(5.5*SC));
+		}
 		ctx.closePath();
-	}
-}
-// Prepares a circuit for drawing, by finding the positions of it's gates and wires.
-function prepareCircuit(circuit){
-	findGatePositions(circuit);
-	findWirePositions(circuit);
-	if (circuit.startx < cvs1.width){
-		startWireAnimations(circuit);
+
+		if (!levels[i].unlocked){
+			// Draw transparent grey box.
+			ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+			ctx.beginPath();
+			ctx.rect(x, y, 6*SC, 6*SC);
+			ctx.fill();
+			ctx.closePath();
+
+			// Draw lock icon.
+			ctx.font = 1.5*SC + "px FontAwesome";
+			ctx.fillStyle = "#262626";
+			ctx.fillText("\uf023", x+8, y+(1.5*SC)+2);
+			ctx.font = 1.5*SC + "px FontAwesome";
+			ctx.fillStyle = "#f2f2f2";
+			ctx.fillText("\uf023", x+6, y+(1.5*SC));
+		}
 	}
 }
 
-// Finds the x and y positions of every gate in the circuit.
-function findGatePositions(circuit){
-	var cols = circuit.gateSections;
+function handleMenuMouseMove(){
+	mousex = event.clientX-8;
+	mousey = event.clientY-8;
+
+	var lvl = getSelectedLevel();
+	if (lvl != selectedLevel){
+		selectedLevel = lvl;
+		drawMenu(ctx1);
+	}
+}
+
+function handleMenuMouseDown(){
+	if (selectedLevel != -1){
+		startGame(selectedLevel);
+	}
+}
+
+// Find which level icon the mouse is hovering over, if any.
+function getSelectedLevel(){
+	if ((mousey > (cvs1.height/2)-(2*SC)) && (mousey < (cvs1.height/2)+(4*SC))){
+		// In y range of levels
+		var width = (levels.length*6*SC) + ((levels.length-1)*3*SC),
+			startx = Math.round((cvs1.width/2)-(width/2));
+		for (var i = 0; i < levels.length; i++){
+			if ((mousex > startx+(i*9*SC)) && (mousex < startx+(i*9*SC)+(6*SC))){
+				// In x range of a level
+				return i;
+			}
+		}
+	}
+
+	return -1;
+}
+// Prepares a circuit for drawing, by finding the positions of it's gates and wires.
+function prepareCircuits(){
+	for (var i = 0; i < circuits.length; i++){
+		findGatePositions(i);
+		findWirePositions(circuits[i]);
+		findCircuitPosition(i);
+		updateCircuitValues([i, 0, 0]);
+	}
+}
+
+function findCircuitPosition(idx){
+	var y, circuit = circuits[idx];
+	circuit.startx = (idx == 0) ? cvs1.width + 50 : circuits[idx-1].startx + circuits[idx-1].width + (8*SC);
+	do {
+		y = (6*SC) + Math.round((0.3+(0.4*Math.random()))*(cvs1.height-(6*SC))) - (10*SC);
+	}
+	while (idx != 0 && Math.abs(circuits[idx-1].starty - y) < (4*SC));
+	circuit.starty = y;
+}
+
+// Finds the x and y positions of every gate in the circuit, and the total width of the circuit.
+function findGatePositions(circuitIdx){
+	var circuit = circuits[circuitIdx],
+		cols = circuit.gateSections;
 	for (var i = 0; i < cols.length; i++){
 		for (var j = 0; j < cols[i].length; j++){
 			var gate = cols[i][j];
@@ -536,10 +646,20 @@ function findGatePositions(circuit){
 						   (cols[i].length == 2) ? (j*8*SC) + (4*SC) :
 						   (cols[i].length == 1) ? (8*SC) : 0;
 
+			// While we're here, create/tweak some other properties needed for each gate.
 			gate.invis = false;
+			gate.outputVal = -1;
+			for (var k = 0; k < gate.nextGates.length; k++){
+				gate.nextGates[k].gateIdx.unshift(circuitIdx);
+			}
+			for (var k = 0; k < gate.inputs.length; k++){
+				if (gate.inputs[k].type == "gate"){
+					gate.inputs[k].val = -1;
+				}
+			}
 		}
 	}
-	circuit.width = (cols.length*8*SC) + (4*SC);
+	circuit.width = cols.length * 8 * SC;
 }
 
 // Finds the x and y positions of every wire in the circuit, and organises them into groups based on which gate output they originate from.
@@ -775,8 +895,10 @@ function stopWireAnimations(circuit){
 }
 
 function setWireInterval(wire, circuit){
+	// Do the first animation immediately, then start a timer to do it repeatedly.
+	drawWireAnimation(wire, circuit);
 	var length = Math.abs(wire.x1 - wire.x2) + Math.abs(wire.y1 - wire.y2);
-	var interval = 100000 / length;
+	var interval = 50000 / length;
 	return setInterval(drawWireAnimation, interval, wire, circuit);
 }
 /*
@@ -855,6 +977,7 @@ function drawWire(x1, y1, x2, y2, live, ctx){
 // Draws an input signal.
 function drawSignal(x, y, sig, ctx){
 	ctx.font = "26px Arial";
+	ctx.fillStyle = "#000000";
 	ctx.fillText(sig, x, y);
 }
 
@@ -876,32 +999,32 @@ function drawWireAnimation(wire, circuit){
 	var line1 = {}, line2 = {}, line3 = {};
 
 	if (direction == 0){
-		line1.x2 = xOffset - 3;
-		line1.y2 = yOffset - 3;
-		line2.x2 = xOffset + 3;
-		line2.y2 = yOffset - 9;
+		line1.x2 = xOffset - 2;
+		line1.y2 = yOffset - 2;
+		line2.x2 = xOffset + 2;
+		line2.y2 = yOffset - 6;
 		line3.x2 = xOffset;
-		line3.y2 = yOffset - 12;
+		line3.y2 = yOffset - 8;
 	} else if (direction == 1){
-		line1.x2 = xOffset + 3;
-		line1.y2 = yOffset + 3;
-		line2.x2 = xOffset - 3;
-		line2.y2 = yOffset + 9;
+		line1.x2 = xOffset + 2;
+		line1.y2 = yOffset + 2;
+		line2.x2 = xOffset - 2;
+		line2.y2 = yOffset + 6;
 		line3.x2 = xOffset;
-		line3.y2 = yOffset + 12;
+		line3.y2 = yOffset + 8;
 	} else if (direction == 2){
-		line1.x2 = xOffset - 3;
-		line1.y2 = yOffset - 3;
-		line2.x2 = xOffset - 9;
-		line2.y2 = yOffset + 3;
-		line3.x2 = xOffset - 12;
+		line1.x2 = xOffset - 2;
+		line1.y2 = yOffset - 2;
+		line2.x2 = xOffset - 6;
+		line2.y2 = yOffset + 2;
+		line3.x2 = xOffset - 8;
 		line3.y2 = yOffset;
 	} else if (direction == 3){
-		line1.x2 = xOffset + 3;
-		line1.y2 = yOffset + 3;
-		line2.x2 = xOffset + 9;
-		line2.y2 = yOffset - 3;
-		line3.x2 = xOffset + 12;
+		line1.x2 = xOffset + 2;
+		line1.y2 = yOffset + 2;
+		line2.x2 = xOffset + 6;
+		line2.y2 = yOffset - 2;
+		line3.x2 = xOffset + 8;
 		line3.y2 = yOffset;
 	}
 	line1.x1 = xOffset;
@@ -913,11 +1036,14 @@ function drawWireAnimation(wire, circuit){
 
 	var lightning = [line1, line2, line3];
 
-	setTimeout(startAnimation, Math.random()*500)
+	setTimeout(startAnimation, Math.random()*1500)
 
 	function startAnimation(){
-		wire.animations.push(lightning);
-		setTimeout(stopAnimation, 250);
+		// Check the wire is live again, just in case it changed since the timeout delay.
+		if (wire.live == 1){
+			wire.animations.push(lightning);
+			setTimeout(stopAnimation, 150);
+		}
 	}
 
 	function stopAnimation(){
@@ -996,6 +1122,9 @@ function drawGate(x, y, type, inputs, output, fixed, ctx) {
 			break;
 		case gatesEnum.bulb:
 			drawBulb(x, y, input1, ctx);
+			break;
+		case gatesEnum.star:
+			drawStar(x, y, input1, ctx);
 			break;
 	}
 }
@@ -1244,14 +1373,16 @@ function drawBulb(x, y, live, ctx){
 
 function drawStar(x, y, live, ctx){
 	ctx.font = 3*SC + "px FontAwesome";
-	if (live == 1){
-		ctx.fillStyle = "#ffff00";
-		ctx.fillText("\uF005", x+(0.65*SC), y+(3.1*SC));
-		ctx.fillStyle = "black";
-	}
+	// if (live == 1){
+	// 	ctx.fillStyle = "#ffff00";
+	// 	ctx.fillText("\uF005", x+(0.65*SC), y+(3.1*SC));
+	// 	ctx.fillStyle = "black";
+	// }
 	ctx.lineWidth = 2;
+	ctx.fillStyle = (live == 1) ? "#FFFF00" : "#FFFFFF";
+	ctx.fillText("\uF005", x+(0.65*SC), y+(3.1*SC));
 	ctx.strokeText("\uF005", x+(0.65*SC), y+(3.1*SC));
-	ctx.font = "26px Arial";
+	//ctx.font = "26px Arial";
 	ctx.lineWidth = 1;
 }
 //#endregion
@@ -1317,118 +1448,36 @@ function handleMouseMove(){
 }
 var levels = [{
 	unlocked : true,
-	starsGained : 0,
+	starsGained : 3,
 	allowedGates : [1, 2],
 	enableGateChanges : false,
 	circuits : [{
-		startx : null,
-		starty : null,
 		gateSections : [
 			[{
 				inputs : [{
 					type : "signal",
-					val : 0
+					val : 1
 				}, {
 					type : "signal",
 					val : 1
 				}],
-				type : 0,
-				outputVal : -1,
-				fixed : 0,
+				type : gatesEnum.blank,
+				fixed : false,
 				nextGates : [{
-					gateIdx : [0, 1, 0],
-					inputs : [0]
-				}, {
-					gateIdx : [0, 1, 1],
+					gateIdx : [1, 0],
 					inputs : [0]
 				}]
-			}, {
-				inputs : [{
-					type : "signal",
-					val : 1
-				}, {
-					type : "signal",
-					val : 0
-				}],
-				type : 3,
-				outputVal : 1,
-				fixed : 1,
-				nextGates : [{
-					gateIdx : [0, 1, 1],
-					inputs : [1]
-				}, {
-					gateIdx : [0, 1, 0],
-					inputs : [1]
-				}]
-			}],
-			[{
+			}], [{
 				inputs : [{
 					type : "gate",
 					gate : [0, 0],
-					val : -1
-				}, {
-					type : "gate",
-					gate : [0, 1],
-					val : 1
 				}],
-				type : 3,
-				outputVal : -1,
-				fixed : 1,
-				nextGates : [{
-					gateIdx : [0, 2, 0],
-					inputs : [0]
-				}]
-			}, {
-				inputs : [{
-					type : "gate",
-					gate : [0, 0],
-					val : -1
-				}, {
-					type : "gate",
-					gate : [0, 1],
-					val : 1
-				}],
-				type : 0,
-				outputVal : -1,
-				fixed : 0,
-				nextGates : [{
-					gateIdx : [0, 2, 0],
-					inputs : [1]
-				}]
-			}],
-			[{
-				inputs : [{
-					type : "gate",
-					gate : [1, 0],
-					val : -1
-				}, {
-					type : "gate",
-					gate : [1, 1],
-					val : -1
-				}],
-				type : 6,
-				outputVal : -1,
-				fixed : 1,
-				nextGates : [{
-					gateIdx : [0, 3, 0],
-					inputs : [0]
-				}]
-			}],
-			[{
-				inputs : [{
-					type : "gate",
-					gate : [2, 0],
-					val : -1
-				}],
-				type : 7,
-				outputVal : 0,
-				fixed : 1,
+				type : gatesEnum.bulb,
+				fixed : true,
 				nextGates : []
 			}]
 		]
 	}, {
-		startx : null,
-		starty : null,
 		gateSections : [
 			[{
 				inputs : [{
@@ -1436,101 +1485,25 @@ var levels = [{
 					val : 0
 				}, {
 					type : "signal",
-					val : 1
-				}],
-				type : 0,
-				outputVal : -1,
-				fixed : 0,
-				nextGates : [{
-					gateIdx : [1, 1, 0],
-					inputs : [1]
-				}, {
-					gateIdx : [1, 1, 1],
-					inputs : [0]
-				}]
-			}, {
-				inputs : [{
-					type : "signal",
-					val : 1
-				}, {
-					type : "signal",
 					val : 0
 				}],
-				type : 0,
-				outputVal : -1,
-				fixed : 0,
+				type : gatesEnum.blank,
+				fixed : false,
 				nextGates : [{
-					gateIdx : [1, 1, 1],
-					inputs : [1]
-				}]
-			}],
-			[{
-				inputs : [{
-					type : "signal",
-					val : 1
-				}, {
-					type : "gate",
-					gate : [0, 0],
-					val : -1
-				}],
-				type : 0,
-				outputVal : -1,
-				fixed : 0,
-				nextGates : [{
-					gateIdx : [1, 2, 0],
+					gateIdx : [1, 0],
 					inputs : [0]
 				}]
-			}, {
+			}], [{
 				inputs : [{
 					type : "gate",
 					gate : [0, 0],
-					val : -1
-				}, {
-					type : "gate",
-					gate : [0, 1],
-					val : -1
 				}],
-				type : 0,
-				outputVal : -1,
-				fixed : 0,
-				nextGates : [{
-					gateIdx : [1, 2, 0],
-					inputs : [1]
-				}]
-			}],
-			[{
-				inputs : [{
-					type : "gate",
-					gate : [1, 0],
-					val : -1
-				}, {
-					type : "gate",
-					gate : [1, 1],
-					val : -1
-				}],
-				type : 0,
-				outputVal : -1,
-				fixed : 0,
-				nextGates : [{
-					gateIdx : [1, 3, 0],
-					inputs : [0]
-				}]
-			}],
-			[{
-				inputs : [{
-					type : "gate",
-					gate : [2, 0],
-					val : -1
-				}],
-				type : 7,
-				outputVal : 0,
-				fixed : 1,
+				type : gatesEnum.star,
+				fixed : true,
 				nextGates : []
 			}]
 		]
 	}, {
-		startx : null,
-		starty : null,
 		gateSections : [
 			[{
 				inputs : [{
@@ -1540,14 +1513,264 @@ var levels = [{
 					type : "signal",
 					val : 1
 				}],
-				type : 0,
-				outputVal : -1,
-				fixed : 0,
+				type : gatesEnum.blank,
+				fixed : false,
 				nextGates : [{
-					gateIdx : [2, 1, 0],
-					inputs : [0, 1]
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
 				}, {
-					gateIdx : [2, 1, 1],
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.and,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+				}],
+				type : gatesEnum.star,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.nand,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [1]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}, {
+					type : "gate",
+					gate : [0, 1],
+				}],
+				type : gatesEnum.and,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.nand,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [1]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}, {
+					type : "gate",
+					gate : [0, 1],
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+				}],
+				type : gatesEnum.star,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
 					inputs : [0]
 				}]
 			}, {
@@ -1558,90 +1781,1064 @@ var levels = [{
 					type : "signal",
 					val : 0
 				}],
-				type : 2,
-				outputVal : 1,
-				fixed : 1,
+				type : gatesEnum.blank,
+				fixed : false,
 				nextGates : [{
-					gateIdx : [2, 1, 1],
+					gateIdx : [1, 0],
 					inputs : [1]
 				}]
-			}],
-			[{
+			}], [{
 				inputs : [{
 					type : "gate",
 					gate : [0, 0],
-					val : -1
-				}, {
-					type : "gate",
-					gate : [0, 0],
-					val : -1
-				}],
-				type : 5,
-				outputVal : -1,
-				fixed : 1,
-				nextGates : [{
-					gateIdx : [2, 2, 0],
-					inputs : [0]
-				}]
-			}, {
-				inputs : [{
-					type : "gate",
-					gate : [0, 0],
-					val : -1
 				}, {
 					type : "gate",
 					gate : [0, 1],
-					val : 1
 				}],
-				type : 0,
-				outputVal : -1,
-				fixed : 0,
+				type : gatesEnum.nand,
+				fixed : true,
 				nextGates : [{
-					gateIdx : [2, 2, 0],
-					inputs : [1]
+					gateIdx : [2, 0],
+					inputs : [0]
 				}]
-			}],
-			[{
+			}], [{
 				inputs : [{
 					type : "gate",
 					gate : [1, 0],
-					val : -1
-				}, {
-					type : "gate",
-					gate : [1, 1],
-					val : -1
 				}],
-				type : 6,
-				outputVal : -1,
-				fixed : 1,
-				nextGates : [{
-					gateIdx : [2, 3, 0],
-					inputs : [0]
-				}]
-			}],
-			[{
-				inputs : [{
-					type : "gate",
-					gate : [2, 0],
-					val : -1
-				}],
-				type : 7,
-				outputVal : 0,
-				fixed : 1,
+				type : gatesEnum.bulb,
+				fixed : true,
 				nextGates : []
 			}]
 		]
 	}]
 }, {
-	unlocked : false,
-	starsGained : 1,
-	allowedGates : [1, 2],
+	unlocked : true,
+	starsGained : 0,
+	allowedGates : [3,4],
 	enableGateChanges : false,
-	circuits : []
+	circuits : [{
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}],
+				type : gatesEnum.star,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.or,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+				}],
+				type : gatesEnum.star,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.nor,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [1]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}, {
+					type : "gate",
+					gate : [0, 1],
+				}],
+				type : gatesEnum.or,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.nor,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [1]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}, {
+					type : "gate",
+					gate : [0, 1],
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+				}],
+				type : gatesEnum.star,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [1]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}, {
+					type : "gate",
+					gate : [0, 1],
+				}],
+				type : gatesEnum.nor,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0],
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}]
 }, {
-	unlocked : false,
-	starsGained : 2,
-	allowedGates : [1, 2],
-	enableGateChanges : false,
-	circuits : []
+	unlocked : true,
+	starsGained : 0,
+	allowedGates : [1,2,4],
+	enableGateChanges : true,
+	circuits : [{
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0]
+				}, {
+					type : "gate",
+					gate : [0, 1]
+				}],
+				type : gatesEnum.and,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0]
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0]
+				}, {
+					type : "gate",
+					gate : [0, 1]
+				}],
+				type : gatesEnum.nor,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0]
+				}],
+				type : gatesEnum.star,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0]
+				}, {
+					type : "gate",
+					gate : [0, 1]
+				}],
+				type : gatesEnum.xor,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0]
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [1]
+				}, {
+					gateIdx : [1, 1],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "gate",
+					gate : [0, 1]
+				}],
+				type : gatesEnum.xor,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "gate",
+					gate : [0, 0]
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0]
+				}, {
+					type : "gate",
+					gate : [1, 1]
+				}],
+				type : gatesEnum.nor,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [3, 0],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [2, 0]
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.and,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [1]
+				}, {
+					gateIdx : [1, 1],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "gate",
+					gate : [0, 1]
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "gate",
+					gate : [0, 0]
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.nand,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0]
+				}, {
+					type : "gate",
+					gate : [1, 1]
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [3, 0],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [2, 0]
+				}],
+				type : gatesEnum.star,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [1]
+				}, {
+					gateIdx : [1, 1],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "gate",
+					gate : [0, 1]
+				}],
+				type : gatesEnum.or,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "gate",
+					gate : [0, 0]
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.nor,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0]
+				}, {
+					type : "gate",
+					gate : [1, 1]
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [3, 0],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [2, 0]
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}, {
+					gateIdx : [1, 1],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.or,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [1, 1],
+					inputs : [1]
+				}, {
+					gateIdx : [1, 0],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0]
+				}, {
+					type : "gate",
+					gate : [0, 1]
+				}],
+				type : gatesEnum.or,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "gate",
+					gate : [0, 0]
+				}, {
+					type : "gate",
+					gate : [0, 1]
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0]
+				}, {
+					type : "gate",
+					gate : [1, 1]
+				}],
+				type : gatesEnum.xnor,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [3, 0],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [2, 0]
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [1]
+				}, {
+					gateIdx : [1, 1],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 1],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "gate",
+					gate : [0, 0]
+				}],
+				type : gatesEnum.xnor,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "gate",
+					gate : [0, 0]
+				}, {
+					type : "gate",
+					gate : [0, 1]
+				}],
+				type : gatesEnum.xor,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0]
+				}, {
+					type : "gate",
+					gate : [1, 1]
+				}],
+				type : gatesEnum.and,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [3, 0],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [2, 0]
+				}],
+				type : gatesEnum.star,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}, {
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 0
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0, 1]
+				}, {
+					gateIdx : [1, 1],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 0
+				}],
+				type : gatesEnum.nand,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [1, 1],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0]
+				}, {
+					type : "gate",
+					gate : [0, 0]
+				}],
+				type : gatesEnum.xor,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [0]
+				}]
+			}, {
+				inputs : [{
+					type : "gate",
+					gate : [0, 0]
+				}, {
+					type : "gate",
+					gate : [0, 1]
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [2, 0],
+					inputs : [1]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [1, 0]
+				}, {
+					type : "gate",
+					gate : [1, 1]
+				}],
+				type : gatesEnum.xnor,
+				fixed : true,
+				nextGates : [{
+					gateIdx : [3, 0],
+					inputs : [0]
+				}]
+			}],
+			[{
+				inputs : [{
+					type : "gate",
+					gate : [2, 0]
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}]
 }]

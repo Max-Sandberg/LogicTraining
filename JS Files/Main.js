@@ -1,8 +1,9 @@
 var SC = 20; // Scale
 var cvs1, ctx1, cvs2, ctx2;
 var circuits
-var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7});
-var allowedGates = [gatesEnum.and, gatesEnum.or];
+var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7, "star":8});
+var allowedGates;
+var enableGateChanges;
 var draggedGate = 0;
 var selectedGate = null;
 var drawDraggedIntervalId, updateIntervalId;
@@ -10,20 +11,25 @@ var mousex, mousey;
 var frameNo = 0;
 var pause = false;
 
-function startGame() {
+function startGame(level) {
+	// Assign event handlers.
+	cvs2.onmousedown = handleMouseDown;
+	cvs2.onmouseup = handleMouseUp;
+	cvs2.onmousemove = handleMouseMove;
+
+	circuits = levels[level].circuits;
+	enableGateChanges = levels[level].enableGateChanges;
+	allowedGates = levels[level].allowedGates;
+
 	drawMenuBar();
-	prepareGameArea();
+	prepareCircuits();
+	updateIntervalId = setInterval(updateGameArea, 10);
 
 	document.onkeypress = function (e) {
 		e = e || window.event;
 		pause = !pause;
 	};
 }
-
-// function start(){
-// 	ctx.font='48px fontawesome';
-// 	ctx.fillText('\uF064\uF065 \uF0a5',20,75);
-// }
 
 // Waits for font awesome to load before continuing. This code is not mine - taken from https://stackoverflow.com/questions/35570801/how-to-draw-font-awesome-icons-onto-html-canvas
 function loadFontAwesome(callback,failAfterMS){
@@ -69,12 +75,19 @@ function loadFontAwesome(callback,failAfterMS){
 // Updates the values in a circuit after a particular gate has changed.
 function updateCircuitValues(gateIdx){
 	var gateSections = circuits[gateIdx[0]].gateSections,
-		gate = getGate(gateIdx),
-		oldOutput = gate.outputVal,
-		newOutput = updateGateOutput(gateIdx);
+		section = gateSections[gateIdx[1]],
+		gate, oldOutput, newOutput, changed = false;
 
-	// If the output of the updated gate changed, update future gates too.
-	if (oldOutput != newOutput){
+	// Recalculate all the gates in the section that changed, keeping track of whether any outputs changed.
+	for (var i = 0; i < section.length; i++){
+		gate = section[i];
+		oldOutput = gate.outputVal;
+		newOutput = updateGateOutput([gateIdx[0], gateIdx[1], i]);
+		if (newOutput != oldOutput) { changed = true; }
+	}
+
+	// If the output of the updated gate changed, update all future gates too.
+	if (changed){
 		for (var i = gateIdx[1] + 1; i < gateSections.length; i++){
 			for (var j = 0; j < gateSections[i].length; j++){
 				updateGateOutput([gateIdx[0],i,j]);
@@ -116,6 +129,7 @@ function updateGateOutput(gateIdx){
 				newOutput = !((input1 || input2) && !(input1 && input2)) ? 1 : 0;
 				break;
 			case gatesEnum.bulb:
+			case gatesEnum.star:
 				newOutput = (input1 == 1) ? 1 : 0;
 				break;
 		}
@@ -124,13 +138,14 @@ function updateGateOutput(gateIdx){
 	// Update the wire section, and the input values of all the gates this one connects to.
 	if (oldOutput != newOutput){
 		gate.outputVal = newOutput;
-		if (gate.type != gatesEnum.bulb){
+		if (gate.type != gatesEnum.bulb && gate.type != gatesEnum.star){
 			// If there is a wire group coming out of this gate, update it's value, and enable/disable animations.
 			var wireGroup = circuit.wireSections[gateIdx[1]+1][gateIdx[2]];
 			wireGroup.live = newOutput;
 			for (var i = 0; i < wireGroup.wires.length; i++){
 				var wire = wireGroup.wires[i];
 				wire.animations = [];
+				wire.live = newOutput;
 				if (newOutput == 1){
 					wire.animationId = setWireInterval(wire, circuit);
 				} else {
@@ -154,7 +169,7 @@ function updateGateOutput(gateIdx){
 
 // Takes an x and y coordinate and looks to see if that point is within the boundaries of one of the gates in the circuits. If it is, that gate index is returned.
 function getSelectedGate(x, y, tol){
-	if (y > 300-tol && y < 300+(20*SC)+tol){
+	if (y > 6*SC){
 		// In y range of the whole circuit
 		for (var i = 0; i < circuits.length; i++){
 			if ((x > circuits[i].startx) && (x < circuits[i].startx+circuits[i].width)){
@@ -240,39 +255,21 @@ function drawMenuBar(){
 	}
 }
 
-function prepareGameArea(){
-	// Draw box around the game area
-	ctx1.beginPath();
-	ctx1.strokeStyle="#000000";
-	ctx1.rect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-2);
-	ctx1.stroke();
-	ctx1.closePath();
-
-	// Find out how to draw all the circuits
-	for (var i = 0; i < circuits.length; i++){
-		prepareCircuit(circuits[i]);
-		circuits[i].startx = (i == 0) ? cvs1.width+50 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
-		//circuits[i].startx = (i == 0) ? -200 : circuits[i-1].startx + circuits[i-1].width + (8*SC);
-		circuits[i].starty = ((cvs1.height-(6*SC))/2)+(6*SC)-(10*SC);
-	}
-
-	updateIntervalId = setInterval(updateGameArea, 10);
-}
-
 // Clears the game area of all drawings
 function clearGameArea(){
-	ctx1.clearRect(2, (SC*6), cvs1.width-4, cvs1.height-(SC*6)-4);
+	ctx1.clearRect(2, (SC*6), cvs1.width-4, cvs1.height-(SC*6)-2);
 }
 
 // Updates the game area. This function is called on an interval.
 function updateGameArea() {
 	clearGameArea();
 
+	if (!pause) { frameNo++; }
+
 	// Draw and move the circuits.
 	for (var i = 0; i < circuits.length; i++){
 		drawCircuit(circuits[i], ctx1);
 		if (!pause){
-			frameNo++;
 			circuits[i].startx--;
 			if (circuits[i].startx == cvs1.width){
 				startWireAnimations(circuits[i]);
@@ -291,7 +288,7 @@ function updateGameArea() {
 
 	checkWinOrLose();
 
-	if (enableGateChanges && (frameNo % 1000 == 0)){
+	if (!pause && enableGateChanges && (frameNo % 1000 == 0)){
 		changeLockedGates();
 	}
 }
@@ -321,8 +318,6 @@ function checkWinOrLose(){
 	// If the game is won or lost, stop the game and display the relevant message.
 	if (gameState == "won" || gameState == "lost"){
 		// Cancel all the intervals and handlers
-		// draggedGate = 0;
-		// drawDraggedGate();
 		clearInterval(drawDraggedIntervalId);
 		clearInterval(updateIntervalId);
 		drawDraggedIntervalId = undefined;
@@ -331,31 +326,54 @@ function checkWinOrLose(){
 		cvs2.onmouseup = undefined;
 		cvs2.onmousemove = undefined;
 
-		// Draw a partially transparent rectangle over the whole canvas to make it look faded out, and draw a box in the middle of the game area.
+		// Draw a partially transparent rectangle over the whole canvas to make it look faded out. and draw a box in the middle of the game area.
 		ctx2.fillStyle = "rgba(0, 0, 0, 0.2)";
 		ctx2.fillRect(0, 0, cvs2.width, cvs2.height);
-		ctx2.lineWidth = 1;
-		ctx2.fillStyle = "#eeeeee";
-		var rectX = (cvs1.width/2)-100,
-			rectY = ((cvs1.height-(6*SC))/2)+(6*SC)-50;
-		ctx2.rect(rectX, rectY, 200, 100);
-		ctx2.fill();
-		ctx2.stroke();
-		ctx2.fillStyle = "#000000";
 
-		// Write the relevant message in the box.
+		// Display the win or lose message.
 		if (gameState == "lost"){
-			ctx2.font = "26px Arial";
-			ctx2.fillText("You lost...", rectX + 28, rectY + 60);
-			ctx2.font = "26px FontAwesome";
-			ctx2.fillText("\uf119", rectX + 152, rectY + 60);
-		} else if (gameState == "won"){
-			ctx2.font = "26px Arial";
-			ctx2.fillText("You win!", rectX + 36, rectY + 60);
-			ctx2.font = "26px FontAwesome";
-			ctx2.fillText("\uf118", rectX + 146, rectY + 60);
+			displayLoseMessage(ctx2);
+		} else {
+			displayWinMessage(ctx2);
 		}
 	}
+}
+
+// Display the "You Lost" message box.
+function displayLoseMessage(ctx){
+	// Draw the box.
+	ctx.lineWidth = 1;
+	ctx.fillStyle = "#eeeeee";
+	var rectX = (cvs1.width/2)-100,
+		rectY = ((cvs1.height-(6*SC))/2)+(6*SC)-50;
+	ctx.rect(rectX, rectY, 200, 100);
+	ctx.fill();
+	ctx.stroke();
+	ctx.fillStyle = "#000000";
+
+	// Write the "You Lost :(" message
+	ctx.font = "26px Arial";
+	ctx.fillText("You lost.", rectX + 32, rectY + 60);
+	ctx.font = "26px FontAwesome";
+	ctx.fillText("\uf119", rectX + 148, rectY + 60);
+}
+
+function displayWinMessage(ctx){
+	// Draw the box.
+	ctx.lineWidth = 1;
+	ctx.fillStyle = "#eeeeee";
+	var rectX = (cvs1.width/2)-100,
+		rectY = ((cvs1.height-(6*SC))/2)+(6*SC)-50;
+	ctx.rect(rectX, rectY, 200, 100);
+	ctx.fill();
+	ctx.stroke();
+	ctx.fillStyle = "#000000";
+
+	// Write the "You Won! :)" message
+	ctx.font = "26px Arial";
+	ctx.fillText("You win!", rectX + 32, rectY + 60);
+	ctx.font = "26px FontAwesome";
+	ctx.fillText("\uf118", rectX + 148, rectY + 60);
 }
 
 // Draws the whole circuit.
@@ -375,9 +393,11 @@ function drawAnimations(circuit, ctx){
 			var group = section[j];
 			for (var k = 0; k < group.wires.length; k++){
 				var wire = group.wires[k];
-				for (var l = 0; l < wire.animations.length; l++){
-					var bolt = wire.animations[l];
-					drawBolt(bolt, circuit.startx, circuit.starty, ctx);
+				if (typeof(wire.animations) != "undefined"){
+					for (var l = 0; l < wire.animations.length; l++){
+						var bolt = wire.animations[l];
+						drawBolt(bolt, circuit.startx, circuit.starty, ctx);
+					}
 				}
 			}
 		}
@@ -445,7 +465,4 @@ function changeLockedGates(){
 			frame++;
 		}
 	}
-
-
-
 }

@@ -74,6 +74,7 @@ function drawWire(x1, y1, x2, y2, live, ctx){
 // Draws an input signal.
 function drawSignal(x, y, sig, ctx){
 	ctx.font = "26px Arial";
+	ctx.fillStyle = "#000000";
 	ctx.fillText(sig, x, y);
 }
 
@@ -95,32 +96,32 @@ function drawWireAnimation(wire, circuit){
 	var line1 = {}, line2 = {}, line3 = {};
 
 	if (direction == 0){
-		line1.x2 = xOffset - 3;
-		line1.y2 = yOffset - 3;
-		line2.x2 = xOffset + 3;
-		line2.y2 = yOffset - 9;
+		line1.x2 = xOffset - 2;
+		line1.y2 = yOffset - 2;
+		line2.x2 = xOffset + 2;
+		line2.y2 = yOffset - 6;
 		line3.x2 = xOffset;
-		line3.y2 = yOffset - 12;
+		line3.y2 = yOffset - 8;
 	} else if (direction == 1){
-		line1.x2 = xOffset + 3;
-		line1.y2 = yOffset + 3;
-		line2.x2 = xOffset - 3;
-		line2.y2 = yOffset + 9;
+		line1.x2 = xOffset + 2;
+		line1.y2 = yOffset + 2;
+		line2.x2 = xOffset - 2;
+		line2.y2 = yOffset + 6;
 		line3.x2 = xOffset;
-		line3.y2 = yOffset + 12;
+		line3.y2 = yOffset + 8;
 	} else if (direction == 2){
-		line1.x2 = xOffset - 3;
-		line1.y2 = yOffset - 3;
-		line2.x2 = xOffset - 9;
-		line2.y2 = yOffset + 3;
-		line3.x2 = xOffset - 12;
+		line1.x2 = xOffset - 2;
+		line1.y2 = yOffset - 2;
+		line2.x2 = xOffset - 6;
+		line2.y2 = yOffset + 2;
+		line3.x2 = xOffset - 8;
 		line3.y2 = yOffset;
 	} else if (direction == 3){
-		line1.x2 = xOffset + 3;
-		line1.y2 = yOffset + 3;
-		line2.x2 = xOffset + 9;
-		line2.y2 = yOffset - 3;
-		line3.x2 = xOffset + 12;
+		line1.x2 = xOffset + 2;
+		line1.y2 = yOffset + 2;
+		line2.x2 = xOffset + 6;
+		line2.y2 = yOffset - 2;
+		line3.x2 = xOffset + 8;
 		line3.y2 = yOffset;
 	}
 	line1.x1 = xOffset;
@@ -132,11 +133,14 @@ function drawWireAnimation(wire, circuit){
 
 	var lightning = [line1, line2, line3];
 
-	setTimeout(startAnimation, Math.random()*500)
+	setTimeout(startAnimation, Math.random()*1500)
 
 	function startAnimation(){
-		wire.animations.push(lightning);
-		setTimeout(stopAnimation, 250);
+		// Check the wire is live again, just in case it changed since the timeout delay.
+		if (wire.live == 1){
+			wire.animations.push(lightning);
+			setTimeout(stopAnimation, 150);
+		}
 	}
 
 	function stopAnimation(){

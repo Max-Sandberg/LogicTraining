@@ -67,6 +67,9 @@ function drawGate(x, y, type, inputs, output, fixed, ctx) {
 		case gatesEnum.bulb:
 			drawBulb(x, y, input1, ctx);
 			break;
+		case gatesEnum.star:
+			drawStar(x, y, input1, ctx);
+			break;
 	}
 }
 
@@ -314,14 +317,16 @@ function drawBulb(x, y, live, ctx){
 
 function drawStar(x, y, live, ctx){
 	ctx.font = 3*SC + "px FontAwesome";
-	if (live == 1){
-		ctx.fillStyle = "#ffff00";
-		ctx.fillText("\uF005", x+(0.65*SC), y+(3.1*SC));
-		ctx.fillStyle = "black";
-	}
+	// if (live == 1){
+	// 	ctx.fillStyle = "#ffff00";
+	// 	ctx.fillText("\uF005", x+(0.65*SC), y+(3.1*SC));
+	// 	ctx.fillStyle = "black";
+	// }
 	ctx.lineWidth = 2;
+	ctx.fillStyle = (live == 1) ? "#FFFF00" : "#FFFFFF";
+	ctx.fillText("\uF005", x+(0.65*SC), y+(3.1*SC));
 	ctx.strokeText("\uF005", x+(0.65*SC), y+(3.1*SC));
-	ctx.font = "26px Arial";
+	//ctx.font = "26px Arial";
 	ctx.lineWidth = 1;
 }
 //#endregion

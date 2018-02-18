@@ -1,15 +1,27 @@
 // Prepares a circuit for drawing, by finding the positions of it's gates and wires.
-function prepareCircuit(circuit){
-	findGatePositions(circuit);
-	findWirePositions(circuit);
-	if (circuit.startx < cvs1.width){
-		startWireAnimations(circuit);
+function prepareCircuits(){
+	for (var i = 0; i < circuits.length; i++){
+		findGatePositions(i);
+		findWirePositions(circuits[i]);
+		findCircuitPosition(i);
+		updateCircuitValues([i, 0, 0]);
 	}
 }
 
-// Finds the x and y positions of every gate in the circuit.
-function findGatePositions(circuit){
-	var cols = circuit.gateSections;
+function findCircuitPosition(idx){
+	var y, circuit = circuits[idx];
+	circuit.startx = (idx == 0) ? cvs1.width + 50 : circuits[idx-1].startx + circuits[idx-1].width + (8*SC);
+	do {
+		y = (6*SC) + Math.round((0.3+(0.4*Math.random()))*(cvs1.height-(6*SC))) - (10*SC);
+	}
+	while (idx != 0 && Math.abs(circuits[idx-1].starty - y) < (4*SC));
+	circuit.starty = y;
+}
+
+// Finds the x and y positions of every gate in the circuit, and the total width of the circuit.
+function findGatePositions(circuitIdx){
+	var circuit = circuits[circuitIdx],
+		cols = circuit.gateSections;
 	for (var i = 0; i < cols.length; i++){
 		for (var j = 0; j < cols[i].length; j++){
 			var gate = cols[i][j];
@@ -18,10 +30,20 @@ function findGatePositions(circuit){
 						   (cols[i].length == 2) ? (j*8*SC) + (4*SC) :
 						   (cols[i].length == 1) ? (8*SC) : 0;
 
+			// While we're here, create/tweak some other properties needed for each gate.
 			gate.invis = false;
+			gate.outputVal = -1;
+			for (var k = 0; k < gate.nextGates.length; k++){
+				gate.nextGates[k].gateIdx.unshift(circuitIdx);
+			}
+			for (var k = 0; k < gate.inputs.length; k++){
+				if (gate.inputs[k].type == "gate"){
+					gate.inputs[k].val = -1;
+				}
+			}
 		}
 	}
-	circuit.width = (cols.length*8*SC) + (4*SC);
+	circuit.width = cols.length * 8 * SC;
 }
 
 // Finds the x and y positions of every wire in the circuit, and organises them into groups based on which gate output they originate from.
@@ -257,7 +279,9 @@ function stopWireAnimations(circuit){
 }
 
 function setWireInterval(wire, circuit){
+	// Do the first animation immediately, then start a timer to do it repeatedly.
+	drawWireAnimation(wire, circuit);
 	var length = Math.abs(wire.x1 - wire.x2) + Math.abs(wire.y1 - wire.y2);
-	var interval = 100000 / length;
+	var interval = 50000 / length;
 	return setInterval(drawWireAnimation, interval, wire, circuit);
 }
