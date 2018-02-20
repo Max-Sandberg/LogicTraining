@@ -1,6 +1,7 @@
 // Checks if the user clicked on a gate in the menu bar, and if so, set draggedGate to that gate.
 function handleMouseDown(){
 	draggedGate = 0;
+	updateSelectedGate();
 
 	// See if the mouse position is in the boundaries of one of the gates in the menu bar.
 	if ((mousey > SC) && (mousey < (5*SC))){
@@ -10,19 +11,18 @@ function handleMouseDown(){
 				// Sets draggedGate to the selected gate, and puts drawDraggedGate on an interval, so that it can be redrawn to snap to nearby gates even if the mouse doesn't move.
 				draggedGate = i;
 				drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
+				updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
 			}
 		}
 	} else {
-		var gateIdx = getSelectedGate(mousex, mousey, 0);
-		if (gateIdx != null){
+		var gate = getSelectedGate(mousex, mousey, 0);
+		if (gate != null){
 			// If the user clicked and dragged a non-fixed gate in the circuit, remove that gate from the circuit.
-			var gate = getGate(gateIdx);
-			if (!gate.fixed){
-				draggedGate = gate.type;
-				gate.type = 0;
-				updateCircuitValues(gateIdx);
-				drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
-			}
+			draggedGate = gate.type;
+			gate.type = 0;
+			updateCircuitValues(gate.idx);
+			drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
+			updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
 		}
 	}
 }
@@ -30,22 +30,21 @@ function handleMouseDown(){
 // Checks if the user is currently dragging a gate, and if they released the mouse over a non-fixed gate in a circuit. If so, update that gate's type and update the circuit's values.
 function handleMouseUp(){
 	if (draggedGate != 0){
-		var gateIdx = getSelectedGate(mousex, mousey, SC/2),
+		var gate = getSelectedGate(mousex, mousey, SC/2),
 			chosenGate = draggedGate;
 
+		clearInterval(updateSelectedIntervalId);
 		clearInterval(drawDraggedIntervalId);
+		updateSelectedIntervalId = undefined;
 		drawDraggedIntervalId = undefined;
 		draggedGate = 0;
 		ctx2.clearRect(0, 0, cvs2.width, cvs2.height);
 
-		if (gateIdx != null){
-			var gate = getGate(gateIdx);
-			if (!gate.fixed){
-				gate.invis = false;
-				if (gate.type != chosenGate){
-					gate.type = chosenGate;
-					updateCircuitValues(gateIdx);
-				}
+		if (gate != null){
+			gate.invis = false;
+			if (gate.type != chosenGate){
+				gate.type = chosenGate;
+				updateCircuitValues(gate.idx);
 			}
 		}
 	}
@@ -54,7 +53,4 @@ function handleMouseUp(){
 function handleMouseMove(){
 	mousex = event.clientX-8;
 	mousey = event.clientY-8;
-	if (draggedGate != 0){
-		drawDraggedGate();
-	}
 }

@@ -75,28 +75,14 @@ function drawGate(x, y, type, inputs, output, fixed, ctx) {
 
 // Draws the currently selected gate at the position of the mouse cursor, or snapped to a nearby gate.
 function drawDraggedGate(){
-	var x = mousex,
-		y = mousey,
-		gateIdx = getSelectedGate(x, y, SC/2);
+	var x, y;
 
-	// If the mouse is no longer over the previously selected gate, make that gate visible again.
-	if ((selectedGate != null) && (gateIdx == null)){
-		circuits[selectedGate[0]].gateSections[selectedGate[1]][selectedGate[2]].invis = false;
-		selectedGate = null;
-	}
-	// If the mouse isn't currently over a non-fixed gate, draw at the mouse position. Otherwise, draw in the gate, and set that gate to be invisible.
-	else if (gateIdx != null){
-		var gate = getGate(gateIdx);
-		if (!gate.fixed){
-			var circuit = circuits[gateIdx[0]];
-			x = circuit.startx + gate.xOffset + (2*SC);
-			y = circuit.starty + gate.yOffset + (2*SC);
-			// If the mouse has just moved into a new gate, set that gate to invisible.
-			if (selectedGate == null){
-				gate.invis = true;
-				selectedGate = gateIdx;
-			}
-		}
+	if (selectedGate == null){
+		x = mousex;
+		y = mousey;
+	} else {
+		x = circuits[selectedGate.idx[0]].startx + selectedGate.xOffset + (2*SC);
+		y = circuits[selectedGate.idx[0]].starty + selectedGate.yOffset + (2*SC);
 	}
 
 	// Clear the canvas and draw the correct gate.

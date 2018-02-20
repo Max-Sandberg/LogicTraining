@@ -5,12 +5,15 @@ function prepareCircuits(){
 		findWirePositions(circuits[i]);
 		findCircuitPosition(i);
 		updateCircuitValues([i, 0, 0]);
+		stopWireAnimations(circuits[i]);
 	}
 }
 
 function findCircuitPosition(idx){
 	var y, circuit = circuits[idx];
-	circuit.startx = (idx == 0) ? cvs1.width + 50 : circuits[idx-1].startx + circuits[idx-1].width + (8*SC);
+	circuit.startx = (idx == 0) ? cvs1.width + 50 : circuits[idx-1].endx + (8*SC);
+	circuit.endx = circuit.startx + circuit.width;
+	delete circuit.width;
 	do {
 		y = (6*SC) + Math.round((0.3+(0.4*Math.random()))*(cvs1.height-(6*SC))) - (10*SC);
 	}
@@ -41,6 +44,7 @@ function findGatePositions(circuitIdx){
 					gate.inputs[k].val = -1;
 				}
 			}
+			gate.idx = [circuitIdx, i, j];
 		}
 	}
 	circuit.width = cols.length * 8 * SC;
@@ -245,43 +249,4 @@ function findWirePositions(circuit){
 
 	// Assign the wireSections found to the circuit.
 	circuit.wireSections = wireSections;
-}
-
-// Finds all the live wires and starts their animation interval
-function startWireAnimations(circuit){
-	for (var i = 0; i < circuit.wireSections.length; i++){
-		var section = circuit.wireSections[i];
-		for (var j = 0; j < section.length; j++){
-			var group = section[j];
-			for (var k = 0; k < group.wires.length; k++){
-				var wire = group.wires[k];
-				wire.animations = [];
-				if (((typeof(group.live) != "undefined") && (group.live == 1)) || (typeof(wire.live) != "undefined") && (wire.live == 1)){
-					wire.animationId = setWireInterval(wire, circuit);
-				}
-			}
-		}
-	}
-}
-
-// Finds all the live wires and starts their animation interval
-function stopWireAnimations(circuit){
-	for (var i = 0; i < circuit.wireSections.length; i++){
-		var section = circuit.wireSections[i];
-		for (var j = 0; j < section.length; j++){
-			var group = section[j];
-			for (var k = 0; k < group.wires.length; k++){
-				var wire = group.wires[k];
-				wire.animations = [];
-			}
-		}
-	}
-}
-
-function setWireInterval(wire, circuit){
-	// Do the first animation immediately, then start a timer to do it repeatedly.
-	drawWireAnimation(wire, circuit);
-	var length = Math.abs(wire.x1 - wire.x2) + Math.abs(wire.y1 - wire.y2);
-	var interval = 50000 / length;
-	return setInterval(drawWireAnimation, interval, wire, circuit);
 }
