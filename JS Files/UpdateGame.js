@@ -73,7 +73,7 @@ function checkWinOrLose(){
 
 function updateSelectedGate(){
 	var oldGate = selectedGate,
-		newGate = getSelectedGate(mousex, mousey, SC/2);
+		newGate = getSelectedGate(mousex, mousey, 12);
 
 	// If the mouse is no longer over the previously selected gate, make that gate visible again.
 	if ((oldGate != null) && (newGate == null)){

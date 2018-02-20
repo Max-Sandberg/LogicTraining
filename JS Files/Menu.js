@@ -19,6 +19,8 @@ function openMenu(){
 	cvs2.onmousemove = handleMenuMouseMove;
 	document.body.insertBefore(cvs2, document.body.childNodes[0]);
 
+	SC = Math.round((cvs1.height/50)/5) * 5;
+
 	// Draw a dark green box over the whole screen
 	drawMenu(ctx1);
 }

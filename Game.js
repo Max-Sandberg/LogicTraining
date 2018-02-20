@@ -1,4 +1,4 @@
-var SC = 20; // Scale
+var SC; // Scale
 var cvs1, ctx1, cvs2, ctx2;
 var circuits
 var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7, "star":8});
@@ -95,6 +95,8 @@ function openMenu(){
 	cvs2.onmousedown = handleMenuMouseDown;
 	cvs2.onmousemove = handleMenuMouseMove;
 	document.body.insertBefore(cvs2, document.body.childNodes[0]);
+
+	SC = Math.round((cvs1.height/50)/5) * 5;
 
 	// Draw a dark green box over the whole screen
 	drawMenu(ctx1);
@@ -298,7 +300,7 @@ function checkWinOrLose(){
 
 function updateSelectedGate(){
 	var oldGate = selectedGate,
-		newGate = getSelectedGate(mousex, mousey, SC/2);
+		newGate = getSelectedGate(mousex, mousey, 12);
 
 	// If the mouse is no longer over the previously selected gate, make that gate visible again.
 	if ((oldGate != null) && (newGate == null)){
@@ -1446,7 +1448,7 @@ function handleMouseDown(){
 // Checks if the user is currently dragging a gate, and if they released the mouse over a non-fixed gate in a circuit. If so, update that gate's type and update the circuit's values.
 function handleMouseUp(){
 	if (draggedGate != 0){
-		var gate = getSelectedGate(mousex, mousey, SC/2),
+		var gate = getSelectedGate(mousex, mousey, 12),
 			chosenGate = draggedGate;
 
 		clearInterval(updateSelectedIntervalId);

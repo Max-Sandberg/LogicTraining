@@ -30,7 +30,7 @@ function handleMouseDown(){
 // Checks if the user is currently dragging a gate, and if they released the mouse over a non-fixed gate in a circuit. If so, update that gate's type and update the circuit's values.
 function handleMouseUp(){
 	if (draggedGate != 0){
-		var gate = getSelectedGate(mousex, mousey, SC/2),
+		var gate = getSelectedGate(mousex, mousey, 12),
 			chosenGate = draggedGate;
 
 		clearInterval(updateSelectedIntervalId);

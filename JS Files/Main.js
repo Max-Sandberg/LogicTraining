@@ -1,4 +1,4 @@
-var SC = 20; // Scale
+var SC; // Scale
 var cvs1, ctx1, cvs2, ctx2;
 var circuits
 var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7, "star":8});
