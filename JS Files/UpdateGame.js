@@ -58,16 +58,8 @@ function checkWinOrLose(){
 		cvs2.onmouseup = undefined;
 		cvs2.onmousemove = undefined;
 
-		// Draw a partially transparent rectangle over the whole canvas to make it look faded out. and draw a box in the middle of the game area.
-		ctx2.fillStyle = "rgba(0, 0, 0, 0.2)";
-		ctx2.fillRect(0, 0, cvs2.width, cvs2.height);
-
-		// Display the win or lose message.
-		if (gameState == "lost"){
-			displayLoseMessage(ctx2);
-		} else {
-			displayWinMessage(ctx2);
-		}
+		won = (gameState == "won");
+		showEndScreen();
 	}
 }
 

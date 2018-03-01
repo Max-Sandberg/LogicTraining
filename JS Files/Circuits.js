@@ -1,6 +1,6 @@
 var levels = [{
 	unlocked : true,
-	starsGained : 3,
+	starsGained : 0,
 	allowedGates : [1, 2],
 	enableGateChanges : false,
 	circuits : [{
@@ -365,7 +365,7 @@ var levels = [{
 		]
 	}]
 }, {
-	unlocked : true,
+	unlocked : false,
 	starsGained : 0,
 	allowedGates : [3,4],
 	enableGateChanges : false,
@@ -731,7 +731,7 @@ var levels = [{
 		]
 	}]
 }, {
-	unlocked : true,
+	unlocked : false,
 	starsGained : 0,
 	allowedGates : [1,2,4],
 	enableGateChanges : true,

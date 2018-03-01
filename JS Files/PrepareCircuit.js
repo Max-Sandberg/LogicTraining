@@ -2,8 +2,8 @@
 function prepareCircuits(){
 	for (var i = 0; i < circuits.length; i++){
 		findGatePositions(i);
-		findWirePositions(circuits[i]);
 		findCircuitPosition(i);
+		findWirePositions(circuits[i]);
 		updateCircuitValues([i, 0, 0]);
 		stopWireAnimations(circuits[i]);
 	}
@@ -11,7 +11,8 @@ function prepareCircuits(){
 
 function findCircuitPosition(idx){
 	var y, circuit = circuits[idx];
-	circuit.startx = (idx == 0) ? cvs1.width + 50 : circuits[idx-1].endx + (8*SC);
+	// circuit.startx = (idx == 0) ? cvs1.width + 50 : circuits[idx-1].endx + (8*SC);
+	circuit.startx = (idx == 0) ? 0 : circuits[idx-1].endx + (8*SC);
 	circuit.endx = circuit.startx + circuit.width;
 	delete circuit.width;
 	do {
@@ -34,10 +35,13 @@ function findGatePositions(circuitIdx){
 						   (cols[i].length == 1) ? (8*SC) : 0;
 
 			// While we're here, create/tweak some other properties needed for each gate.
+			gate.type = (gate.fixed) ? gate.type : gatesEnum.blank;
 			gate.invis = false;
 			gate.outputVal = -1;
 			for (var k = 0; k < gate.nextGates.length; k++){
-				gate.nextGates[k].gateIdx.unshift(circuitIdx);
+				if (gate.nextGates[k].gateIdx.length < 3){
+					gate.nextGates[k].gateIdx.unshift(circuitIdx);
+				}
 			}
 			for (var k = 0; k < gate.inputs.length; k++){
 				if (gate.inputs[k].type == "gate"){

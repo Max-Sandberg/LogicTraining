@@ -6,6 +6,7 @@ var allowedGates;
 var enableGateChanges;
 var draggedGate = 0;
 var selectedGate = null;
+var starsGained = 0;
 var drawDraggedIntervalId, updateSelectedIntervalId, drawIntervalId, updateIntervalId, gateChangeIntervalId;
 var mousex, mousey;
 var frameNo = 0;
@@ -126,13 +127,13 @@ function drawMenu(ctx){
 
 // Draws the icons for each level.
 function drawLevels(ctx){
-	var startx, width, x, y;
+	var startx, width, x, y, selected;
 	y = (cvs1.height/2) - (2*SC);
 	width = (levels.length*6*SC) + ((levels.length-1)*3*SC);
 	startx = Math.round((cvs1.width/2) - (width/2));
 
 	for (var i = 0; i < levels.length; i++){
-		var selected = (levels[i].unlocked && selectedLevel == i);
+		selected = (levels[i].unlocked && selectedLevel == i);
 
 		// Draw rectangle around the level.
 		x = startx + (i*9*SC);
@@ -285,16 +286,8 @@ function checkWinOrLose(){
 		cvs2.onmouseup = undefined;
 		cvs2.onmousemove = undefined;
 
-		// Draw a partially transparent rectangle over the whole canvas to make it look faded out. and draw a box in the middle of the game area.
-		ctx2.fillStyle = "rgba(0, 0, 0, 0.2)";
-		ctx2.fillRect(0, 0, cvs2.width, cvs2.height);
-
-		// Display the win or lose message.
-		if (gameState == "lost"){
-			displayLoseMessage(ctx2);
-		} else {
-			displayWinMessage(ctx2);
-		}
+		won = (gameState == "won");
+		showEndScreen();
 	}
 }
 
@@ -441,43 +434,6 @@ function drawGameArea(ctx){
 	ctx1.closePath();
 }
 
-// Display the "You Lost" message box.
-function displayLoseMessage(ctx){
-	// Draw the box.
-	ctx.lineWidth = 1;
-	ctx.fillStyle = "#eeeeee";
-	var rectX = (cvs1.width/2)-100,
-		rectY = ((cvs1.height-(6*SC))/2)+(6*SC)-50;
-	ctx.rect(rectX, rectY, 200, 100);
-	ctx.fill();
-	ctx.stroke();
-	ctx.fillStyle = "#000000";
-
-	// Write the "You Lost :(" message
-	ctx.font = "26px Arial";
-	ctx.fillText("You lost.", rectX + 32, rectY + 60);
-	ctx.font = "26px FontAwesome";
-	ctx.fillText("\uf119", rectX + 148, rectY + 60);
-}
-
-function displayWinMessage(ctx){
-	// Draw the box.
-	ctx.lineWidth = 1;
-	ctx.fillStyle = "#eeeeee";
-	var rectX = (cvs1.width/2)-100,
-		rectY = ((cvs1.height-(6*SC))/2)+(6*SC)-50;
-	ctx.rect(rectX, rectY, 200, 100);
-	ctx.fill();
-	ctx.stroke();
-	ctx.fillStyle = "#000000";
-
-	// Write the "You Won! :)" message
-	ctx.font = "26px Arial";
-	ctx.fillText("You win!", rectX + 32, rectY + 60);
-	ctx.font = "26px FontAwesome";
-	ctx.fillText("\uf118", rectX + 148, rectY + 60);
-}
-
 // Draws the whole circuit.
 function drawCircuit(circuit, ctx) {
 	if (circuit.startx < cvs1.width && circuit.endx > 0){
@@ -489,8 +445,6 @@ function drawCircuit(circuit, ctx) {
 
 // Draws all the lightning animations on the live wires.
 function drawAnimations(circuit, ctx){
-	ctx.font = SC + "px FontAwesome";
-	ctx.fillStyle = "#00bfff";
 	for (var i = 0; i < circuit.wireSections.length; i++){
 		var section = circuit.wireSections[i];
 		for (var j = 0; j < section.length; j++){
@@ -613,6 +567,12 @@ function updateGateOutput(gateIdx){
 					nextGate.inputs[nextGateInputs[j]].val = newOutput;
 				}
 			}
+		} else if (gate.type == gatesEnum.star){
+			if (newOutput == 1){
+				starsGained++;
+			} else {
+				starsGained--;
+			}
 		}
 	}
 
@@ -697,8 +657,8 @@ function setWireInterval(wire, circuit){
 function prepareCircuits(){
 	for (var i = 0; i < circuits.length; i++){
 		findGatePositions(i);
-		findWirePositions(circuits[i]);
 		findCircuitPosition(i);
+		findWirePositions(circuits[i]);
 		updateCircuitValues([i, 0, 0]);
 		stopWireAnimations(circuits[i]);
 	}
@@ -706,7 +666,8 @@ function prepareCircuits(){
 
 function findCircuitPosition(idx){
 	var y, circuit = circuits[idx];
-	circuit.startx = (idx == 0) ? cvs1.width + 50 : circuits[idx-1].endx + (8*SC);
+	// circuit.startx = (idx == 0) ? cvs1.width + 50 : circuits[idx-1].endx + (8*SC);
+	circuit.startx = (idx == 0) ? 0 : circuits[idx-1].endx + (8*SC);
 	circuit.endx = circuit.startx + circuit.width;
 	delete circuit.width;
 	do {
@@ -729,10 +690,13 @@ function findGatePositions(circuitIdx){
 						   (cols[i].length == 1) ? (8*SC) : 0;
 
 			// While we're here, create/tweak some other properties needed for each gate.
+			gate.type = (gate.fixed) ? gate.type : gatesEnum.blank;
 			gate.invis = false;
 			gate.outputVal = -1;
 			for (var k = 0; k < gate.nextGates.length; k++){
-				gate.nextGates[k].gateIdx.unshift(circuitIdx);
+				if (gate.nextGates[k].gateIdx.length < 3){
+					gate.nextGates[k].gateIdx.unshift(circuitIdx);
+				}
 			}
 			for (var k = 0; k < gate.inputs.length; k++){
 				if (gate.inputs[k].type == "gate"){
@@ -1472,9 +1436,192 @@ function handleMouseMove(){
 	mousex = event.clientX-8;
 	mousey = event.clientY-8;
 }
+var won, btn;
+var selectedButton = null;
+
+function showEndScreen(){
+	// Animation to slowly fade the screen.
+	var frame = -1;
+	var id = setInterval(fadeScreen, 10);
+
+	function fadeScreen(){
+		frame++;
+		if (frame < 80){
+			ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
+			ctx2.fillStyle = "rgba(0, 0, 0, " + ((frame/80)*0.8) + ")";
+			ctx2.fillRect(0, 0, cvs1.width, cvs1.height);
+		} else if (frame == 80){
+			ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
+			ctx1.fillStyle = "rgba(0, 0, 0, " + ((frame/80)*0.8) + ")";
+			ctx1.fillRect(0, 0, cvs1.width, cvs1.height);
+		} else if (frame > 160){
+			clearInterval(id);
+			frame = -1;
+			id = setInterval(slideEndMessage, 10);
+		}
+	}
+
+	var width = won ? 360 : 300;
+		height = won ? 260 : 200,
+		x = (cvs1.width/2) - (width/2);
+		y = -height;
+	function slideEndMessage(){
+		frame++;
+		y = (frame/100) * ((cvs1.height/2)+(height/2)) - height;
+		ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
+		if (frame < 100){
+			drawEndMessage(x, y, ctx2);
+		} else if (frame == 100){
+			drawEndMessage(x, y, ctx1);
+			clearInterval(id);
+			cvs2.onmousedown = handleEndScreenMouseDown;
+			cvs2.onmousemove = handleEndScreenMouseMove;
+			if (won){
+				frame = -1;
+				starX = x+100;
+				starY = y+128;
+				ctx2.fillStyle = "#FFFF00";
+				ctx2.strokeStyle = "#000000";
+				ctx2.lineWidth = 1.5;
+				id = setInterval(animateStars, 10);
+			}
+		}
+	}
+
+	var starX, starY, size;
+	function animateStars(){
+		frame++;
+		if ((frame == 50 && starsGained > 1) || (frame == 100 && starsGained > 2)){
+			starX += 80;
+		} else if (frame == 150){
+			clearInterval(id);
+		}
+		size = Math.ceil(((frame % 50)/50) * 36);
+		ctx2.font = size + "pt FontAwesome";
+		ctx2.fillText("\uF005", starX, starY+(size/2));
+	}
+}
+
+function drawEndMessage(x, y, ctx){
+	var width = won ? 360 : 300;
+		height = won ? 260 : 200;
+
+	// Draw the box.
+	ctx.lineWidth = 2;
+	ctx.fillStyle = "#184e32";
+	ctx.beginPath();
+	ctx.rect(x, y, width, height);
+	ctx.fill();
+	ctx.stroke();
+	ctx.closePath();
+
+	// Write the win or lose message.
+	var text = won ? "LEVEL COMPLETE" : "GAME OVER";
+	ctx.textAlign = "center";
+	ctx.font = "30pt Impact";
+	ctx.fillStyle = "#FFFFFF";
+	ctx.fillText(text, x+(width/2)+1, y+71);
+	ctx.fillStyle = "#000000";
+	ctx.fillText(text, x+(width/2), y+70);
+
+	// If the game was won, draw the number of stars earned (empty for now).
+	if (won){
+		ctx.lineWidth = 1.5;
+		ctx.font = "40pt FontAwesome"
+		for (var i = 0; i < 3; i++){
+			ctx.strokeText("\uF005", x+100+(i*80), y+148);
+		}
+	}
+
+	// Draw the retry and menu buttons.
+	xOffset = won ? 70 : 40;
+	yOffset = won ? 180 : 120;
+	drawButton("RETRY", x+xOffset, y+yOffset, false, ctx);
+	drawButton("MENU", x+xOffset+140, y+yOffset, false, ctx);
+}
+
+function drawButton(text, x, y, selected, ctx){
+	// Draw a flat green box over whatever was here before.
+	ctx.beginPath();
+	ctx.fillStyle = "#184E32";
+	ctx.fillRect(x-4, y-4, 88, 48);
+
+	// Draw the retry or menu button.
+	ctx.fillStyle = selected ? "#7D9C8D" : "#5D8370";
+	ctx.lineWidth = selected ? 3 : 1;
+	ctx.rect(x, y, 80, 40);
+	ctx.fill();
+	ctx.stroke();
+	ctx.fillStyle = "#000000";
+	ctx.font = "20pt Impact";
+	ctx.fillText(text, x+40, y+30);
+	ctx.closePath();
+}
+
+function handleEndScreenMouseMove(){
+	mousex = event.clientX-8;
+	mousey = event.clientY-8;
+
+	var newBtn = getSelectedButton();
+	if (newBtn != selectedButton){
+		var btnX = (newBtn == "RETRY" || selectedButton == "RETRY") ? (cvs1.width/2)-110 : (cvs1.width/2)+30,
+			btnY = won ? (cvs1.height/2)+50 : (cvs1.height/2)+20,
+			text = (newBtn == null) ? selectedButton : newBtn;
+		drawButton(text, btnX, btnY, (newBtn != null), ctx1);
+		selectedButton = newBtn;
+	}
+}
+
+function handleEndScreenMouseDown(){
+	if (selectedButton != null){
+		if (won){
+			if (selectedLevel < levels.length-1){
+				levels[selectedLevel+1].unlocked = true;
+			}
+			if (levels[selectedLevel].starsGained < starsGained){
+				levels[selectedLevel].starsGained = starsGained;
+			}
+		}
+
+
+		starsGained = 0;
+		frameNo = 0;
+		draggedGate = 0;
+		selectedGate = null;
+		ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
+		ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
+		ctx1.textAlign = "left";
+
+		if (selectedButton == "RETRY"){
+			selectedButton = null;
+			cvs2.onmousedown = undefined;
+			cvs2.onmousemove = undefined;
+			startGame(selectedLevel);
+		} else {
+			selectedButton = null;
+			selectedLevel = -1;
+			cvs2.onmousedown = handleMenuMouseDown;
+			cvs2.onmousemove = handleMenuMouseMove;
+			drawMenu(ctx1);
+		}
+	}
+}
+
+function getSelectedButton(){
+	var btnX = (cvs1.width/2)-110;
+		btnY = won ? (cvs1.height/2)+50 : (cvs1.height/2)+20;
+
+	for (var i = 0; i < 2; i++){
+		btnX += (i * 140);
+		if ((mousex > btnX) && (mousex < btnX+80) && (mousey > btnY) && (mousey < btnY+40)){
+			return (i == 0) ? "RETRY" : "MENU";
+		}
+	}
+	return null;
+}
 var levels = [{
 	unlocked : true,
-	starsGained : 3,
+	starsGained : 0,
 	allowedGates : [1, 2],
 	enableGateChanges : false,
 	circuits : [{
@@ -1839,7 +1986,7 @@ var levels = [{
 		]
 	}]
 }, {
-	unlocked : true,
+	unlocked : false,
 	starsGained : 0,
 	allowedGates : [3,4],
 	enableGateChanges : false,
@@ -2205,7 +2352,7 @@ var levels = [{
 		]
 	}]
 }, {
-	unlocked : true,
+	unlocked : false,
 	starsGained : 0,
 	allowedGates : [1,2,4],
 	enableGateChanges : true,

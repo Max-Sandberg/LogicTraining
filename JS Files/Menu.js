@@ -49,13 +49,13 @@ function drawMenu(ctx){
 
 // Draws the icons for each level.
 function drawLevels(ctx){
-	var startx, width, x, y;
+	var startx, width, x, y, selected;
 	y = (cvs1.height/2) - (2*SC);
 	width = (levels.length*6*SC) + ((levels.length-1)*3*SC);
 	startx = Math.round((cvs1.width/2) - (width/2));
 
 	for (var i = 0; i < levels.length; i++){
-		var selected = (levels[i].unlocked && selectedLevel == i);
+		selected = (levels[i].unlocked && selectedLevel == i);
 
 		// Draw rectangle around the level.
 		x = startx + (i*9*SC);

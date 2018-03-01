@@ -79,43 +79,6 @@ function drawGameArea(ctx){
 	ctx1.closePath();
 }
 
-// Display the "You Lost" message box.
-function displayLoseMessage(ctx){
-	// Draw the box.
-	ctx.lineWidth = 1;
-	ctx.fillStyle = "#eeeeee";
-	var rectX = (cvs1.width/2)-100,
-		rectY = ((cvs1.height-(6*SC))/2)+(6*SC)-50;
-	ctx.rect(rectX, rectY, 200, 100);
-	ctx.fill();
-	ctx.stroke();
-	ctx.fillStyle = "#000000";
-
-	// Write the "You Lost :(" message
-	ctx.font = "26px Arial";
-	ctx.fillText("You lost.", rectX + 32, rectY + 60);
-	ctx.font = "26px FontAwesome";
-	ctx.fillText("\uf119", rectX + 148, rectY + 60);
-}
-
-function displayWinMessage(ctx){
-	// Draw the box.
-	ctx.lineWidth = 1;
-	ctx.fillStyle = "#eeeeee";
-	var rectX = (cvs1.width/2)-100,
-		rectY = ((cvs1.height-(6*SC))/2)+(6*SC)-50;
-	ctx.rect(rectX, rectY, 200, 100);
-	ctx.fill();
-	ctx.stroke();
-	ctx.fillStyle = "#000000";
-
-	// Write the "You Won! :)" message
-	ctx.font = "26px Arial";
-	ctx.fillText("You win!", rectX + 32, rectY + 60);
-	ctx.font = "26px FontAwesome";
-	ctx.fillText("\uf118", rectX + 148, rectY + 60);
-}
-
 // Draws the whole circuit.
 function drawCircuit(circuit, ctx) {
 	if (circuit.startx < cvs1.width && circuit.endx > 0){
@@ -127,8 +90,6 @@ function drawCircuit(circuit, ctx) {
 
 // Draws all the lightning animations on the live wires.
 function drawAnimations(circuit, ctx){
-	ctx.font = SC + "px FontAwesome";
-	ctx.fillStyle = "#00bfff";
 	for (var i = 0; i < circuit.wireSections.length; i++){
 		var section = circuit.wireSections[i];
 		for (var j = 0; j < section.length; j++){

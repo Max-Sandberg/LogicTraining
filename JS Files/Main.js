@@ -6,6 +6,7 @@ var allowedGates;
 var enableGateChanges;
 var draggedGate = 0;
 var selectedGate = null;
+var starsGained = 0;
 var drawDraggedIntervalId, updateSelectedIntervalId, drawIntervalId, updateIntervalId, gateChangeIntervalId;
 var mousex, mousey;
 var frameNo = 0;

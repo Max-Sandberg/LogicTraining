@@ -87,6 +87,12 @@ function updateGateOutput(gateIdx){
 					nextGate.inputs[nextGateInputs[j]].val = newOutput;
 				}
 			}
+		} else if (gate.type == gatesEnum.star){
+			if (newOutput == 1){
+				starsGained++;
+			} else {
+				starsGained--;
+			}
 		}
 	}
 
