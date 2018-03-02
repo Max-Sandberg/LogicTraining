@@ -1,4 +1,3 @@
-
 // Updates the game area. This function is called on an interval.
 function updateGameArea() {
 	// Start/stop animations if the circuit is on/off the screen.
@@ -122,6 +121,23 @@ function changeLockedGates(){
 			ctx1.fillStyle = (frame < 100) ? "#113723" : "rgba(17, 55, 35, " + (150-frame)/50 + ")";
 			ctx1.fillText("GATE CHANGE!", xOffset, yOffset + (3*SC));
 			frame++;
+		}
+	}
+}
+
+function findLevelPar(){
+	var lvl = levels[selectedLevel],
+		circuits = lvl.circuits;
+
+	lvl.par = 0;
+
+	for (var i = 0; i < circuits.length; i++){
+		for (var j = 0; j < circuits[i].gateSections.length; j++){
+			for (var k = 0; k < circuits[i].gateSections[j].length; k++){
+				if (!circuits[i].gateSections[j][k].fixed){
+					lvl.par++;
+				}
+			}
 		}
 	}
 }

@@ -10,6 +10,7 @@ var starsGained = 0;
 var drawDraggedIntervalId, updateSelectedIntervalId, drawIntervalId, updateIntervalId, gateChangeIntervalId;
 var mousex, mousey;
 var frameNo = 0;
+var moves = 0;
 var pause = false;
 
 function startGame(level) {
@@ -22,8 +23,12 @@ function startGame(level) {
 	enableGateChanges = levels[level].enableGateChanges;
 	allowedGates = levels[level].allowedGates;
 
+	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 	drawMenuBar();
 	prepareCircuits();
+	findLevelPar();
+	moves = 0;
+	drawMoves();
 	drawIntervalId = setInterval(drawGameArea, 10, ctx1);
 	updateIntervalId = setInterval(updateGameArea, 50);
 	if (enableGateChanges){

@@ -73,6 +73,7 @@ function drawGameArea(ctx){
 
 	// Draw box around game area.
 	ctx1.beginPath();
+	ctx1.lineWidth = 1;
 	ctx1.strokeStyle="#000000";
 	ctx1.rect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-2);
 	ctx1.stroke();
@@ -119,7 +120,32 @@ function drawBolt(bolt, xOffset, yOffset, ctx){
 	ctx.closePath();
 }
 
+function drawMoves(){
+	ctx1.strokeStyle = "#000000";
+	ctx1.fillStyle = "#2a8958";
+	ctx1.lineWidth = 2;
+	ctx1.beginPath();
+	ctx1.moveTo((cvs1.width/2)-80, cvs1.height-2);
+	ctx1.lineTo((cvs1.width/2)-50, cvs1.height-60);
+	ctx1.lineTo((cvs1.width/2)+50, cvs1.height-60);
+	ctx1.lineTo((cvs1.width/2)+80, cvs1.height-2);
+	ctx1.fill();
+	ctx1.stroke();
+	ctx1.closePath();
+
+	ctx1.textAlign = "center";
+	ctx1.font = "18pt Impact";
+	ctx1.fillStyle = "#000000";
+	ctx1.fillText("MOVES: " + moves, cvs1.width/2, cvs1.height-30);
+	ctx1.fillStyle = (moves > levels[selectedLevel].par) ? "#B4301F" : "#C4EDD8";
+	ctx1.font = "12pt Tahoma";
+	ctx1.fontWeight = "bold"
+	ctx1.fillText("(PAR: " + levels[selectedLevel].par + ")", cvs1.width/2, cvs1.height-10);
+	ctx1.fontWeight = "normal"
+	ctx1.textAlign = "left";
+}
+
 // Clears the game area of all drawings
 function clearGameArea(){
-	ctx1.clearRect(2, (SC*6), cvs1.width-4, cvs1.height-(SC*6)-2);
+	ctx1.clearRect(2, (SC*6), cvs1.width-4, cvs1.height-(SC*10));
 }

@@ -2,6 +2,10 @@ var won, btn;
 var selectedButton = null;
 
 function showEndScreen(){
+	if (moves <= levels[selectedLevel].par){
+		starsGained++;
+	}
+
 	// Animation to slowly fade the screen.
 	var frame = -1;
 	var id = setInterval(fadeScreen, 10);
@@ -149,6 +153,7 @@ function handleEndScreenMouseDown(){
 		starsGained = 0;
 		frameNo = 0;
 		draggedGate = 0;
+		moves = 0;
 		selectedGate = null;
 		ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 		ctx2.clearRect(0, 0, cvs1.width, cvs1.height);

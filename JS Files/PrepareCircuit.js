@@ -11,14 +11,14 @@ function prepareCircuits(){
 
 function findCircuitPosition(idx){
 	var y, circuit = circuits[idx];
-	// circuit.startx = (idx == 0) ? cvs1.width + 50 : circuits[idx-1].endx + (8*SC);
-	circuit.startx = (idx == 0) ? 0 : circuits[idx-1].endx + (8*SC);
+	circuit.startx = (idx == 0) ? cvs1.width + 50 : circuits[idx-1].endx + (8*SC);
+	// circuit.startx = (idx == 0) ? 0 : circuits[idx-1].endx + (8*SC);
 	circuit.endx = circuit.startx + circuit.width;
 	delete circuit.width;
 	do {
-		y = (6*SC) + Math.round((0.3+(0.4*Math.random()))*(cvs1.height-(6*SC))) - (10*SC);
+		y = (6*SC) + Math.round((0.3+(0.4*Math.random()))*(cvs1.height-(6*SC))) - (10*SC) - 10;
 	}
-	while (idx != 0 && Math.abs(circuits[idx-1].starty - y) < (4*SC));
+	while (idx != 0 && Math.abs(circuits[idx-1].starty - y) < (6*SC));
 	circuit.starty = y;
 }
 

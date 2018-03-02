@@ -10,6 +10,7 @@ var starsGained = 0;
 var drawDraggedIntervalId, updateSelectedIntervalId, drawIntervalId, updateIntervalId, gateChangeIntervalId;
 var mousex, mousey;
 var frameNo = 0;
+var moves = 0;
 var pause = false;
 
 function startGame(level) {
@@ -22,8 +23,12 @@ function startGame(level) {
 	enableGateChanges = levels[level].enableGateChanges;
 	allowedGates = levels[level].allowedGates;
 
+	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 	drawMenuBar();
 	prepareCircuits();
+	findLevelPar();
+	moves = 0;
+	drawMoves();
 	drawIntervalId = setInterval(drawGameArea, 10, ctx1);
 	updateIntervalId = setInterval(updateGameArea, 50);
 	if (enableGateChanges){
@@ -226,7 +231,6 @@ function getSelectedLevel(){
 
 	return -1;
 }
-
 // Updates the game area. This function is called on an interval.
 function updateGameArea() {
 	// Start/stop animations if the circuit is on/off the screen.
@@ -353,6 +357,23 @@ function changeLockedGates(){
 		}
 	}
 }
+
+function findLevelPar(){
+	var lvl = levels[selectedLevel],
+		circuits = lvl.circuits;
+
+	lvl.par = 0;
+
+	for (var i = 0; i < circuits.length; i++){
+		for (var j = 0; j < circuits[i].gateSections.length; j++){
+			for (var k = 0; k < circuits[i].gateSections[j].length; k++){
+				if (!circuits[i].gateSections[j][k].fixed){
+					lvl.par++;
+				}
+			}
+		}
+	}
+}
 // Draws the menu bar at the top of the screen.
 function drawMenuBar(){
 	// Clear the menu area.
@@ -428,6 +449,7 @@ function drawGameArea(ctx){
 
 	// Draw box around game area.
 	ctx1.beginPath();
+	ctx1.lineWidth = 1;
 	ctx1.strokeStyle="#000000";
 	ctx1.rect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-2);
 	ctx1.stroke();
@@ -474,9 +496,34 @@ function drawBolt(bolt, xOffset, yOffset, ctx){
 	ctx.closePath();
 }
 
+function drawMoves(){
+	ctx1.strokeStyle = "#000000";
+	ctx1.fillStyle = "#2a8958";
+	ctx1.lineWidth = 2;
+	ctx1.beginPath();
+	ctx1.moveTo((cvs1.width/2)-80, cvs1.height-2);
+	ctx1.lineTo((cvs1.width/2)-50, cvs1.height-60);
+	ctx1.lineTo((cvs1.width/2)+50, cvs1.height-60);
+	ctx1.lineTo((cvs1.width/2)+80, cvs1.height-2);
+	ctx1.fill();
+	ctx1.stroke();
+	ctx1.closePath();
+
+	ctx1.textAlign = "center";
+	ctx1.font = "18pt Impact";
+	ctx1.fillStyle = "#000000";
+	ctx1.fillText("MOVES: " + moves, cvs1.width/2, cvs1.height-30);
+	ctx1.fillStyle = (moves > levels[selectedLevel].par) ? "#B4301F" : "#C4EDD8";
+	ctx1.font = "12pt Tahoma";
+	ctx1.fontWeight = "bold"
+	ctx1.fillText("(PAR: " + levels[selectedLevel].par + ")", cvs1.width/2, cvs1.height-10);
+	ctx1.fontWeight = "normal"
+	ctx1.textAlign = "left";
+}
+
 // Clears the game area of all drawings
 function clearGameArea(){
-	ctx1.clearRect(2, (SC*6), cvs1.width-4, cvs1.height-(SC*6)-2);
+	ctx1.clearRect(2, (SC*6), cvs1.width-4, cvs1.height-(SC*10));
 }
 // Updates the values in a circuit after a particular gate has changed.
 function updateCircuitValues(gateIdx){
@@ -666,14 +713,14 @@ function prepareCircuits(){
 
 function findCircuitPosition(idx){
 	var y, circuit = circuits[idx];
-	// circuit.startx = (idx == 0) ? cvs1.width + 50 : circuits[idx-1].endx + (8*SC);
-	circuit.startx = (idx == 0) ? 0 : circuits[idx-1].endx + (8*SC);
+	circuit.startx = (idx == 0) ? cvs1.width + 50 : circuits[idx-1].endx + (8*SC);
+	// circuit.startx = (idx == 0) ? 0 : circuits[idx-1].endx + (8*SC);
 	circuit.endx = circuit.startx + circuit.width;
 	delete circuit.width;
 	do {
-		y = (6*SC) + Math.round((0.3+(0.4*Math.random()))*(cvs1.height-(6*SC))) - (10*SC);
+		y = (6*SC) + Math.round((0.3+(0.4*Math.random()))*(cvs1.height-(6*SC))) - (10*SC) - 10;
 	}
-	while (idx != 0 && Math.abs(circuits[idx-1].starty - y) < (4*SC));
+	while (idx != 0 && Math.abs(circuits[idx-1].starty - y) < (6*SC));
 	circuit.starty = y;
 }
 
@@ -1425,6 +1472,8 @@ function handleMouseUp(){
 		if (gate != null){
 			gate.invis = false;
 			if (gate.type != chosenGate){
+				moves++;
+				drawMoves();
 				gate.type = chosenGate;
 				updateCircuitValues(gate.idx);
 			}
@@ -1440,6 +1489,10 @@ var won, btn;
 var selectedButton = null;
 
 function showEndScreen(){
+	if (moves <= levels[selectedLevel].par){
+		starsGained++;
+	}
+
 	// Animation to slowly fade the screen.
 	var frame = -1;
 	var id = setInterval(fadeScreen, 10);
@@ -1587,6 +1640,7 @@ function handleEndScreenMouseDown(){
 		starsGained = 0;
 		frameNo = 0;
 		draggedGate = 0;
+		moves = 0;
 		selectedGate = null;
 		ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 		ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
@@ -1777,7 +1831,7 @@ var levels = [{
 					type : "gate",
 					gate : [1, 0],
 				}],
-				type : gatesEnum.star,
+				type : gatesEnum.bulb,
 				fixed : true,
 				nextGates : []
 			}]
@@ -2143,7 +2197,7 @@ var levels = [{
 					type : "gate",
 					gate : [1, 0],
 				}],
-				type : gatesEnum.star,
+				type : gatesEnum.bulb,
 				fixed : true,
 				nextGates : []
 			}]
@@ -2667,7 +2721,7 @@ var levels = [{
 					type : "gate",
 					gate : [2, 0]
 				}],
-				type : gatesEnum.star,
+				type : gatesEnum.bulb,
 				fixed : true,
 				nextGates : []
 			}]

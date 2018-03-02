@@ -43,6 +43,8 @@ function handleMouseUp(){
 		if (gate != null){
 			gate.invis = false;
 			if (gate.type != chosenGate){
+				moves++;
+				drawMoves();
 				gate.type = chosenGate;
 				updateCircuitValues(gate.idx);
 			}
