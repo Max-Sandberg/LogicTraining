@@ -2,10 +2,11 @@ var won, btn;
 var selectedButton = null;
 
 function showEndScreen(){
-	if (moves <= levels[selectedLevel].par){
+	// Give an extra star if they completed the level in less moves than the par.
+	if (won && moves <= levels[selectedLevel].par){
 		starsGained++;
 	}
-
+	
 	// Animation to slowly fade the screen.
 	var frame = -1;
 	var id = setInterval(fadeScreen, 10);
@@ -40,8 +41,6 @@ function showEndScreen(){
 		} else if (frame == 100){
 			drawEndMessage(x, y, ctx1);
 			clearInterval(id);
-			cvs2.onmousedown = handleEndScreenMouseDown;
-			cvs2.onmousemove = handleEndScreenMouseMove;
 			if (won){
 				frame = -1;
 				starX = x+100;
@@ -49,7 +48,15 @@ function showEndScreen(){
 				ctx2.fillStyle = "#FFFF00";
 				ctx2.strokeStyle = "#000000";
 				ctx2.lineWidth = 1.5;
-				id = setInterval(animateStars, 10);
+				if (starsGained > 0){
+					id = setInterval(animateStars, 10);
+				} else {
+					cvs2.onmousedown = handleEndScreenMouseDown;
+					cvs2.onmousemove = handleEndScreenMouseMove;
+				}
+			} else {
+				cvs2.onmousedown = handleEndScreenMouseDown;
+				cvs2.onmousemove = handleEndScreenMouseMove;
 			}
 		}
 	}
@@ -57,10 +64,14 @@ function showEndScreen(){
 	var starX, starY, size;
 	function animateStars(){
 		frame++;
-		if ((frame == 50 && starsGained > 1) || (frame == 100 && starsGained > 2)){
-			starX += 80;
-		} else if (frame == 150){
-			clearInterval(id);
+		if (frame == 50 || frame == 100 || frame == 150){
+			if (starsGained > frame/50){
+				starX += 80;
+			} else {
+				cvs2.onmousedown = handleEndScreenMouseDown;
+				cvs2.onmousemove = handleEndScreenMouseMove;
+				clearInterval(id);
+			}
 		}
 		size = Math.ceil(((frame % 50)/50) * 36);
 		ctx2.font = size + "pt FontAwesome";
@@ -100,10 +111,10 @@ function drawEndMessage(x, y, ctx){
 	}
 
 	// Draw the retry and menu buttons.
-	xOffset = won ? 70 : 40;
+	xOffset = won ? 75 : 45;
 	yOffset = won ? 180 : 120;
 	drawButton("RETRY", x+xOffset, y+yOffset, false, ctx);
-	drawButton("MENU", x+xOffset+140, y+yOffset, false, ctx);
+	drawButton("MENU", x+xOffset+130, y+yOffset, false, ctx);
 }
 
 function drawButton(text, x, y, selected, ctx){
@@ -130,7 +141,7 @@ function handleEndScreenMouseMove(){
 
 	var newBtn = getSelectedButton();
 	if (newBtn != selectedButton){
-		var btnX = (newBtn == "RETRY" || selectedButton == "RETRY") ? (cvs1.width/2)-110 : (cvs1.width/2)+30,
+		var btnX = (newBtn == "RETRY" || selectedButton == "RETRY") ? (cvs1.width/2)-105 : (cvs1.width/2)+25,
 			btnY = won ? (cvs1.height/2)+50 : (cvs1.height/2)+20,
 			text = (newBtn == null) ? selectedButton : newBtn;
 		drawButton(text, btnX, btnY, (newBtn != null), ctx1);
@@ -148,7 +159,6 @@ function handleEndScreenMouseDown(){
 				levels[selectedLevel].starsGained = starsGained;
 			}
 		}
-
 
 		starsGained = 0;
 		frameNo = 0;
@@ -175,11 +185,11 @@ function handleEndScreenMouseDown(){
 }
 
 function getSelectedButton(){
-	var btnX = (cvs1.width/2)-110;
+	var btnX = (cvs1.width/2)-105;
 		btnY = won ? (cvs1.height/2)+50 : (cvs1.height/2)+20;
 
 	for (var i = 0; i < 2; i++){
-		btnX += (i * 140);
+		btnX += (i * 130);
 		if ((mousex > btnX) && (mousex < btnX+80) && (mousey > btnY) && (mousey < btnY+40)){
 			return (i == 0) ? "RETRY" : "MENU";
 		}

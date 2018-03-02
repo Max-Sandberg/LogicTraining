@@ -90,7 +90,7 @@ function updateGateOutput(gateIdx){
 		} else if (gate.type == gatesEnum.star){
 			if (newOutput == 1){
 				starsGained++;
-			} else {
+			} else if (oldOutput == 1){
 				starsGained--;
 			}
 		}
