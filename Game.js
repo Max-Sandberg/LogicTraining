@@ -324,36 +324,64 @@ function changeLockedGates(){
 		gate3 = Math.floor(Math.random()*6) + 1;
 	}
 
-	// Update the allowed gates and redraw the menu bar.
-	allowedGates = [gate1, gate2, gate3];
-	drawMenuBar();
+	var frame = -1,
+	 	xOffset = Math.round(cvs1.width / 2) + (26*SC),
+		yOffset = SC,
+		opacity,
+		id = setInterval(animateCountdown, 10);
 
-	// Display a "Gate change!" animation.
-	var frame = 0,
-		xOffset = Math.round(cvs1.width / 2) + (18*SC),
-		yOffset = SC;
-	var id = setInterval(animateGateChange, 10);
+	function animateCountdown(){
+		frame++;
+		if (won == undefined){
+			// Fill over whatever is already there.
+			ctx1.fillStyle = "#2a8958";
+			ctx1.fillRect(xOffset-(4*SC), yOffset, (8*SC), (4*SC));
+
+			if (frame != 300){
+				// Draw the number.
+				ctx1.textAlign = "center";
+				opacity = 1-(frame%100)/100;
+				ctx1.font = "italic " + (2*SC) + "pt Impact";
+				ctx1.fillStyle = "rgba(180, 214, 197, " + opacity + ")";
+				ctx1.fillText(3-Math.floor(frame/100), xOffset+2, yOffset+(3*SC)+2);
+				ctx1.fillStyle = "rgba(17, 55, 35, " + opacity + ")";
+				ctx1.fillText(3-Math.floor(frame/100), xOffset, yOffset+(3*SC));
+				ctx1.textAlign = "left";
+			}
+		}
+		if (frame == 300){
+			// Update the allowed gates and redraw the menu bar, then display the "Gate change!" animation.
+			clearInterval(id);
+			if (won == undefined){
+				allowedGates = [gate1, gate2, gate3];
+				drawMenuBar();
+			}
+			frame = -1;
+			id = setInterval(animateGateChange, 10);
+		}
+	}
 
 	function animateGateChange(){
-		// Clear area we want to draw in.
-		ctx1.clearRect(xOffset, yOffset, (16*SC), (4*SC));
+		frame++;
+		if (won == undefined){
+			// Fill over whatever is already there.
+			ctx1.fillStyle = "#2a8958";
+			ctx1.fillRect(xOffset-(10*SC), yOffset, (20*SC), (4*SC));
 
-		// Fill the background.
-		ctx1.beginPath();
-		ctx1.fillStyle = "#2a8958";
-		ctx1.rect(xOffset, yOffset, (16*SC), (4*SC));
-		ctx1.fill();
-		ctx1.closePath();
-
+			if (frame != 150){
+				// Draw "GATE CHANGE!".
+				ctx1.textAlign = "center";
+				opacity = (frame < 100) ? 1 : (150-frame)/50;
+				ctx1.font = "italic " + (2*SC) + "pt Impact";
+				ctx1.fillStyle = "rgba(180, 214, 197, " + opacity + ")";
+				ctx1.fillText("GATE CHANGE!", xOffset+2, yOffset + (3*SC) + 2);
+				ctx1.fillStyle = "rgba(17, 55, 35, " + opacity + ")";
+				ctx1.fillText("GATE CHANGE!", xOffset, yOffset + (3*SC));
+				ctx1.textAlign = "left";
+			}
+		}
 		if (frame == 150){
 			clearInterval(id);
-		} else {
-			ctx1.font = "italic " + (2*SC) + "pt Impact";
-			ctx1.fillStyle = (frame < 100) ? "#B4D6C5" : "rgba(180, 214, 197, " + (150-frame)/50 + ")";
-			ctx1.fillText("GATE CHANGE!", xOffset+2, yOffset + (3*SC) + 2);
-			ctx1.fillStyle = (frame < 100) ? "#113723" : "rgba(17, 55, 35, " + (150-frame)/50 + ")";
-			ctx1.fillText("GATE CHANGE!", xOffset, yOffset + (3*SC));
-			frame++;
 		}
 	}
 }
@@ -1544,7 +1572,7 @@ function showEndScreen(){
 	if (won && moves <= levels[selectedLevel].par){
 		starsGained++;
 	}
-	
+
 	// Animation to slowly fade the screen.
 	var frame = -1;
 	var id = setInterval(fadeScreen, 10);
@@ -1702,6 +1730,7 @@ function handleEndScreenMouseDown(){
 		frameNo = 0;
 		draggedGate = 0;
 		moves = 0;
+		won = undefined;
 		selectedGate = null;
 		ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 		ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
