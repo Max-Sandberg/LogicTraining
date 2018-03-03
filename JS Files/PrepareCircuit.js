@@ -2,6 +2,9 @@
 function prepareCircuits(){
 	for (var i = 0; i < circuits.length; i++){
 		findGatePositions(i);
+	}
+
+	for (var i = 0; i < circuits.length; i++){
 		findCircuitPosition(i);
 		findWirePositions(circuits[i]);
 		updateCircuitValues([i, 0, 0]);
@@ -10,15 +13,59 @@ function prepareCircuits(){
 }
 
 function findCircuitPosition(idx){
-	var y, circuit = circuits[idx];
-	circuit.startx = (idx == 0) ? cvs1.width + 50 : circuits[idx-1].endx + (8*SC);
+	var y, gap, circuit = circuits[idx];
+	circuit.startx = (idx == 0) ? cvs1.width + 50 :
+	 				 (circuits[idx-1].type != gatesEnum.star) ? circuits[idx-1].endx + (12*SC) :
+					 circuits[idx-2].endx + (12*SC);
 	// circuit.startx = (idx == 0) ? 0 : circuits[idx-1].endx + (8*SC);
 	circuit.endx = circuit.startx + circuit.width;
 	delete circuit.width;
-	do {
-		y = (6*SC) + Math.round((0.3+(0.4*Math.random()))*(cvs1.height-(6*SC))) - (10*SC) - 10;
+
+	var isStar = (circuit.type == gatesEnum.star),
+		oneBeforeStar = false,
+		twoBeforeStar = false,
+		afterStar = false;
+	if (idx+1 < circuits.length){
+		oneBeforeStar = (circuits[idx+1].type == gatesEnum.star);
 	}
-	while (idx != 0 && Math.abs(circuits[idx-1].starty - y) < (6*SC));
+	if (idx+2 < circuits.length){
+		twoBeforeStar = (circuits[idx+2].type == gatesEnum.star);
+	}
+	if (idx != 0){
+		afterStar = (circuits[idx-1].type == gatesEnum.star);
+	}
+
+	var count = 0;
+	if (twoBeforeStar){
+		do {
+			y = Math.round((0.25+(0.5*Math.round(Math.random())))*(cvs1.height-(6*SC)))-(4*SC)-10
+			gap = (idx != 0) ? Math.abs(circuits[idx-1].starty - y) : 1000;
+			count++;
+		}
+		while (gap < 6*SC && count<3000);
+		if (count>=3000){ console.log("1"); }
+	}
+	else if (oneBeforeStar && idx != 0){
+		y = circuits[idx-1].starty;
+	}
+	else if ((oneBeforeStar && idx == 0) || isStar){
+		do {
+			y = Math.round((0.25+(0.5*Math.round(Math.random())))*(cvs1.height-(6*SC)))-(4*SC)-10;
+			count++;
+		}
+		while (isStar && y == circuits[idx-1].starty && count<3000);
+		if (count>=3000){ console.log("2 " + oneBeforeStar + " " + isStar); }
+	}
+	else {
+		do {
+			y = Math.round((0.25+(0.5*Math.random()))*(cvs1.height-(6*SC)))-(4*SC)-10;
+			gap = (idx != 0) ? Math.abs(circuits[idx-1].starty - y) : 1000;
+			count++;
+		}
+		while (((afterStar && gap < 20*SC) || (!afterStar && gap < 8*SC)) && count<3000);
+		if (count>=3000){ console.log("3"); }
+	}
+
 	circuit.starty = y;
 }
 
@@ -49,6 +96,9 @@ function findGatePositions(circuitIdx){
 				}
 			}
 			gate.idx = [circuitIdx, i, j];
+			if (gate.type == gatesEnum.star || gate.type == gatesEnum.bulb){
+				circuit.type = gate.type;
+			}
 		}
 	}
 	circuit.width = cols.length * 8 * SC;

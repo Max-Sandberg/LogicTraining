@@ -67,7 +67,14 @@ function drawGameArea(ctx){
 
 	// Move and draw the circuits.
 	for (var i = 0; i < circuits.length; i++){
-		if (!pause){ circuits[i].startx--; }
+		if (!pause){
+			// Normal circuits move 1 pixel, star circuits move two pixels.
+			if (circuits[i].type == gatesEnum.star && circuits[i].startx < cvs1.width){
+				circuits[i].startx -= 1.5;
+			} else {
+				circuits[i].startx -= 1;
+			}
+		}
 		drawCircuit(circuits[i], ctx);
 	}
 

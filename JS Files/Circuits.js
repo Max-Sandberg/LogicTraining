@@ -50,7 +50,7 @@ var levels = [{
 					type : "gate",
 					gate : [0, 0],
 				}],
-				type : gatesEnum.star,
+				type : gatesEnum.bulb,
 				fixed : true,
 				nextGates : []
 			}]
@@ -116,7 +116,7 @@ var levels = [{
 					type : "gate",
 					gate : [1, 0],
 				}],
-				type : gatesEnum.bulb,
+				type : gatesEnum.star,
 				fixed : true,
 				nextGates : []
 			}]
