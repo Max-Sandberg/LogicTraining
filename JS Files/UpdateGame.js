@@ -56,6 +56,7 @@ function checkWinOrLose(){
 		cvs2.onmousedown = undefined;
 		cvs2.onmouseup = undefined;
 		cvs2.onmousemove = undefined;
+		document.onkeypress = undefined;
 
 		won = (gameState == "won");
 		showEndScreen();

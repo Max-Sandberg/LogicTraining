@@ -37,6 +37,13 @@ function drawMenuBar(){
 	drawXOR(x+(20*SC), y, 0, 0, 0, ctx1);
 	drawXNOR(x+(25*SC), y, 0, 0, 0, ctx1);
 
+	// Draw the hotkey numbers.
+	for (var i = 0; i < 6; i++){
+		ctx1.font = "8pt Arial";
+		ctx1.fillStyle = "#000000";
+		ctx1.fillText(i+1, x+(i*5*SC)+(4*SC)-10, y+(4*SC)-4);
+	}
+
 	// Draw a partially transparent grey box and a lock symbol on any locked gates.
 	for (var i = 1; i < 7; i++){
 		if (!allowedGates.includes(i)){

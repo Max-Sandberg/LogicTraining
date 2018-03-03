@@ -29,6 +29,7 @@ function startGame(level) {
 	findLevelPar();
 	moves = 0;
 	drawMoves();
+	pause = false;
 	drawIntervalId = setInterval(drawGameArea, 10, ctx1);
 	updateIntervalId = setInterval(updateGameArea, 50);
 	if (enableGateChanges){
@@ -37,7 +38,21 @@ function startGame(level) {
 
 	document.onkeypress = function (e) {
 		e = e || window.event;
-		pause = !pause;
+		var key = event.which || event.keyCode;  // Use either which or keyCode, depending on browser support
+		if (String.fromCharCode(key) == " "){
+			pause = !pause;
+		} else {
+			var gate = parseInt(String.fromCharCode(key));
+			if (gate > 0 && gate < 7){
+				if (allowedGates.includes(gate)){
+					draggedGate = gate;
+					if (drawDraggedIntervalId == undefined && updateSelectedIntervalId == undefined){
+						drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
+						updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
+					}
+				}
+			}
+		}
 	};
 }
 
@@ -289,6 +304,7 @@ function checkWinOrLose(){
 		cvs2.onmousedown = undefined;
 		cvs2.onmouseup = undefined;
 		cvs2.onmousemove = undefined;
+		document.onkeypress = undefined;
 
 		won = (gameState == "won");
 		showEndScreen();
@@ -440,6 +456,13 @@ function drawMenuBar(){
 	drawNOR(x+(15*SC), y, 0, 0, 0, ctx1);
 	drawXOR(x+(20*SC), y, 0, 0, 0, ctx1);
 	drawXNOR(x+(25*SC), y, 0, 0, 0, ctx1);
+
+	// Draw the hotkey numbers.
+	for (var i = 0; i < 6; i++){
+		ctx1.font = "8pt Arial";
+		ctx1.fillStyle = "#000000";
+		ctx1.fillText(i+1, x+(i*5*SC)+(4*SC)-10, y+(4*SC)-4);
+	}
 
 	// Draw a partially transparent grey box and a lock symbol on any locked gates.
 	for (var i = 1; i < 7; i++){
@@ -1508,29 +1531,33 @@ function drawStar(x, y, live, ctx){
 //#endregion
 // Checks if the user clicked on a gate in the menu bar, and if so, set draggedGate to that gate.
 function handleMouseDown(){
-	draggedGate = 0;
 	updateSelectedGate();
 
-	// See if the mouse position is in the boundaries of one of the gates in the menu bar.
-	if ((mousey > SC) && (mousey < (5*SC))){
-		var startX = (cvs1.width/2) - (14.5*SC);
-		for (var i = 1; i < 7; i++){
-			if (allowedGates.includes(i) && (mousex > startX+((i-1)*5*SC)) && (mousex < startX+((i-1)*5*SC)+(4*SC))){
-				// Sets draggedGate to the selected gate, and puts drawDraggedGate on an interval, so that it can be redrawn to snap to nearby gates even if the mouse doesn't move.
-				draggedGate = i;
+	if (draggedGate != 0){
+		// Player is already holding a gate without holding the mouse down, i.e. they used a hotkey.
+		handleMouseUp();
+	} else {
+		// See if the mouse position is in the boundaries of one of the gates in the menu bar.
+		if ((mousey > SC) && (mousey < (5*SC))){
+			var startX = (cvs1.width/2) - (14.5*SC);
+			for (var i = 1; i < 7; i++){
+				if (allowedGates.includes(i) && (mousex > startX+((i-1)*5*SC)) && (mousex < startX+((i-1)*5*SC)+(4*SC))){
+					// Sets draggedGate to the selected gate, and puts drawDraggedGate on an interval, so that it can be redrawn to snap to nearby gates even if the mouse doesn't move.
+					draggedGate = i;
+					drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
+					updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
+				}
+			}
+		} else {
+			var gate = getSelectedGate(mousex, mousey, 0);
+			if (gate != null){
+				// If the user clicked and dragged a non-fixed gate in the circuit, remove that gate from the circuit.
+				draggedGate = gate.type;
+				gate.type = 0;
+				updateCircuitValues(gate.idx);
 				drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
 				updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
 			}
-		}
-	} else {
-		var gate = getSelectedGate(mousex, mousey, 0);
-		if (gate != null){
-			// If the user clicked and dragged a non-fixed gate in the circuit, remove that gate from the circuit.
-			draggedGate = gate.type;
-			gate.type = 0;
-			updateCircuitValues(gate.idx);
-			drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
-			updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
 		}
 	}
 }
@@ -1558,6 +1585,7 @@ function handleMouseUp(){
 			}
 		}
 	}
+	selectedGate = null;
 }
 
 function handleMouseMove(){

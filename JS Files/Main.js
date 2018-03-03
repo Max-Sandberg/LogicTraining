@@ -29,6 +29,7 @@ function startGame(level) {
 	findLevelPar();
 	moves = 0;
 	drawMoves();
+	pause = false;
 	drawIntervalId = setInterval(drawGameArea, 10, ctx1);
 	updateIntervalId = setInterval(updateGameArea, 50);
 	if (enableGateChanges){
@@ -37,7 +38,21 @@ function startGame(level) {
 
 	document.onkeypress = function (e) {
 		e = e || window.event;
-		pause = !pause;
+		var key = event.which || event.keyCode;  // Use either which or keyCode, depending on browser support
+		if (String.fromCharCode(key) == " "){
+			pause = !pause;
+		} else {
+			var gate = parseInt(String.fromCharCode(key));
+			if (gate > 0 && gate < 7){
+				if (allowedGates.includes(gate)){
+					draggedGate = gate;
+					if (drawDraggedIntervalId == undefined && updateSelectedIntervalId == undefined){
+						drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
+						updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
+					}
+				}
+			}
+		}
 	};
 }
 
