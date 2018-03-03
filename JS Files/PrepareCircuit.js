@@ -35,35 +35,29 @@ function findCircuitPosition(idx){
 		afterStar = (circuits[idx-1].type == gatesEnum.star);
 	}
 
-	var count = 0;
+	var gameAreaHeight = cvs1.height - (6*SC) - 60;
 	if (twoBeforeStar){
 		do {
-			y = Math.round((0.25+(0.5*Math.round(Math.random())))*(cvs1.height-(6*SC)))-(4*SC)-10
+			y = Math.round((0.25+(0.5*Math.round(Math.random())))*gameAreaHeight)-(4*SC);
 			gap = (idx != 0) ? Math.abs(circuits[idx-1].starty - y) : 1000;
-			count++;
 		}
-		while (gap < 6*SC && count<3000);
-		if (count>=3000){ console.log("1"); }
+		while (gap < 6*SC);
 	}
 	else if (oneBeforeStar && idx != 0){
 		y = circuits[idx-1].starty;
 	}
 	else if ((oneBeforeStar && idx == 0) || isStar){
 		do {
-			y = Math.round((0.25+(0.5*Math.round(Math.random())))*(cvs1.height-(6*SC)))-(4*SC)-10;
-			count++;
+			y = Math.round((0.25+(0.5*Math.round(Math.random())))*gameAreaHeight)-(4*SC);
 		}
-		while (isStar && y == circuits[idx-1].starty && count<3000);
-		if (count>=3000){ console.log("2 " + oneBeforeStar + " " + isStar); }
+		while (isStar && y == circuits[idx-1].starty);
 	}
 	else {
 		do {
-			y = Math.round((0.25+(0.5*Math.random()))*(cvs1.height-(6*SC)))-(4*SC)-10;
+			y = Math.round((0.25+(0.5*Math.random()))*gameAreaHeight)-(4*SC);
 			gap = (idx != 0) ? Math.abs(circuits[idx-1].starty - y) : 1000;
-			count++;
 		}
-		while (((afterStar && gap < 20*SC) || (!afterStar && gap < 8*SC)) && count<3000);
-		if (count>=3000){ console.log("3"); }
+		while ((afterStar && gap < 15*SC) || (!afterStar && gap < 8*SC));
 	}
 
 	circuit.starty = y;
