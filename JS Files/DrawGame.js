@@ -50,10 +50,7 @@ function drawMenuBar(){
 			// Draw transparent grey box.
 			var startx = x+((i-1)*5*SC);
 			ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
-			ctx1.beginPath();
-			ctx1.rect(startx, y, 4*SC, 4*SC);
-			ctx1.fill();
-			ctx1.closePath();
+			ctx1.fillRect(startx, y, 4*SC, 4*SC);
 
 			// Draw lock icon.
 			ctx1.font = 2*SC + "px FontAwesome";
@@ -64,6 +61,30 @@ function drawMenuBar(){
 			ctx1.fillText("\uf023", startx+(1.3*SC), y+(2.65*SC));
 		}
 	}
+
+	// Draw the menu button.
+	ctx1.font = "16pt Impact";
+	ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx1.fillText("MENU", 10, 28);
+	var highlightMenu = false;
+	menuHoverIntervalId = setInterval(function(){
+		if ((mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && !highlightMenu){
+			highlightMenu = true;
+			ctx1.fillStyle="#2a8958";
+			ctx1.fillRect(10, 10, 50, 18);
+			ctx1.fillStyle = "rgba(0, 0, 0, 1)";
+			ctx1.font = "16pt Impact";
+			ctx1.fillText("MENU", 10, 28);
+		}
+		else if (!(mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && highlightMenu){
+			highlightMenu = false;
+			ctx1.fillStyle="#2a8958";
+			ctx1.fillRect(10, 10, 50, 18);
+			ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
+			ctx1.font = "16pt Impact";
+			ctx1.fillText("MENU", 10, 28);
+		}
+	}, 50);
 }
 
 // Draws and moves all the circuits.

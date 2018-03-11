@@ -1,3 +1,33 @@
+var tutorial = {
+	circuits: [{
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}]
+}
+
 var levels = [{
 	unlocked : true,
 	starsGained : 0,

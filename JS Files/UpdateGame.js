@@ -42,25 +42,42 @@ function checkWinOrLose(){
 
 	// If the game is won or lost, stop the game and display the relevant message.
 	if (gameState == "won" || gameState == "lost"){
-		// Cancel all the intervals and handlers
-		clearInterval(updateSelectedIntervalId);
-		clearInterval(drawDraggedIntervalId);
-		clearInterval(drawIntervalId);
-		clearInterval(updateIntervalId);
-		clearInterval(gateChangeIntervalId);
-		updateSelectedIntervalId = undefined;
-		drawDraggedIntervalId = undefined;
-		drawIntervalId = undefined;
-		updateIntervalId = undefined;
-		gateChangeIntervalId = undefined;
-		cvs2.onmousedown = undefined;
-		cvs2.onmouseup = undefined;
-		cvs2.onmousemove = undefined;
-		document.onkeypress = undefined;
-
+		clearIntervals();
 		won = (gameState == "won");
 		showEndScreen();
 	}
+}
+
+function clearIntervals(){
+	// Cancel all the intervals and handlers
+	clearInterval(updateSelectedIntervalId);
+	clearInterval(drawDraggedIntervalId);
+	clearInterval(drawIntervalId);
+	clearInterval(updateIntervalId);
+	clearInterval(gateChangeIntervalId);
+	clearInterval(menuHoverIntervalId);
+	updateSelectedIntervalId = undefined;
+	drawDraggedIntervalId = undefined;
+	drawIntervalId = undefined;
+	updateIntervalId = undefined;
+	gateChangeIntervalId = undefined;
+	menuHoverIntervalId = undefined;
+	cvs2.onmousedown = undefined;
+	cvs2.onmouseup = undefined;
+	cvs2.onmousemove = undefined;
+	document.onkeypress = undefined;
+}
+
+function resetGameState(){
+	starsGained = 0;
+	frameNo = 0;
+	draggedGate = 0;
+	moves = 0;
+	won = undefined;
+	selectedGate = null;
+	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
+	ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
+	ctx1.textAlign = "left";
 }
 
 function updateSelectedGate(){

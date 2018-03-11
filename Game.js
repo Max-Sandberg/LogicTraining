@@ -7,7 +7,7 @@ var enableGateChanges;
 var draggedGate = 0;
 var selectedGate = null;
 var starsGained = 0;
-var drawDraggedIntervalId, updateSelectedIntervalId, drawIntervalId, updateIntervalId, gateChangeIntervalId;
+var drawDraggedIntervalId, updateSelectedIntervalId, drawIntervalId, updateIntervalId, gateChangeIntervalId, menuHoverIntervalId;
 var mousex, mousey;
 var frameNo = 0;
 var moves = 0;
@@ -98,7 +98,7 @@ function loadFontAwesome(callback,failAfterMS){
 }
 var selectedLevel = -1;
 
-function openMenu(){
+function prepareGame(){
 	// Create the main canvas
 	cvs1 = document.createElement("canvas");
 	ctx1 = cvs1.getContext("2d");
@@ -113,8 +113,6 @@ function openMenu(){
 	cvs2.width = window.innerWidth-15;
 	cvs2.height = window.innerHeight-15;
 	cvs2.style = "position: absolute; left: 5; top: 5; z-index: 1;";
-	cvs2.onmousedown = handleMenuMouseDown;
-	cvs2.onmousemove = handleMenuMouseMove;
 	document.body.insertBefore(cvs2, document.body.childNodes[0]);
 
 	SC = Math.round((cvs1.height/50)/5) * 5;
@@ -143,17 +141,20 @@ function drawMenu(ctx){
 	ctx.fillText("Logic Training", (cvs1.width/2) - (11.5*SC), (cvs1.height/2) - (6*SC));
 
 	drawLevels(ctx);
+
+	cvs2.onmousedown = handleMenuMouseDown;
+	cvs2.onmousemove = handleMenuMouseMove;
 }
 
 // Draws the icons for each level.
 function drawLevels(ctx){
 	var startx, width, x, y, selected;
 	y = (cvs1.height/2) - (2*SC);
-	width = (levels.length*6*SC) + ((levels.length-1)*3*SC);
+	width = ((levels.length+1)*6*SC) + (levels.length*3*SC);
 	startx = Math.round((cvs1.width/2) - (width/2));
 
-	for (var i = 0; i < levels.length; i++){
-		selected = (levels[i].unlocked && selectedLevel == i);
+	for (var i = 0; i < levels.length + 1; i++){
+		selected = ((i == 0 || levels[i-1].unlocked) && selectedLevel == i);
 
 		// Draw rectangle around the level.
 		x = startx + (i*9*SC);
@@ -167,48 +168,48 @@ function drawLevels(ctx){
 		ctx.lineWidth = 1;
 		ctx.closePath();
 
-		// Write the "LEVEL" text.
-		ctx.beginPath();
-		ctx.font = (0.8*SC) + "pt Impact";
-		ctx.fillStyle = "#000000";
-		ctx.fillText("LEVEL", x+(1.8*SC), y+(1.5*SC));
-		ctx.closePath();
+		if (i == 0){
+			// Draw the tutorial button
+			ctx.font = SC + "pt Impact";
+			ctx.textAlign = "center";
+			ctx.fillStyle = "#000000";
+			ctx.fillText("TUTORIAL", x+(3*SC), y+(3*SC)+(0.4*SC));
+			ctx.textAlign = "left";
+		} else {
+			// Write the "LEVEL" text.
+			ctx.font = (0.8*SC) + "pt Impact";
+			ctx.fillStyle = "#000000";
+			ctx.fillText("LEVEL", x+(1.8*SC), y+(1.5*SC));
 
-		// Draw the level number.
-		ctx.beginPath();
-		ctx.font = (2*SC) + "pt Impact";
-		ctx.fillStyle = "#000000";
-		ctx.fillText(i+1, x+(2.3*SC), y+(4.2*SC));
-		ctx.closePath();
+			// Draw the level number.
+			ctx.font = (2*SC) + "pt Impact";
+			ctx.fillStyle = "#000000";
+			ctx.fillText(i, x+(2.3*SC), y+(4.2*SC));
 
-		// Draw the stars, filling in the ones which have been earned.
-		ctx.beginPath();
-		ctx.font = (0.8*SC) + "pt FontAwesome";
-		for (var j = 0; j < 3; j++){
-			if (j < levels[i].starsGained){
-				ctx.fillStyle = "#ffff00";
-				ctx.fillText("\uF005", x+(1.2*SC)+(j*25), y+(5.5*SC));
+			// Draw the stars, filling in the ones which have been earned.
+			ctx.font = (0.8*SC) + "pt FontAwesome";
+			for (var j = 0; j < 3; j++){
+				if (j < levels[i-1].starsGained){
+					ctx.fillStyle = "#ffff00";
+					ctx.fillText("\uF005", x+(1.2*SC)+(j*25), y+(5.5*SC));
+				}
+				ctx.strokeStyle = "#000000";
+				ctx.strokeText("\uF005", x+(1.2*SC)+(j*25), y+(5.5*SC));
 			}
-			ctx.strokeStyle = "#000000";
-			ctx.strokeText("\uF005", x+(1.2*SC)+(j*25), y+(5.5*SC));
-		}
-		ctx.closePath();
 
-		if (!levels[i].unlocked){
-			// Draw transparent grey box.
-			ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-			ctx.beginPath();
-			ctx.rect(x, y, 6*SC, 6*SC);
-			ctx.fill();
-			ctx.closePath();
+			if (!levels[i-1].unlocked){
+				// Draw transparent grey box.
+				ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+				ctx.fillRect(x, y, 6*SC, 6*SC);
 
-			// Draw lock icon.
-			ctx.font = 1.5*SC + "px FontAwesome";
-			ctx.fillStyle = "#262626";
-			ctx.fillText("\uf023", x+8, y+(1.5*SC)+2);
-			ctx.font = 1.5*SC + "px FontAwesome";
-			ctx.fillStyle = "#f2f2f2";
-			ctx.fillText("\uf023", x+6, y+(1.5*SC));
+				// Draw lock icon.
+				ctx.font = 1.5*SC + "px FontAwesome";
+				ctx.fillStyle = "#262626";
+				ctx.fillText("\uf023", x+8, y+(1.5*SC)+2);
+				ctx.font = 1.5*SC + "px FontAwesome";
+				ctx.fillStyle = "#f2f2f2";
+				ctx.fillText("\uf023", x+6, y+(1.5*SC));
+			}
 		}
 	}
 }
@@ -225,7 +226,10 @@ function handleMenuMouseMove(){
 }
 
 function handleMenuMouseDown(){
-	if (selectedLevel != -1){
+	if (selectedLevel == 0){
+		startTutorial();
+	} else if (selectedLevel != -1){
+		selectedLevel--;
 		startGame(selectedLevel);
 	}
 }
@@ -234,7 +238,7 @@ function handleMenuMouseDown(){
 function getSelectedLevel(){
 	if ((mousey > (cvs1.height/2)-(2*SC)) && (mousey < (cvs1.height/2)+(4*SC))){
 		// In y range of levels
-		var width = (levels.length*6*SC) + ((levels.length-1)*3*SC),
+			var width = ((levels.length+1)*6*SC) + (levels.length*3*SC),
 			startx = Math.round((cvs1.width/2)-(width/2));
 		for (var i = 0; i < levels.length; i++){
 			if ((mousex > startx+(i*9*SC)) && (mousex < startx+(i*9*SC)+(6*SC))){
@@ -290,25 +294,42 @@ function checkWinOrLose(){
 
 	// If the game is won or lost, stop the game and display the relevant message.
 	if (gameState == "won" || gameState == "lost"){
-		// Cancel all the intervals and handlers
-		clearInterval(updateSelectedIntervalId);
-		clearInterval(drawDraggedIntervalId);
-		clearInterval(drawIntervalId);
-		clearInterval(updateIntervalId);
-		clearInterval(gateChangeIntervalId);
-		updateSelectedIntervalId = undefined;
-		drawDraggedIntervalId = undefined;
-		drawIntervalId = undefined;
-		updateIntervalId = undefined;
-		gateChangeIntervalId = undefined;
-		cvs2.onmousedown = undefined;
-		cvs2.onmouseup = undefined;
-		cvs2.onmousemove = undefined;
-		document.onkeypress = undefined;
-
+		clearIntervals();
 		won = (gameState == "won");
 		showEndScreen();
 	}
+}
+
+function clearIntervals(){
+	// Cancel all the intervals and handlers
+	clearInterval(updateSelectedIntervalId);
+	clearInterval(drawDraggedIntervalId);
+	clearInterval(drawIntervalId);
+	clearInterval(updateIntervalId);
+	clearInterval(gateChangeIntervalId);
+	clearInterval(menuHoverIntervalId);
+	updateSelectedIntervalId = undefined;
+	drawDraggedIntervalId = undefined;
+	drawIntervalId = undefined;
+	updateIntervalId = undefined;
+	gateChangeIntervalId = undefined;
+	menuHoverIntervalId = undefined;
+	cvs2.onmousedown = undefined;
+	cvs2.onmouseup = undefined;
+	cvs2.onmousemove = undefined;
+	document.onkeypress = undefined;
+}
+
+function resetGameState(){
+	starsGained = 0;
+	frameNo = 0;
+	draggedGate = 0;
+	moves = 0;
+	won = undefined;
+	selectedGate = null;
+	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
+	ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
+	ctx1.textAlign = "left";
 }
 
 function updateSelectedGate(){
@@ -470,10 +491,7 @@ function drawMenuBar(){
 			// Draw transparent grey box.
 			var startx = x+((i-1)*5*SC);
 			ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
-			ctx1.beginPath();
-			ctx1.rect(startx, y, 4*SC, 4*SC);
-			ctx1.fill();
-			ctx1.closePath();
+			ctx1.fillRect(startx, y, 4*SC, 4*SC);
 
 			// Draw lock icon.
 			ctx1.font = 2*SC + "px FontAwesome";
@@ -484,6 +502,30 @@ function drawMenuBar(){
 			ctx1.fillText("\uf023", startx+(1.3*SC), y+(2.65*SC));
 		}
 	}
+
+	// Draw the menu button.
+	ctx1.font = "16pt Impact";
+	ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx1.fillText("MENU", 10, 28);
+	var highlightMenu = false;
+	menuHoverIntervalId = setInterval(function(){
+		if ((mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && !highlightMenu){
+			highlightMenu = true;
+			ctx1.fillStyle="#2a8958";
+			ctx1.fillRect(10, 10, 50, 18);
+			ctx1.fillStyle = "rgba(0, 0, 0, 1)";
+			ctx1.font = "16pt Impact";
+			ctx1.fillText("MENU", 10, 28);
+		}
+		else if (!(mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && highlightMenu){
+			highlightMenu = false;
+			ctx1.fillStyle="#2a8958";
+			ctx1.fillRect(10, 10, 50, 18);
+			ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
+			ctx1.font = "16pt Impact";
+			ctx1.fillText("MENU", 10, 28);
+		}
+	}, 50);
 }
 
 // Draws and moves all the circuits.
@@ -1531,6 +1573,14 @@ function drawStar(x, y, live, ctx){
 //#endregion
 // Checks if the user clicked on a gate in the menu bar, and if so, set draggedGate to that gate.
 function handleMouseDown(){
+	if (mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28){
+		// Player clicked the menu button, so end the game.
+		clearIntervals();
+		resetGameState();
+		selectedLevel = -1;
+		drawMenu(ctx1);
+	}
+
 	updateSelectedGate();
 
 	if (draggedGate != 0){
@@ -1754,15 +1804,7 @@ function handleEndScreenMouseDown(){
 			}
 		}
 
-		starsGained = 0;
-		frameNo = 0;
-		draggedGate = 0;
-		moves = 0;
-		won = undefined;
-		selectedGate = null;
-		ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
-		ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
-		ctx1.textAlign = "left";
+		resetGameState();
 
 		if (selectedButton == "RETRY"){
 			selectedButton = null;
@@ -1791,6 +1833,36 @@ function getSelectedButton(){
 	}
 	return null;
 }
+var tutorial = {
+	circuits: [{
+		gateSections : [
+			[{
+				inputs : [{
+					type : "signal",
+					val : 1
+				}, {
+					type : "signal",
+					val : 1
+				}],
+				type : gatesEnum.blank,
+				fixed : false,
+				nextGates : [{
+					gateIdx : [1, 0],
+					inputs : [0]
+				}]
+			}], [{
+				inputs : [{
+					type : "gate",
+					gate : [0, 0],
+				}],
+				type : gatesEnum.bulb,
+				fixed : true,
+				nextGates : []
+			}]
+		]
+	}]
+}
+
 var levels = [{
 	unlocked : true,
 	starsGained : 0,

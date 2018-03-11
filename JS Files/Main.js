@@ -7,7 +7,7 @@ var enableGateChanges;
 var draggedGate = 0;
 var selectedGate = null;
 var starsGained = 0;
-var drawDraggedIntervalId, updateSelectedIntervalId, drawIntervalId, updateIntervalId, gateChangeIntervalId;
+var drawDraggedIntervalId, updateSelectedIntervalId, drawIntervalId, updateIntervalId, gateChangeIntervalId, menuHoverIntervalId;
 var mousex, mousey;
 var frameNo = 0;
 var moves = 0;

@@ -160,15 +160,7 @@ function handleEndScreenMouseDown(){
 			}
 		}
 
-		starsGained = 0;
-		frameNo = 0;
-		draggedGate = 0;
-		moves = 0;
-		won = undefined;
-		selectedGate = null;
-		ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
-		ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
-		ctx1.textAlign = "left";
+		resetGameState();
 
 		if (selectedButton == "RETRY"){
 			selectedButton = null;

@@ -1,5 +1,13 @@
 // Checks if the user clicked on a gate in the menu bar, and if so, set draggedGate to that gate.
 function handleMouseDown(){
+	if (mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28){
+		// Player clicked the menu button, so end the game.
+		clearIntervals();
+		resetGameState();
+		selectedLevel = -1;
+		drawMenu(ctx1);
+	}
+
 	updateSelectedGate();
 
 	if (draggedGate != 0){
