@@ -107,12 +107,9 @@ function drawGameArea(ctx){
 	}
 
 	// Draw box around game area.
-	ctx1.beginPath();
 	ctx1.lineWidth = 1;
-	ctx1.strokeStyle="#000000";
-	ctx1.rect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-2);
-	ctx1.stroke();
-	ctx1.closePath();
+	ctx1.strokeStyle = "#000000";
+	ctx1.strokeRect(1, (SC*6)+1, cvs1.width-2, cvs1.height-(SC*6)-3);
 }
 
 // Draws the whole circuit.
@@ -182,5 +179,12 @@ function drawMoves(){
 
 // Clears the game area of all drawings
 function clearGameArea(){
-	ctx1.clearRect(2, (SC*6), cvs1.width-4, cvs1.height-(SC*10));
+	for (var i = 0; i < circuits.length; i++){
+		var startx = Math.max(circuits[i].startx, 1),
+			endx = Math.min(circuits[i].endx, cvs1.width-1),
+			starty = circuits[i].starty;
+		if (startx < cvs1.width && endx > 1){
+			ctx1.clearRect(startx, starty+(3*SC), endx-startx, (16*SC));
+		}
+	}
 }

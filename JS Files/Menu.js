@@ -52,11 +52,11 @@ function drawMenu(ctx){
 function drawLevels(ctx){
 	var startx, width, x, y, selected;
 	y = (cvs1.height/2) - (2*SC);
-	width = ((levels.length+1)*6*SC) + (levels.length*3*SC);
+	width = (levels.length*6*SC) + ((levels.length-1)*3*SC);
 	startx = Math.round((cvs1.width/2) - (width/2));
 
-	for (var i = 0; i < levels.length + 1; i++){
-		selected = ((i == 0 || levels[i-1].unlocked) && selectedLevel == i);
+	for (var i = 0; i < levels.length; i++){
+		selected = (levels[i].unlocked && selectedLevel == i);
 
 		// Draw rectangle around the level.
 		x = startx + (i*9*SC);
@@ -91,7 +91,7 @@ function drawLevels(ctx){
 			// Draw the stars, filling in the ones which have been earned.
 			ctx.font = (0.8*SC) + "pt FontAwesome";
 			for (var j = 0; j < 3; j++){
-				if (j < levels[i-1].starsGained){
+				if (j < levels[i].starsGained){
 					ctx.fillStyle = "#ffff00";
 					ctx.fillText("\uF005", x+(1.2*SC)+(j*25), y+(5.5*SC));
 				}
@@ -99,7 +99,7 @@ function drawLevels(ctx){
 				ctx.strokeText("\uF005", x+(1.2*SC)+(j*25), y+(5.5*SC));
 			}
 
-			if (!levels[i-1].unlocked){
+			if (!levels[i].unlocked){
 				// Draw transparent grey box.
 				ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
 				ctx.fillRect(x, y, 6*SC, 6*SC);
@@ -131,7 +131,6 @@ function handleMenuMouseDown(){
 	if (selectedLevel == 0){
 		startTutorial();
 	} else if (selectedLevel != -1){
-		selectedLevel--;
 		startGame(selectedLevel);
 	}
 }
@@ -140,7 +139,7 @@ function handleMenuMouseDown(){
 function getSelectedLevel(){
 	if ((mousey > (cvs1.height/2)-(2*SC)) && (mousey < (cvs1.height/2)+(4*SC))){
 		// In y range of levels
-			var width = ((levels.length+1)*6*SC) + (levels.length*3*SC),
+			var width = (levels.length*6*SC) + ((levels.length-1)*3*SC),
 			startx = Math.round((cvs1.width/2)-(width/2));
 		for (var i = 0; i < levels.length; i++){
 			if ((mousex > startx+(i*9*SC)) && (mousex < startx+(i*9*SC)+(6*SC))){
