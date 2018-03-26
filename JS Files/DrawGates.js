@@ -20,31 +20,21 @@ function drawGates(circuit, ctx){
 
 // Draws a logic gate with a dotted line box around it.
 function drawGate(x, y, type, inputs, output, fixed, ctx) {
-	ctx.beginPath();
+	// Draw the box around the gate.
 	if (fixed){
-		ctx.strokeStyle = "#666666";
-		ctx.lineWidth = 2;
-		ctx.fillStyle = "#e6e6e6";
+		drawFixedBox(x, y, ctx);
 	} else {
-		ctx.strokeStyle = "#000000";
-		ctx.setLineDash([5, 3]);
+		drawDottedBox(x, y, ctx);
 	}
-	ctx.rect(x, y, 4*SC, 4*SC);
-	ctx.stroke();
-	if (fixed){
-		ctx.fill();
-	}
-	ctx.lineWidth = 1;
-	ctx.setLineDash([]);
-	ctx.strokeStyle="#000000";
-	ctx.closePath();
 
+	// Get the inputs.
 	var input1, input2;
 	input1 = inputs[0].val;
 	if (inputs.length > 1){
 		input2 = inputs[1].val;
 	}
 
+	// Draw the actual gate inside the box.
 	switch (type){
 		case gatesEnum.and:
 			drawAND(x, y, input1, input2, output, ctx);
@@ -71,6 +61,23 @@ function drawGate(x, y, type, inputs, output, fixed, ctx) {
 			drawStar(x, y, input1, ctx);
 			break;
 	}
+}
+
+function drawFixedBox(x, y, ctx){
+	ctx.strokeStyle = "#666666";
+	ctx.fillStyle = "#DADADA";
+	ctx.lineWidth = 1;
+	ctx.fillRect(x+0.5, y+0.5, 4*SC, 4*SC);
+	ctx.strokeRect(x+0.5, y+0.5, 4*SC, 4*SC);
+	ctx.strokeStyle = "#000000";
+}
+
+function drawDottedBox(x, y, ctx){
+	ctx.strokeStyle = "#000000";
+	ctx.setLineDash([5, 3]);
+	ctx.lineWidth = 1;
+	ctx.strokeRect(x+0.5, y+0.5, 4*SC, 4*SC);
+	ctx.setLineDash([]);
 }
 
 // Draws the currently selected gate at the position of the mouse cursor, or snapped to a nearby gate.

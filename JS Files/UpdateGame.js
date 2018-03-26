@@ -42,9 +42,14 @@ function checkWinOrLose(){
 
 	// If the game is won or lost, stop the game and display the relevant message.
 	if (gameState == "won" || gameState == "lost"){
-		clearIntervals();
-		won = (gameState == "won");
-		showEndScreen();
+		if (selectedLevel != 0 || gameState == "lost"){
+			clearIntervals();
+			won = (gameState == "won");
+			showEndScreen();
+		} else {
+			pause = true;
+			handleTestCircuit(won);
+		}
 	}
 }
 

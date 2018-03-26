@@ -1,14 +1,14 @@
 // Draws the menu bar at the top of the screen.
 function drawMenuBar(){
 	// Clear the menu area.
-	ctx1.clearRect(1, 1, cvs1.width-2, (6*SC));
+	ctx1.clearRect(0, 0, cvs1.width, (6*SC));
 
 	// Draw outer box.
 	ctx1.beginPath();
 	ctx1.lineWidth = 2;
 	ctx1.strokeStyle = "#000000";
 	ctx1.fillStyle="#2a8958";
-	ctx1.rect(1, 1, cvs1.width-2, (SC*6));
+	ctx1.rect(1, 1, cvs1.width-2, (SC*6)-1);
 	ctx1.fill();
 	ctx1.stroke();
 	ctx1.closePath();
@@ -68,6 +68,12 @@ function drawMenuBar(){
 	ctx1.fillText("MENU", 10, 28);
 	var highlightMenu = false;
 	menuHoverIntervalId = setInterval(function(){
+		// Clear this interval if we go back to the menu.
+		if (selectedLevel == -1){
+			clearInterval(menuHoverIntervalId);
+			menuHoverIntervalId = undefined;
+		}
+		// Highlight or un-highlight the button.
 		if ((mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && !highlightMenu){
 			highlightMenu = true;
 			ctx1.fillStyle="#2a8958";
@@ -109,7 +115,13 @@ function drawGameArea(ctx){
 	// Draw box around game area.
 	ctx1.lineWidth = 1;
 	ctx1.strokeStyle = "#000000";
-	ctx1.strokeRect(1, (SC*6)+1, cvs1.width-2, cvs1.height-(SC*6)-3);
+	ctx1.beginPath();
+	ctx1.moveTo(1, (SC*6)+1);
+	ctx1.lineTo(1, cvs1.height-1);
+	ctx1.moveTo(cvs1.width-1, (SC*6)+1);
+	ctx1.lineTo(cvs1.width-1, cvs1.height-1);
+	ctx1.stroke();
+	ctx1.closePath();
 }
 
 // Draws the whole circuit.

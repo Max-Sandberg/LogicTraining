@@ -29,6 +29,9 @@ function startGame(level) {
 	findLevelPar();
 	moves = 0;
 	drawMoves();
+	ctx1.lineWidth = 2;
+	ctx1.strokeStyle = "#000000";
+	ctx1.strokeRect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-1);
 	pause = false;
 	drawIntervalId = setInterval(drawGameArea, 10, ctx1);
 	updateIntervalId = setInterval(updateGameArea, 50);

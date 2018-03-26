@@ -66,6 +66,6 @@ function handleMouseUp(){
 }
 
 function handleMouseMove(){
-	mousex = event.clientX-8;
-	mousey = event.clientY-8;
+	mousex = event.clientX;
+	mousey = event.clientY;
 }

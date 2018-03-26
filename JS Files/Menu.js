@@ -4,17 +4,17 @@ function prepareGame(){
 	// Create the main canvas
 	cvs1 = document.createElement("canvas");
 	ctx1 = cvs1.getContext("2d");
-	cvs1.width = window.innerWidth-15;
-	cvs1.height = window.innerHeight-15;
-	cvs1.style = "position: absolute; left: 5; top: 5; z-index: 0; background-color: #d8f3e6; border:0px solid #d3d3d3;";
+	cvs1.width = window.innerWidth;
+	cvs1.height = window.innerHeight;
+	cvs1.style = "position: absolute; left: 0; top: 0; z-index: 0; background-color: #d8f3e6; border:0px solid #d3d3d3;";
 	document.body.insertBefore(cvs1, document.body.childNodes[0]);
 
 	// Create the layer 2 canvas
 	cvs2 = document.createElement("canvas");
 	ctx2 = cvs2.getContext("2d");
-	cvs2.width = window.innerWidth-15;
-	cvs2.height = window.innerHeight-15;
-	cvs2.style = "position: absolute; left: 5; top: 5; z-index: 1;";
+	cvs2.width = window.innerWidth;
+	cvs2.height = window.innerHeight;
+	cvs2.style = "position: absolute; left: 0; top: 0; z-index: 1;";
 	document.body.insertBefore(cvs2, document.body.childNodes[0]);
 
 	SC = Math.round((cvs1.height/50)/5) * 5;
@@ -51,7 +51,7 @@ function drawMenu(ctx){
 // Draws the icons for each level.
 function drawLevels(ctx){
 	var startx, width, x, y, selected;
-	y = (cvs1.height/2) - (2*SC);
+	y = Math.round((cvs1.height/2) - (2*SC));
 	width = (levels.length*6*SC) + ((levels.length-1)*3*SC);
 	startx = Math.round((cvs1.width/2) - (width/2));
 
@@ -60,15 +60,12 @@ function drawLevels(ctx){
 
 		// Draw rectangle around the level.
 		x = startx + (i*9*SC);
-		ctx.beginPath();
 		ctx.fillStyle = (selected) ? "#7D9C8D" : "#5D8370";
 		ctx.lineWidth = (selected) ? 3 : 1;
 		ctx.strokeStyle = "#000000";
-		ctx.rect(x, y, 6*SC, 6*SC);
-		ctx.fill();
-		ctx.stroke();
+		ctx.fillRect(x+0.5, y+0.5, 6*SC, 6*SC);
+		ctx.strokeRect(x+0.5, y+0.5, 6*SC, 6*SC);
 		ctx.lineWidth = 1;
-		ctx.closePath();
 
 		if (i == 0){
 			// Draw the tutorial button
@@ -117,8 +114,8 @@ function drawLevels(ctx){
 }
 
 function handleMenuMouseMove(){
-	mousex = event.clientX-8;
-	mousey = event.clientY-8;
+	mousex = event.clientX;
+	mousey = event.clientY;
 
 	var lvl = getSelectedLevel();
 	if (lvl != selectedLevel){
@@ -128,9 +125,10 @@ function handleMenuMouseMove(){
 }
 
 function handleMenuMouseDown(){
+	// If the level is unlocked, start the level the user clicked on.
 	if (selectedLevel == 0){
 		startTutorial();
-	} else if (selectedLevel != -1){
+	} else if (selectedLevel != -1 && levels[selectedLevel].unlocked){
 		startGame(selectedLevel);
 	}
 }

@@ -1,6 +1,6 @@
 var levels = [{
 	unlocked : true,
-	allowedGates : [1],
+	allowedGates : [3],
 	enableGateChanges : false,
 	circuits: [{
 		gateSections : [
