@@ -166,7 +166,11 @@ function handleEndScreenMouseDown(){
 			selectedButton = null;
 			cvs2.onmousedown = undefined;
 			cvs2.onmousemove = undefined;
-			startGame(selectedLevel);
+			if (selectedLevel == 0){
+				startTutorial();
+			} else {
+				startGame(selectedLevel);
+			}
 		} else {
 			selectedButton = null;
 			selectedLevel = -1;

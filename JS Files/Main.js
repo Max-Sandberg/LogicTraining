@@ -39,6 +39,7 @@ function startGame(level) {
 		gateChangeIntervalId = setInterval(changeLockedGates, 10000);
 	}
 
+	// Assign hotkeys.
 	document.onkeypress = function (e) {
 		e = e || window.event;
 		var key = event.which || event.keyCode;  // Use either which or keyCode, depending on browser support
@@ -57,6 +58,12 @@ function startGame(level) {
 			}
 		}
 	};
+
+	// If this level introduces new gates, show the intro dialogue for those gates.
+	if (levels[level].newGates){
+		pause = true;
+		introduceGates(allowedGates[0]);
+	}
 }
 
 // Waits for font awesome to load before continuing. This code is not mine - taken from https://stackoverflow.com/questions/35570801/how-to-draw-font-awesome-icons-onto-html-canvas

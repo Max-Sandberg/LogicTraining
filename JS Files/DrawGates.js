@@ -21,9 +21,9 @@ function drawGates(circuit, ctx){
 // Draws a logic gate with a dotted line box around it.
 function drawGate(x, y, type, inputs, output, fixed, ctx) {
 	// Draw the box around the gate.
-	if (fixed){
+	if (fixed == 1){
 		drawFixedBox(x, y, ctx);
-	} else {
+	} else if (fixed == 0) {
 		drawDottedBox(x, y, ctx);
 	}
 

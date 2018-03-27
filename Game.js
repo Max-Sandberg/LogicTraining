@@ -39,6 +39,7 @@ function startGame(level) {
 		gateChangeIntervalId = setInterval(changeLockedGates, 10000);
 	}
 
+	// Assign hotkeys.
 	document.onkeypress = function (e) {
 		e = e || window.event;
 		var key = event.which || event.keyCode;  // Use either which or keyCode, depending on browser support
@@ -57,6 +58,12 @@ function startGame(level) {
 			}
 		}
 	};
+
+	// If this level introduces new gates, show the intro dialogue for those gates.
+	if (levels[level].newGates){
+		pause = true;
+		introduceGates(allowedGates[0]);
+	}
 }
 
 // Waits for font awesome to load before continuing. This code is not mine - taken from https://stackoverflow.com/questions/35570801/how-to-draw-font-awesome-icons-onto-html-canvas
@@ -1297,9 +1304,9 @@ function drawGates(circuit, ctx){
 // Draws a logic gate with a dotted line box around it.
 function drawGate(x, y, type, inputs, output, fixed, ctx) {
 	// Draw the box around the gate.
-	if (fixed){
+	if (fixed == 1){
 		drawFixedBox(x, y, ctx);
-	} else {
+	} else if (fixed == 0) {
 		drawDottedBox(x, y, ctx);
 	}
 
@@ -1838,7 +1845,11 @@ function handleEndScreenMouseDown(){
 			selectedButton = null;
 			cvs2.onmousedown = undefined;
 			cvs2.onmousemove = undefined;
-			startGame(selectedLevel);
+			if (selectedLevel == 0){
+				startTutorial();
+			} else {
+				startGame(selectedLevel);
+			}
 		} else {
 			selectedButton = null;
 			selectedLevel = -1;
@@ -1980,7 +1991,7 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight, noPrint) {
 		line = "",
 		lineCount = 1;
 
-	ctx.font = "14pt Arial";
+
 	for (var i = 0; i < words.length; i++) {
 		var testLine = line + words[i] + " ",
 			metrics = ctx.measureText(testLine),
@@ -2004,6 +2015,7 @@ function displayDialogue(dlgIdx){
 
 	// Calculate the height the dialogue box should be.
 	var topTextHeight, botTextHeight, textHeight, boxHeight;
+	ctx1.font = "14pt Arial";
 	if (dlg.text == undefined){
 		topTextHeight = wrapText(ctx1, dlg.topText, 0, 0, 480, 24, true);
 		botTextHeight = wrapText(ctx1, dlg.botText, 0, 0, 480, 24, true);
@@ -2013,8 +2025,8 @@ function displayDialogue(dlgIdx){
 		boxHeight = 15 + textHeight + 58;
 	}
 
-	var startx = (cvs1.width/2) - 250;
-	var starty = (cvs1.height/2) - (boxHeight/2);
+	var startx = (cvs1.width/2) - 250,
+		starty = (cvs1.height/2) - (boxHeight/2);
 
 	// Draw the rectangle.
 	ctx1.beginPath();
@@ -2056,7 +2068,7 @@ function displayDialogue(dlgIdx){
 	ctx1.fillText("CONTINUE", btnX, btnY+20);
 
 	// The interval to control highlighting the continue button when the mouse hovers over it.
-	btnHoverIntervalId = setInterval(function(){
+	var btnHoverIntervalId = setInterval(function(){
 		// Clear this interval if we go back to the menu.
 		if (selectedLevel == -1){
 			clearInterval(btnHoverIntervalId);
@@ -2152,12 +2164,162 @@ function startTestCircuit(){
 	pause = false;
 }
 
+// Function to be called when the test circuit is complete - calls the next dialogue rather than ending the level.
 function handleTestCircuit(){
 	ctx1.clearRect((cvs1.width/2)-200, 6*SC, 400, 100);
 	drawMenuBar();
 	displayDialogue(4);
 }
-var levels = [{
+
+// Displays dialogues to introduce and explain any of the 3 gate pairs.
+function introduceGates(gate){
+	// The explanations of the different gates.
+	var gateExplanations = [,
+		"The AND gate only outputs 1 if both of the inputs are 1. If any of the inputs are 0, the output is 0.",
+		"The NAND gate does the exact opposite of the AND gate. If any of the inputs are 0, the output is 1.",
+		"The OR gate outputs 1 if either of the inputs are 1. It only outputs 0 if both inputs are 0.",
+		"The NOR gate does the exact opposite of the OR gate. It only outputs 1 if both inputs are 0.",
+		"The XOR gate only outputs 1 if both the inputs are different. If they are both 0 or both 1, the output is 0.",
+		"The XNOR gate does the exact opposite of the XOR gate. It outputs 1 if both inputs are the same."
+	];
+
+	ctx1.font = "14pt Arial";
+	var textHeight = wrapText(ctx1, gateExplanations[gate], 500, 500, 450, 26, true);
+
+	// Calculate box size and position.
+	var width = 500,
+		height = 356+textHeight,
+		startx = Math.round((cvs1.width/2)-(width/2));
+		starty = Math.round((cvs1.height/2)-(height/2));
+
+	// Draw the rectangle.
+	ctx1.fillStyle = "#2a8958";
+	ctx1.lineWidth = 2;
+	ctx1.fillRect(startx, starty, width, height);
+	ctx1.strokeRect(startx, starty, width, height);
+
+	// Draw the title.
+	var name = Object.keys(gatesEnum)[gate].toUpperCase();
+	ctx1.font = "30pt Impact";
+	ctx1.textAlign = "center";
+	ctx1.fillStyle = "#FFFFFF";
+	ctx1.fillText("New gate: " + name, (cvs1.width/2)+1, starty+63);
+	ctx1.fillStyle = "#000000";
+	ctx1.fillText("New gate: " + name, (cvs1.width/2), starty+62);
+
+	// Draw the gate icon.
+	var iconx = Math.round(startx + 100) + 0.5,
+		icony = Math.round(starty + 140) + 0.5;
+	ctx1.lineWidth = 1;
+	ctx1.clearRect(iconx, icony, 4*SC, 4*SC);
+	ctx1.strokeRect(iconx, icony, 4*SC, 4*SC);
+	drawGate(iconx, icony, gate, [{val:0}, {val:0}], 0, -1, ctx1);
+	ctx1.font = "12pt Arial";
+	ctx1.fillStyle = "#000000";
+	ctx1.fillText("Icon", iconx+(2*SC), icony+(4*SC)+22);
+
+	// Draw the truth table
+	var tablex =  Math.round(startx + width - 260)+0.5,
+		tabley = Math.round(starty + 140 + (2*SC) - 73)+0.5;
+	drawTruthTable(tablex, tabley, gate);
+	ctx1.font = "12pt Arial";
+	ctx1.fillText("Truth Table", tablex+80, tabley+168);
+
+	// Write the explanation of how the gate works.
+	ctx1.font = "14pt Arial";
+	wrapText(ctx1, gateExplanations[gate], cvs1.width/2, starty+322, 0.9*width, 26)
+
+	// Draw the continue button.
+	var highlight = false,
+		btnX = startx+394,
+		btnY = starty+height-34;
+	ctx1.font = "18pt Impact";
+	ctx1.textAlign = "left";
+	ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
+	ctx1.fillText("CONTINUE", btnX, btnY+20);
+
+	// The interval to control highlighting the continue button when the mouse hovers over it.
+	var btnHoverIntervalId = setInterval(function(){
+		// Clear this interval if we go back to the menu.
+		if (selectedLevel == -1){
+			clearInterval(btnHoverIntervalId);
+			btnHoverIntervalId = undefined;
+		}
+
+		// If the mouse is over the button, and it isn't already highlighted.
+		if ((mousex > btnX-4 && mousex < btnX+98  && mousey > btnY-2 && mousey < btnY+24) && !highlight){
+			highlight = true;
+			ctx1.fillStyle="#2a8958";
+			ctx1.fillRect(btnX, btnY-2, 94, 24);
+			ctx1.fillStyle = "rgba(0, 0, 0, 1)";
+			ctx1.font = "18pt Impact";
+			ctx1.fillText("CONTINUE", btnX, btnY+20);
+			// If the mouse is hovering over the button, change the mousedown handler to go to the next message.
+			cvs2.onmousedown = function(){
+				ctx1.clearRect(startx-3, starty-3, width+6, height+6);
+				clearInterval(btnHoverIntervalId);
+				btnHoverIntervalId = undefined;
+				// Display the next gate introduction, or start the game
+				if (gate % 2 == 1){
+					introduceGates(gate+1);
+				} else {
+					cvs2.onmousedown = handleMouseDown;
+					pause = false;
+				}
+			}
+		}
+		// If the mouse isn't over the button, but it is still highlighted.
+		else if (!(mousex > btnX-4 && mousex < btnX+98  && mousey > btnY-2 && mousey < btnY+24) && highlight){
+			highlight = false;
+			ctx1.fillStyle="#2a8958";
+			ctx1.fillRect(btnX, btnY-2, 94, 24);
+			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
+			ctx1.font = "18pt Impact";
+			ctx1.fillText("CONTINUE", btnX, btnY+20);
+			cvs2.onmousedown = handleMouseDown;
+		}
+	}, 50);
+}
+
+function drawTruthTable(x, y, gate){
+	// Clear a rectangle.
+	ctx1.lineWidth = 1;
+	ctx1.clearRect(x, y, 160, 146);
+	ctx1.strokeRect(x, y, 160, 146);
+
+	// Draw the separating lines.
+	ctx1.beginPath();
+	ctx1.moveTo(x, y+30);
+	ctx1.lineTo(x+160, y+30);
+	ctx1.moveTo(x+80, y);
+	ctx1.lineTo(x+80, y+146);
+	ctx1.stroke();
+	ctx1.closePath();
+
+	// Draw the inputs and outputs text.
+	ctx1.font = "14pt Arial";
+	ctx1.textAlign = "center";
+	ctx1.fillStyle = "#000000";
+	ctx1.fillText("Inputs", x+40, y+22);
+	ctx1.fillText("Output", x+120, y+22);
+
+	// Fill in the inputs.
+	ctx1.fillText("1     1", x+40, y+54);
+	ctx1.fillText("1     0", x+40, y+81);
+	ctx1.fillText("0     1", x+40, y+108);
+	ctx1.fillText("0     0", x+40, y+135);
+
+	// Fill in the outputs.
+	var output1 = (gate == gatesEnum.and || gate == gatesEnum.or || gate == gatesEnum.xnor) ? 1 : 0,
+		output2 = (gate == gatesEnum.or || gate == gatesEnum.nand || gate == gatesEnum.xor) ? 1 : 0,
+		output3 = (gate == gatesEnum.nand || gate == gatesEnum.nor || gate == gatesEnum.xnor) ? 1 : 0;
+	ctx1.fillText(output1, x+120, y+54);
+	ctx1.fillText(output2, x+120, y+81);
+	ctx1.fillText(output2, x+120, y+108);
+	ctx1.fillText(output3, x+120, y+135);
+}
+var levels = [
+{ // Tutorial level
 	unlocked : true,
 	allowedGates : [3],
 	enableGateChanges : false,
@@ -2192,6 +2354,7 @@ var levels = [{
 	unlocked : true,
 	starsGained : 0,
 	allowedGates : [1, 2],
+	newGates : true,
 	enableGateChanges : false,
 	circuits : [{
 		gateSections : [
@@ -2558,6 +2721,7 @@ var levels = [{
 	unlocked : false,
 	starsGained : 0,
 	allowedGates : [3,4],
+	newGates : true,
 	enableGateChanges : false,
 	circuits : [{
 		gateSections : [

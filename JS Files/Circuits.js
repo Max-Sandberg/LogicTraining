@@ -1,4 +1,5 @@
-var levels = [{
+var levels = [
+{ // Tutorial level
 	unlocked : true,
 	allowedGates : [3],
 	enableGateChanges : false,
@@ -33,6 +34,7 @@ var levels = [{
 	unlocked : true,
 	starsGained : 0,
 	allowedGates : [1, 2],
+	newGates : true,
 	enableGateChanges : false,
 	circuits : [{
 		gateSections : [
@@ -399,6 +401,7 @@ var levels = [{
 	unlocked : false,
 	starsGained : 0,
 	allowedGates : [3,4],
+	newGates : true,
 	enableGateChanges : false,
 	circuits : [{
 		gateSections : [
