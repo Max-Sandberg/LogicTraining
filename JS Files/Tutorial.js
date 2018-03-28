@@ -101,7 +101,7 @@ var tutDialogues = [
 	},
 	{
 		idx : 7,
-		text : "Thats it for the tutorial. You're now ready for level 1, where you'll learn how to use the AND gate!"
+		text : "Thats it for the tutorial. You're now ready for level 1, where you'll learn about the AND and NAND gates!"
 	}
 ]
 
@@ -314,7 +314,7 @@ function introduceGates(gate){
 
 	// Calculate box size and position.
 	var width = 500,
-		height = 356+textHeight,
+		height = 346+textHeight,
 		startx = Math.round((cvs1.width/2)-(width/2));
 		starty = Math.round((cvs1.height/2)-(height/2));
 
@@ -335,7 +335,7 @@ function introduceGates(gate){
 
 	// Draw the gate icon.
 	var iconx = Math.round(startx + 100) + 0.5,
-		icony = Math.round(starty + 140) + 0.5;
+		icony = Math.round(starty + 130) + 0.5;
 	ctx1.lineWidth = 1;
 	ctx1.clearRect(iconx, icony, 4*SC, 4*SC);
 	ctx1.strokeRect(iconx, icony, 4*SC, 4*SC);
@@ -346,14 +346,14 @@ function introduceGates(gate){
 
 	// Draw the truth table
 	var tablex =  Math.round(startx + width - 260)+0.5,
-		tabley = Math.round(starty + 140 + (2*SC) - 73)+0.5;
+		tabley = Math.round(starty + 130 + (2*SC) - 73)+0.5;
 	drawTruthTable(tablex, tabley, gate);
 	ctx1.font = "12pt Arial";
 	ctx1.fillText("Truth Table", tablex+80, tabley+168);
 
 	// Write the explanation of how the gate works.
 	ctx1.font = "14pt Arial";
-	wrapText(ctx1, gateExplanations[gate], cvs1.width/2, starty+322, 0.9*width, 26)
+	wrapText(ctx1, gateExplanations[gate], cvs1.width/2, starty+310, 0.9*width, 26)
 
 	// Draw the continue button.
 	var highlight = false,
