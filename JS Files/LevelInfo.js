@@ -42,7 +42,7 @@ var levels = [
 
 	//#region Level 1 - AND/NAND, Easy
 	{
-		unlocked : true,
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [1, 2],
 		newGates : true,
@@ -400,7 +400,7 @@ var levels = [
 
 	//#region Level 2 - AND/NAND, Medium
 	{
-		unlocked : true,
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [1, 2],
 		newGates : false,
@@ -918,7 +918,7 @@ var levels = [
 
 	//#region Level 3 - OR/NOR, Easy
 	{
-		unlocked : true,
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [3,4],
 		newGates : true,
@@ -1276,7 +1276,7 @@ var levels = [
 
 	//#region Level 4 - OR/NOR, Medium
 	{
-		unlocked : true,
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [3,4],
 		enableGateChanges : false,
@@ -1793,7 +1793,7 @@ var levels = [
 
 	//#region Level 5 - XOR/XNOR, Easy
 	{
-		unlocked : true,
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [5,6],
 		newGates : true,
@@ -2151,7 +2151,7 @@ var levels = [
 
 	//#region Level 6 - XOR/XNOR, Medium
 	{
-		unlocked : true,
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [5,6],
 		newGates : false,
@@ -2669,7 +2669,7 @@ var levels = [
 
 	//#region Level 7 - All gates, Medium, Gate changes
 	{
-		unlocked : true,
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [1,2,3],
 		newGates : false,
@@ -3187,7 +3187,7 @@ var levels = [
 
 	//#region Level 8 - All gates, Hard, Gate changes
 	{
-		unlocked : true,
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [1,2,3],
 		newGates : false,

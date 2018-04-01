@@ -44,7 +44,8 @@ function startGame(level) {
 		e = e || window.event;
 		var key = event.which || event.keyCode;  // Use either which or keyCode, depending on browser support
 		if (String.fromCharCode(key) == " "){
-			pause = !pause;
+			// Uncomment to allow pausing
+			//pause = !pause;
 		} else {
 			var gate = parseInt(String.fromCharCode(key));
 			if (gate > 0 && gate < 7){

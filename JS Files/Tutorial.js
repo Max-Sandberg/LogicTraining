@@ -226,6 +226,7 @@ function displayDialogue(dlgIdx){
 					clearIntervals();
 					resetGameState();
 					selectedLevel = -1;
+					levels[1].unlocked = true;
 					drawMenu(ctx1);
 				}
 			}
