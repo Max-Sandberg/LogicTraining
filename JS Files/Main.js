@@ -35,8 +35,8 @@ function startGame(level) {
 	pause = false;
 	drawIntervalId = setInterval(drawGameArea, 10, ctx1);
 	updateIntervalId = setInterval(updateGameArea, 50);
-	if (enableGateChanges){
-		gateChangeIntervalId = setInterval(changeLockedGates, 10000);
+	if (enableGateChanges && selectedLevel != 7){
+		gateChangeIntervalId = setInterval(changeLockedGates, 20000);
 	}
 
 	// Assign hotkeys.
@@ -63,6 +63,9 @@ function startGame(level) {
 	if (levels[level].newGates){
 		pause = true;
 		introduceGates(allowedGates[0]);
+	} else if (level == 7){
+		pause = true;
+		introduceGates(7);
 	}
 }
 

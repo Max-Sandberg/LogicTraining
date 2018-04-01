@@ -13,11 +13,14 @@ function prepareCircuits(){
 }
 
 function findCircuitPosition(idx){
-	var y, gap, circuit = circuits[idx];
+	var y, vertGap,
+		circuit = circuits[idx],
+		horzGap = (Array(1,3,5).includes(selectedLevel)) ? 18*SC : 16*SC;
+
+	// Calculate the x position. Easier levels get slightly more spaced out circuits.
 	circuit.startx = (idx == 0) ? cvs1.width + 50 :
-	 				 (circuits[idx-1].type != gatesEnum.star) ? circuits[idx-1].endx + (12*SC) :
-					 circuits[idx-2].endx + (12*SC);
-	// circuit.startx = (idx == 0) ? 0 : circuits[idx-1].endx + (8*SC);
+	 				 (circuits[idx-1].type != gatesEnum.star) ? circuits[idx-1].endx + horzGap :
+					 circuits[idx-2].endx + horzGap;
 	circuit.endx = circuit.startx + circuit.width;
 	delete circuit.width;
 
@@ -39,9 +42,9 @@ function findCircuitPosition(idx){
 	if (twoBeforeStar){
 		do {
 			y = Math.round((0.25+(0.5*Math.round(Math.random())))*gameAreaHeight)-(4*SC);
-			gap = (idx != 0) ? Math.abs(circuits[idx-1].starty - y) : 1000;
+			vertGap = (idx != 0) ? Math.abs(circuits[idx-1].starty - y) : 1000;
 		}
-		while (gap < 6*SC);
+		while (vertGap < 6*SC);
 	}
 	else if (oneBeforeStar && idx != 0){
 		y = circuits[idx-1].starty;
@@ -55,9 +58,9 @@ function findCircuitPosition(idx){
 	else {
 		do {
 			y = Math.round((0.25+(0.5*Math.random()))*gameAreaHeight)-(4*SC);
-			gap = (idx != 0) ? Math.abs(circuits[idx-1].starty - y) : 1000;
+			vertGap = (idx != 0) ? Math.abs(circuits[idx-1].starty - y) : 1000;
 		}
-		while ((afterStar && gap < 15*SC) || (!afterStar && gap < 8*SC));
+		while ((afterStar && vertGap < 15*SC) || (!afterStar && vertGap < 8*SC));
 	}
 
 	circuit.starty = y;

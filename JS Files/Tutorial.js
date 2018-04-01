@@ -306,16 +306,16 @@ function introduceGates(gate){
 		"The OR gate outputs 1 if either of the inputs are 1. It only outputs 0 if both inputs are 0.",
 		"The NOR gate does the exact opposite of the OR gate. It only outputs 1 if both inputs are 0.",
 		"The XOR gate only outputs 1 if both the inputs are different. If they are both 0 or both 1, the output is 0.",
-		"The XNOR gate does the exact opposite of the XOR gate. It outputs 1 if both inputs are the same."
+		"The XNOR gate does the exact opposite of the XOR gate. It outputs 1 if both inputs are the same.",
+		"This level adds a new mechanic: Gate changes. The gates you are allowed to use will periodically change, so you'll have to adapt to use what you've got. Good luck!"
 	];
 
-	ctx1.font = "14pt Arial";
-	var textHeight = wrapText(ctx1, gateExplanations[gate], 500, 500, 450, 26, true);
-
 	// Calculate box size and position.
-	var width = 500,
-		height = 346+textHeight,
-		startx = Math.round((cvs1.width/2)-(width/2));
+	ctx1.font = "14pt Arial";
+	var width = (gate != 7) ? 500 : 550,
+		textHeight = wrapText(ctx1, gateExplanations[gate], 500, 500, 0.9*width, 26, true),
+		height = (gate != 7) ? 346+textHeight : 146+textHeight,
+		startx = Math.round((cvs1.width/2)-(width/2)),
 		starty = Math.round((cvs1.height/2)-(height/2));
 
 	// Draw the rectangle.
@@ -325,39 +325,44 @@ function introduceGates(gate){
 	ctx1.strokeRect(startx, starty, width, height);
 
 	// Draw the title.
-	var name = Object.keys(gatesEnum)[gate].toUpperCase();
+	var name = Object.keys(gatesEnum)[gate].toUpperCase(),
+		text = (gate != 7) ? "New gate: " + name : "New mechanic: GATE CHANGES";
 	ctx1.font = "30pt Impact";
 	ctx1.textAlign = "center";
 	ctx1.fillStyle = "#FFFFFF";
-	ctx1.fillText("New gate: " + name, (cvs1.width/2)+1, starty+63);
+	ctx1.fillText(text, (cvs1.width/2)+1, starty+63);
 	ctx1.fillStyle = "#000000";
-	ctx1.fillText("New gate: " + name, (cvs1.width/2), starty+62);
+	ctx1.fillText(text, (cvs1.width/2), starty+62);
 
-	// Draw the gate icon.
-	var iconx = Math.round(startx + 100) + 0.5,
-		icony = Math.round(starty + 130) + 0.5;
-	ctx1.lineWidth = 1;
-	ctx1.clearRect(iconx, icony, 4*SC, 4*SC);
-	ctx1.strokeRect(iconx, icony, 4*SC, 4*SC);
-	drawGate(iconx, icony, gate, [{val:0}, {val:0}], 0, -1, ctx1);
-	ctx1.font = "12pt Arial";
-	ctx1.fillStyle = "#000000";
-	ctx1.fillText("Icon", iconx+(2*SC), icony+(4*SC)+22);
+	if (gate != 7){
+		// Draw the gate icon.
+		var iconx = Math.round(startx + 100) + 0.5,
+			icony = Math.round(starty + 130) + 0.5;
+		ctx1.lineWidth = 1;
+		ctx1.clearRect(iconx, icony, 4*SC, 4*SC);
+		ctx1.strokeRect(iconx, icony, 4*SC, 4*SC);
+		drawGate(iconx, icony, gate, [{val:0}, {val:0}], 0, -1, ctx1);
+		ctx1.font = "12pt Arial";
+		ctx1.fillStyle = "#000000";
+		ctx1.fillText("Icon", iconx+(2*SC), icony+(4*SC)+22);
 
-	// Draw the truth table
-	var tablex =  Math.round(startx + width - 260)+0.5,
-		tabley = Math.round(starty + 130 + (2*SC) - 73)+0.5;
-	drawTruthTable(tablex, tabley, gate);
-	ctx1.font = "12pt Arial";
-	ctx1.fillText("Truth Table", tablex+80, tabley+168);
+		// Draw the truth table
+		var tablex =  Math.round(startx + width - 260)+0.5,
+			tabley = Math.round(starty + 130 + (2*SC) - 73)+0.5;
+		drawTruthTable(tablex, tabley, gate);
+		ctx1.font = "12pt Arial";
+		ctx1.fillText("Truth Table", tablex+80, tabley+168);
+	}
 
 	// Write the explanation of how the gate works.
 	ctx1.font = "14pt Arial";
-	wrapText(ctx1, gateExplanations[gate], cvs1.width/2, starty+310, 0.9*width, 26)
+	ctx1.fillStyle = "#000000";
+	ctx1.textAlign = "center";
+	wrapText(ctx1, gateExplanations[gate], cvs1.width/2, starty+height-textHeight-36, 0.9*width, 26)
 
 	// Draw the continue button.
 	var highlight = false,
-		btnX = startx+394,
+		btnX = startx+width-106,
 		btnY = starty+height-34;
 	ctx1.font = "18pt Impact";
 	ctx1.textAlign = "left";
@@ -386,11 +391,14 @@ function introduceGates(gate){
 				clearInterval(btnHoverIntervalId);
 				btnHoverIntervalId = undefined;
 				// Display the next gate introduction, or start the game
-				if (gate % 2 == 1){
+				if (gate % 2 == 1 && gate != 7){
 					introduceGates(gate+1);
 				} else {
 					cvs2.onmousedown = handleMouseDown;
 					pause = false;
+					if (gate == 7){
+						gateChangeIntervalId = setInterval(changeLockedGates, 20000);
+					}
 				}
 			}
 		}
@@ -443,4 +451,8 @@ function drawTruthTable(x, y, gate){
 	ctx1.fillText(output2, x+120, y+81);
 	ctx1.fillText(output2, x+120, y+108);
 	ctx1.fillText(output3, x+120, y+135);
+}
+
+function introduceGateChanges(){
+
 }

@@ -1,26 +1,13 @@
-/*
-	Contains all the information about the levels, including the layout of every circuit. The general outline of each level is as follows:
-
-	Level 0 - TUTORIAL
-	Level 1 - AND/NAND, easy
-	Level 2 - AND/NAND, medium
-	Level 3 - OR/NOR, easy
-	Level 4 - OR/NOR, medium
-	Level 5 - XOR/XNOR, easy
-	Level 6 - XOR/XNOR, medium
-	Level 7 - All, medium
-	Level 8 - All, hard
-	Level 9 - All, medium, gate changes
-	Level 10 - All, hard, gate changes
-*/
+// Contains all the information about the levels: Whether it is unlocked or not; how many stars have been earned for that level; which gates are allowed; whether gate changes are enabled; whether the level introduces new gates; and most importantly, the layout of every circuit in each level.
 var levels = [
-	//#region Tutorial level
+	//#region Level 0 - Tutorial
 	{
 		unlocked : true,
 		allowedGates : [3],
+		newGates : false,
 		enableGateChanges : false,
 		circuits: [
-			//#region Circuit 1
+			//#region Circuit 1 - Difficulty 1
 			{
 				gateSections : [
 					[{
@@ -53,7 +40,7 @@ var levels = [
 	},
 	//#endregion
 
-	//#region Level 1
+	//#region Level 1 - AND/NAND, Easy
 	{
 		unlocked : true,
 		starsGained : 0,
@@ -61,7 +48,7 @@ var levels = [
 		newGates : true,
 		enableGateChanges : false,
 		circuits : [
-			//#region Circuit 1
+			//#region Circuit 1 - 1 Gate
 			{
 				gateSections : [
 					[{
@@ -90,7 +77,7 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 2
+			//#region Circuit 2 - 1 Gate
 			{
 				gateSections : [
 					[{
@@ -119,7 +106,7 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 3
+			//#region Circuit 3 - 1 Gate
 			{
 				gateSections : [
 					[{
@@ -148,13 +135,157 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 4 (star)
+			//#region Circuit 4 - 1 Gate, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.star,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 5 - 2 Gates
 			{
 				gateSections : [
 					[{
 						inputs : [{
 							type : "signal",
 							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.and,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 6 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 7 - 1 Gate
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 8 - 2 Gates, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
 						}, {
 							type : "signal",
 							val : 0
@@ -191,13 +322,13 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 5
+			//#region Circuit 9 - 1 Gate
 			{
 				gateSections : [
 					[{
 						inputs : [{
 							type : "signal",
-							val : 0
+							val : 1
 						}, {
 							type : "signal",
 							val : 0
@@ -212,20 +343,6 @@ var levels = [
 						inputs : [{
 							type : "gate",
 							gate : [0, 0],
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
 						}],
 						type : gatesEnum.bulb,
 						fixed : true,
@@ -234,7 +351,7 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 6
+			//#region Circuit 10 - 2 Gates
 			{
 				gateSections : [
 					[{
@@ -277,7 +394,62 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 7
+		]
+	},
+	//#endregion
+
+	//#region Level 2 - AND/NAND, Medium
+	{
+		unlocked : true,
+		starsGained : 0,
+		allowedGates : [1, 2],
+		newGates : false,
+		enableGateChanges : false,
+		circuits : [
+			//#region Circuit 1 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.and,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 2 - 3 Gates
 			{
 				gateSections : [
 					[{
@@ -334,7 +506,79 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 8 (star)
+			//#region Circuit 3 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 4 - 1 Gate, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.star,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 5 - 3 Gates
 			{
 				gateSections : [
 					[{
@@ -375,6 +619,149 @@ var levels = [
 						}],
 						type : gatesEnum.blank,
 						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 6 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.and,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 7 - 3 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "gate",
+							gate : [0, 1],
+						}],
+						type : gatesEnum.nand,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 8 - 2 Gates, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.nand,
+						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
 							inputs : [0]
@@ -391,16 +778,16 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 9
+			//#region Circuit 9 - 3 Gates
 			{
 				gateSections : [
 					[{
 						inputs : [{
 							type : "signal",
-							val : 0
+							val : 1
 						}, {
 							type : "signal",
-							val : 0
+							val : 1
 						}],
 						type : gatesEnum.blank,
 						fixed : false,
@@ -414,7 +801,7 @@ var levels = [
 							val : 1
 						}, {
 							type : "signal",
-							val : 0
+							val : 1
 						}],
 						type : gatesEnum.blank,
 						fixed : false,
@@ -430,7 +817,7 @@ var levels = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.nand,
+						type : gatesEnum.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -440,6 +827,83 @@ var levels = [
 						inputs : [{
 							type : "gate",
 							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 10 - 4 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}, {
+							gateIdx : [1, 1],
+							inputs : [0]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "gate",
+							gate : [0, 1]
+						}],
+						type : gatesEnum.nand,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "gate",
+							gate : [0, 0]
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [1]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0]
+						}, {
+							type : "gate",
+							gate : [1, 1]
+						}],
+						type : gatesEnum.and,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [3, 0],
+							inputs : [0]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "gate",
+							gate : [2, 0]
 						}],
 						type : gatesEnum.bulb,
 						fixed : true,
@@ -452,15 +916,73 @@ var levels = [
 	},
 	//#endregion
 
-	//#region Level 2
+	//#region Level 3 - OR/NOR, Easy
 	{
-		unlocked : false,
+		unlocked : true,
 		starsGained : 0,
 		allowedGates : [3,4],
 		newGates : true,
 		enableGateChanges : false,
 		circuits : [
-			//#region Circuit 1
+			//#region Circuit 1 - 1 Gate
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 2 - 1 Gate
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 3 - 1 Gate
 			{
 				gateSections : [
 					[{
@@ -489,13 +1011,13 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 2
+			//#region Circuit 4 - 1 Gate, Star
 			{
 				gateSections : [
 					[{
 						inputs : [{
 							type : "signal",
-							val : 0
+							val : 1
 						}, {
 							type : "signal",
 							val : 0
@@ -518,36 +1040,7 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 3
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 4 (star)
+			//#region Circuit 5 - 2 Gates
 			{
 				gateSections : [
 					[{
@@ -590,7 +1083,79 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 5
+			//#region Circuit 6 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 7 - 1 Gate
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 8 - 2 Gates, Star
 			{
 				gateSections : [
 					[{
@@ -613,10 +1178,10 @@ var levels = [
 							gate : [0, 0],
 						}, {
 							type : "signal",
-							val : 1
+							val : 0
 						}],
-						type : gatesEnum.blank,
-						fixed : false,
+						type : gatesEnum.nor,
+						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
 							inputs : [0]
@@ -626,6 +1191,35 @@ var levels = [
 							type : "gate",
 							gate : [1, 0],
 						}],
+						type : gatesEnum.star,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 9 - 1 Gate
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
 						type : gatesEnum.bulb,
 						fixed : true,
 						nextGates : []
@@ -633,7 +1227,7 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 6
+			//#region Circuit 10 - 2 Gates
 			{
 				gateSections : [
 					[{
@@ -676,7 +1270,61 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 7
+		]
+	},
+	//#endregion
+
+	//#region Level 4 - OR/NOR, Medium
+	{
+		unlocked : true,
+		starsGained : 0,
+		allowedGates : [3,4],
+		enableGateChanges : false,
+		circuits : [
+			//#region Circuit 1 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.or,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 2 - 3 Gates
 			{
 				gateSections : [
 					[{
@@ -733,7 +1381,79 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 8 (star)
+			//#region Circuit 3 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 4 - 1 Gate, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.star,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 5 - 3 Gates
 			{
 				gateSections : [
 					[{
@@ -756,9 +1476,9 @@ var levels = [
 							val : 0
 						}, {
 							type : "signal",
-							val : 1
+							val : 0
 						}],
-						type : gatesEnum.nor,
+						type : gatesEnum.or,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -774,6 +1494,149 @@ var levels = [
 						}],
 						type : gatesEnum.blank,
 						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 6 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.nor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 7 - 3 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "gate",
+							gate : [0, 1],
+						}],
+						type : gatesEnum.nor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 8 - 2 Gates, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.nor,
+						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
 							inputs : [0]
@@ -790,7 +1653,7 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 9
+			//#region Circuit 9 - 3 Gates
 			{
 				gateSections : [
 					[{
@@ -799,7 +1662,7 @@ var levels = [
 							val : 0
 						}, {
 							type : "signal",
-							val : 0
+							val : 1
 						}],
 						type : gatesEnum.blank,
 						fixed : false,
@@ -810,7 +1673,7 @@ var levels = [
 					}, {
 						inputs : [{
 							type : "signal",
-							val : 1
+							val : 0
 						}, {
 							type : "signal",
 							val : 0
@@ -839,6 +1702,83 @@ var levels = [
 						inputs : [{
 							type : "gate",
 							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 10 - 4 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}, {
+							gateIdx : [1, 1],
+							inputs : [0]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "gate",
+							gate : [0, 1]
+						}],
+						type : gatesEnum.or,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "gate",
+							gate : [0, 0]
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [1]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0]
+						}, {
+							type : "gate",
+							gate : [1, 1]
+						}],
+						type : gatesEnum.nor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [3, 0],
+							inputs : [0]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "gate",
+							gate : [2, 0]
 						}],
 						type : gatesEnum.bulb,
 						fixed : true,
@@ -851,14 +1791,891 @@ var levels = [
 	},
 	//#endregion
 
-	//#region Level 3
+	//#region Level 5 - XOR/XNOR, Easy
 	{
-		unlocked : false,
+		unlocked : true,
 		starsGained : 0,
-		allowedGates : [1,2,4],
+		allowedGates : [5,6],
+		newGates : true,
+		enableGateChanges : false,
+		circuits : [
+			//#region Circuit 1 - 1 Gate
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 2 - 1 Gate
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 3 - 1 Gate
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 4 - 1 Gate, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.star,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 5 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.xor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 6 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 7 - 1 Gate
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 8 - 2 Gates, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.xnor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.star,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 9 - 1 Gate
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 10 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.xor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+		]
+	},
+	//#endregion
+
+	//#region Level 6 - XOR/XNOR, Medium
+	{
+		unlocked : true,
+		starsGained : 0,
+		allowedGates : [5,6],
+		newGates : false,
+		enableGateChanges : false,
+		circuits : [
+			//#region Circuit 1 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.xor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 2 - 3 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "gate",
+							gate : [0, 1],
+						}],
+						type : gatesEnum.xor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 3 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 4 - 1 Gate, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gatesEnum.star,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 5 - 3 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.xnor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "gate",
+							gate : [0, 1],
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 6 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.xnor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 7 - 3 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "gate",
+							gate : [0, 1],
+						}],
+						type : gatesEnum.xnor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 8 - 2 Gates, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.xor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.star,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 9 - 3 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "gate",
+							gate : [0, 1],
+						}],
+						type : gatesEnum.xor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 10 - 4 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}, {
+							gateIdx : [1, 1],
+							inputs : [0]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "gate",
+							gate : [0, 1]
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "gate",
+							gate : [0, 0]
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.xor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [1]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0]
+						}, {
+							type : "gate",
+							gate : [1, 1]
+						}],
+						type : gatesEnum.and,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [3, 0],
+							inputs : [0]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "gate",
+							gate : [2, 0]
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			}
+			//#endregion
+		]
+	},
+	//#endregion
+
+	//#region Level 7 - All gates, Medium, Gate changes
+	{
+		unlocked : true,
+		starsGained : 0,
+		allowedGates : [1,2,3],
+		newGates : false,
 		enableGateChanges : true,
 		circuits : [
-			//#region Circuit 1
+			//#region Circuit 1 - 2 Gates
 			{
 				gateSections : [
 					[{
@@ -867,7 +2684,7 @@ var levels = [
 							val : 1
 						}, {
 							type : "signal",
-							val : 1
+							val : 0
 						}],
 						type : gatesEnum.blank,
 						fixed : false,
@@ -875,28 +2692,13 @@ var levels = [
 							gateIdx : [1, 0],
 							inputs : [0]
 						}]
-					}, {
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}]
-					}],
-					[{
+					}], [{
 						inputs : [{
 							type : "gate",
-							gate : [0, 0]
+							gate : [0, 0],
 						}, {
-							type : "gate",
-							gate : [0, 1]
+							type : "signal",
+							val : 1
 						}],
 						type : gatesEnum.and,
 						fixed : true,
@@ -904,11 +2706,10 @@ var levels = [
 							gateIdx : [2, 0],
 							inputs : [0]
 						}]
-					}],
-					[{
+					}], [{
 						inputs : [{
 							type : "gate",
-							gate : [1, 0]
+							gate : [1, 0],
 						}],
 						type : gatesEnum.bulb,
 						fixed : true,
@@ -917,7 +2718,7 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 2 (star)
+			//#region Circuit 2 - 3 Gates
 			{
 				gateSections : [
 					[{
@@ -948,14 +2749,13 @@ var levels = [
 							gateIdx : [1, 0],
 							inputs : [1]
 						}]
-					}],
-					[{
+					}], [{
 						inputs : [{
 							type : "gate",
-							gate : [0, 0]
+							gate : [0, 0],
 						}, {
 							type : "gate",
-							gate : [0, 1]
+							gate : [0, 1],
 						}],
 						type : gatesEnum.nor,
 						fixed : true,
@@ -963,11 +2763,82 @@ var levels = [
 							gateIdx : [2, 0],
 							inputs : [0]
 						}]
-					}],
-					[{
+					}], [{
 						inputs : [{
 							type : "gate",
-							gate : [1, 0]
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 3 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.xnor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 4 - 1 Gate, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
 						}],
 						type : gatesEnum.star,
 						fixed : true,
@@ -976,13 +2847,13 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 3
+			//#region Circuit 5 - 3 Gates
 			{
 				gateSections : [
 					[{
 						inputs : [{
 							type : "signal",
-							val : 1
+							val : 0
 						}, {
 							type : "signal",
 							val : 1
@@ -1007,125 +2878,246 @@ var levels = [
 							gateIdx : [1, 0],
 							inputs : [1]
 						}]
-					}],
-					[{
+					}], [{
 						inputs : [{
 							type : "gate",
-							gate : [0, 0]
+							gate : [0, 0],
 						}, {
 							type : "gate",
-							gate : [0, 1]
-						}],
-						type : gatesEnum.xor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0]
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 4
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}, {
-							gateIdx : [1, 1],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "gate",
-							gate : [0, 1]
-						}],
-						type : gatesEnum.xor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "gate",
-							gate : [0, 0]
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [1]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0]
-						}, {
-							type : "gate",
-							gate : [1, 1]
-						}],
-						type : gatesEnum.nor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [3, 0],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [2, 0]
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 5
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 1
+							gate : [0, 1],
 						}],
 						type : gatesEnum.and,
 						fixed : true,
 						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 6 - 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.nor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 7 - 3 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "gate",
+							gate : [0, 1],
+						}],
+						type : gatesEnum.xnor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 8 - 2 Gates, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.nand,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.star,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 9 - 3 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.or,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "gate",
+							gate : [0, 1],
+						}],
+						type : gatesEnum.nand,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 10 - 4 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
 							gateIdx : [1, 0],
 							inputs : [1]
 						}, {
@@ -1136,7 +3128,7 @@ var levels = [
 					[{
 						inputs : [{
 							type : "signal",
-							val : 1
+							val : 0
 						}, {
 							type : "gate",
 							gate : [0, 1]
@@ -1153,7 +3145,7 @@ var levels = [
 							gate : [0, 0]
 						}, {
 							type : "signal",
-							val : 0
+							val : 1
 						}],
 						type : gatesEnum.nand,
 						fixed : true,
@@ -1170,8 +3162,154 @@ var levels = [
 							type : "gate",
 							gate : [1, 1]
 						}],
+						type : gatesEnum.xor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [3, 0],
+							inputs : [0]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "gate",
+							gate : [2, 0]
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			}
+			//#endregion
+		]
+	},
+	//#endregion
+
+	//#region Level 8 - All gates, Hard, Gate changes
+	{
+		unlocked : true,
+		starsGained : 0,
+		allowedGates : [1,2,3],
+		newGates : false,
+		enableGateChanges : true,
+		circuits : [
+			//#region Circuit 1 - 3 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
 						type : gatesEnum.blank,
 						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "gate",
+							gate : [0, 1],
+						}],
+						type : gatesEnum.and,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 2 - 4 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}, {
+							gateIdx : [1, 1],
+							inputs : [0]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "gate",
+							gate : [0, 1]
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "gate",
+							gate : [0, 0]
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.xor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [1]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0]
+						}, {
+							type : "gate",
+							gate : [1, 1]
+						}],
+						type : gatesEnum.and,
+						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
 							inputs : [0]
@@ -1189,16 +3327,116 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 6
+			//#region Circuit 3 - 3 Gates
 			{
 				gateSections : [
 					[{
 						inputs : [{
 							type : "signal",
-							val : 1
+							val : 0
 						}, {
 							type : "signal",
 							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "gate",
+							gate : [0, 1],
+						}],
+						type : gatesEnum.nor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 4 - 2 Gates, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.nor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.star,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 5 - 4 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
 						}],
 						type : gatesEnum.blank,
 						fixed : false,
@@ -1230,10 +3468,10 @@ var levels = [
 							gate : [0, 0]
 						}, {
 							type : "signal",
-							val : 0
+							val : 1
 						}],
-						type : gatesEnum.nor,
-						fixed : true,
+						type : gatesEnum.blank,
+						fixed : false,
 						nextGates : [{
 							gateIdx : [2, 0],
 							inputs : [1]
@@ -1247,8 +3485,8 @@ var levels = [
 							type : "gate",
 							gate : [1, 1]
 						}],
-						type : gatesEnum.blank,
-						fixed : false,
+						type : gatesEnum.xnor,
+						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
 							inputs : [0]
@@ -1266,7 +3504,198 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 7
+			//#region Circuit 6 - 3 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "gate",
+							gate : [0, 1],
+						}],
+						type : gatesEnum.xnor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 7 - 4 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}, {
+							gateIdx : [1, 1],
+							inputs : [0]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "gate",
+							gate : [0, 1]
+						}],
+						type : gatesEnum.xor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "gate",
+							gate : [0, 0]
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [1]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0]
+						}, {
+							type : "gate",
+							gate : [1, 1]
+						}],
+						type : gatesEnum.nand,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [3, 0],
+							inputs : [0]
+						}]
+					}],
+					[{
+						inputs : [{
+							type : "gate",
+							gate : [2, 0]
+						}],
+						type : gatesEnum.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 8 - 3 Gates, Star
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}, {
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gatesEnum.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "gate",
+							gate : [0, 1],
+						}],
+						type : gatesEnum.and,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gatesEnum.star,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region Circuit 9 - 5 Gates
 			{
 				gateSections : [
 					[{
@@ -1360,7 +3789,7 @@ var levels = [
 				]
 			},
 			//#endregion
-			//#region Circuit 8 (star)
+			//#region Circuit 10 - 5 Gates
 			{
 				gateSections : [
 					[{
@@ -1433,97 +3862,6 @@ var levels = [
 							gate : [1, 1]
 						}],
 						type : gatesEnum.and,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [3, 0],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [2, 0]
-						}],
-						type : gatesEnum.star,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 9
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0, 1]
-						}, {
-							gateIdx : [1, 1],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.nand,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [1, 1],
-							inputs : [1]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0]
-						}, {
-							type : "gate",
-							gate : [0, 0]
-						}],
-						type : gatesEnum.xor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "gate",
-							gate : [0, 0]
-						}, {
-							type : "gate",
-							gate : [0, 1]
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [1]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0]
-						}, {
-							type : "gate",
-							gate : [1, 1]
-						}],
-						type : gatesEnum.xnor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],

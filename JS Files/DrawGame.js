@@ -66,31 +66,34 @@ function drawMenuBar(){
 	ctx1.font = "16pt Impact";
 	ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
 	ctx1.fillText("MENU", 10, 28);
-	var highlightMenu = false;
-	menuHoverIntervalId = setInterval(function(){
-		// Clear this interval if we go back to the menu.
-		if (selectedLevel == -1){
-			clearInterval(menuHoverIntervalId);
-			menuHoverIntervalId = undefined;
-		}
-		// Highlight or un-highlight the button.
-		if ((mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && !highlightMenu){
-			highlightMenu = true;
-			ctx1.fillStyle="#2a8958";
-			ctx1.fillRect(10, 10, 50, 18);
-			ctx1.fillStyle = "rgba(0, 0, 0, 1)";
-			ctx1.font = "16pt Impact";
-			ctx1.fillText("MENU", 10, 28);
-		}
-		else if (!(mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && highlightMenu){
-			highlightMenu = false;
-			ctx1.fillStyle="#2a8958";
-			ctx1.fillRect(10, 10, 50, 18);
-			ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
-			ctx1.font = "16pt Impact";
-			ctx1.fillText("MENU", 10, 28);
-		}
-	}, 50);
+	if (menuHoverIntervalId == undefined){
+		var highlightMenu = false;
+		menuHoverIntervalId = setInterval(function(){
+			// Clear this interval if we go back to the menu.
+			if (selectedLevel == -1){
+				clearInterval(menuHoverIntervalId);
+				menuHoverIntervalId = undefined;
+			} else {
+				// Highlight or un-highlight the button.
+				if ((mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && !highlightMenu){
+					highlightMenu = true;
+					ctx1.fillStyle="#2a8958";
+					ctx1.fillRect(10, 10, 50, 18);
+					ctx1.fillStyle = "rgba(0, 0, 0, 1)";
+					ctx1.font = "16pt Impact";
+					ctx1.fillText("MENU", 10, 28);
+				}
+				else if (!(mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && highlightMenu){
+					highlightMenu = false;
+					ctx1.fillStyle="#2a8958";
+					ctx1.fillRect(10, 10, 50, 18);
+					ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
+					ctx1.font = "16pt Impact";
+					ctx1.fillText("MENU", 10, 28);
+				}
+			}
+		}, 50);
+	}
 }
 
 // Draws and moves all the circuits.
