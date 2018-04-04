@@ -145,7 +145,8 @@ function createCanvases(){
 	document.body.insertBefore(cvs2, document.body.childNodes[0]);
 
 	// Calculate the scale to use for the UI based on the screen size.
-	SC = Math.round((cvs1.height/50)/5) * 5;
+	SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
+	SC = Math.min(SC, 22);
 }
 
 // Handles the window being resized.

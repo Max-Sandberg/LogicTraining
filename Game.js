@@ -145,7 +145,8 @@ function createCanvases(){
 	document.body.insertBefore(cvs2, document.body.childNodes[0]);
 
 	// Calculate the scale to use for the UI based on the screen size.
-	SC = Math.round((cvs1.height/50)/5) * 5;
+	SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
+	SC = Math.min(SC, 22);
 }
 
 // Handles the window being resized.
@@ -185,11 +186,12 @@ function drawMenu(){
 	ctx1.closePath();
 
 	// Draw title
-	ctx1.font = (3*SC) + "pt Impact";
+	ctx1.font = (3.4*SC) + "pt Impact";
+	ctx1.textAlign = "center";
 	ctx1.fillStyle = "#FFFFFF";
-	ctx1.fillText("Logic Training", (cvs1.width/2) - (11.5*SC) + 2, (cvs1.height/2) - (6*SC) + 2);
+	ctx1.fillText("Logic Training", (cvs1.width/2) + 2, (cvs1.height/2) - (6*SC) + 2);
 	ctx1.fillStyle = "#000000";
-	ctx1.fillText("Logic Training", (cvs1.width/2) - (11.5*SC), (cvs1.height/2) - (6*SC));
+	ctx1.fillText("Logic Training", (cvs1.width/2), (cvs1.height/2) - (6*SC));
 
 	drawLevels(ctx1);
 
@@ -225,24 +227,25 @@ function drawLevels(ctx){
 			ctx.textAlign = "left";
 		} else {
 			// Write the "LEVEL" text.
+			ctx1.textAlign = "center";
 			ctx.font = (0.8*SC) + "pt Impact";
 			ctx.fillStyle = "#000000";
-			ctx.fillText("LEVEL", x+(1.8*SC), y+(1.5*SC));
+			ctx.fillText("LEVEL", x+(3*SC), y+(1.5*SC));
 
 			// Draw the level number.
 			ctx.font = (2*SC) + "pt Impact";
 			ctx.fillStyle = "#000000";
-			ctx.fillText(i, x+(2.3*SC), y+(4.2*SC));
+			ctx.fillText(i, x+(3*SC), y+(4.2*SC));
 
 			// Draw the stars, filling in the ones which have been earned.
 			ctx.font = (0.8*SC) + "pt FontAwesome";
 			for (var j = 0; j < 3; j++){
 				if (j < levels[i].starsGained){
 					ctx.fillStyle = "#ffff00";
-					ctx.fillText("\uF005", x+(1.2*SC)+(j*25), y+(5.5*SC));
+					ctx.fillText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
 				}
 				ctx.strokeStyle = "#000000";
-				ctx.strokeText("\uF005", x+(1.2*SC)+(j*25), y+(5.5*SC));
+				ctx.strokeText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
 			}
 
 			if (!levels[i].unlocked){
@@ -557,9 +560,12 @@ function drawMenuBar(){
 	}
 
 	// Draw the menu button.
+	ctx1.save();
 	ctx1.font = "16pt Impact";
 	ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx1.textAlign = "left";
 	ctx1.fillText("MENU", 10, 28);
+	ctx1.restore();
 	if (menuHoverIntervalId == undefined){
 		var highlightMenu = false;
 		menuHoverIntervalId = setInterval(function(){
@@ -569,6 +575,7 @@ function drawMenuBar(){
 				menuHoverIntervalId = undefined;
 			} else {
 				// Highlight or un-highlight the button.
+
 				if ((mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && !highlightMenu){
 					highlightMenu = true;
 					ctx1.fillStyle="#2a8958";
@@ -579,11 +586,14 @@ function drawMenuBar(){
 				}
 				else if (!(mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && highlightMenu){
 					highlightMenu = false;
+					ctx1.save();
+					ctx1.textAlign = "left";
 					ctx1.fillStyle="#2a8958";
 					ctx1.fillRect(10, 10, 50, 18);
 					ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
 					ctx1.font = "16pt Impact";
 					ctx1.fillText("MENU", 10, 28);
+					ctx1.restore();
 				}
 			}
 		}, 50);

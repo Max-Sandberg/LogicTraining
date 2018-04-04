@@ -63,9 +63,12 @@ function drawMenuBar(){
 	}
 
 	// Draw the menu button.
+	ctx1.save();
 	ctx1.font = "16pt Impact";
 	ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx1.textAlign = "left";
 	ctx1.fillText("MENU", 10, 28);
+	ctx1.restore();
 	if (menuHoverIntervalId == undefined){
 		var highlightMenu = false;
 		menuHoverIntervalId = setInterval(function(){
@@ -75,6 +78,7 @@ function drawMenuBar(){
 				menuHoverIntervalId = undefined;
 			} else {
 				// Highlight or un-highlight the button.
+
 				if ((mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && !highlightMenu){
 					highlightMenu = true;
 					ctx1.fillStyle="#2a8958";
@@ -85,11 +89,14 @@ function drawMenuBar(){
 				}
 				else if (!(mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && highlightMenu){
 					highlightMenu = false;
+					ctx1.save();
+					ctx1.textAlign = "left";
 					ctx1.fillStyle="#2a8958";
 					ctx1.fillRect(10, 10, 50, 18);
 					ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
 					ctx1.font = "16pt Impact";
 					ctx1.fillText("MENU", 10, 28);
+					ctx1.restore();
 				}
 			}
 		}, 50);

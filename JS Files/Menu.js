@@ -13,11 +13,12 @@ function drawMenu(){
 	ctx1.closePath();
 
 	// Draw title
-	ctx1.font = (3*SC) + "pt Impact";
+	ctx1.font = (3.4*SC) + "pt Impact";
+	ctx1.textAlign = "center";
 	ctx1.fillStyle = "#FFFFFF";
-	ctx1.fillText("Logic Training", (cvs1.width/2) - (11.5*SC) + 2, (cvs1.height/2) - (6*SC) + 2);
+	ctx1.fillText("Logic Training", (cvs1.width/2) + 2, (cvs1.height/2) - (6*SC) + 2);
 	ctx1.fillStyle = "#000000";
-	ctx1.fillText("Logic Training", (cvs1.width/2) - (11.5*SC), (cvs1.height/2) - (6*SC));
+	ctx1.fillText("Logic Training", (cvs1.width/2), (cvs1.height/2) - (6*SC));
 
 	drawLevels(ctx1);
 
@@ -53,24 +54,25 @@ function drawLevels(ctx){
 			ctx.textAlign = "left";
 		} else {
 			// Write the "LEVEL" text.
+			ctx1.textAlign = "center";
 			ctx.font = (0.8*SC) + "pt Impact";
 			ctx.fillStyle = "#000000";
-			ctx.fillText("LEVEL", x+(1.8*SC), y+(1.5*SC));
+			ctx.fillText("LEVEL", x+(3*SC), y+(1.5*SC));
 
 			// Draw the level number.
 			ctx.font = (2*SC) + "pt Impact";
 			ctx.fillStyle = "#000000";
-			ctx.fillText(i, x+(2.3*SC), y+(4.2*SC));
+			ctx.fillText(i, x+(3*SC), y+(4.2*SC));
 
 			// Draw the stars, filling in the ones which have been earned.
 			ctx.font = (0.8*SC) + "pt FontAwesome";
 			for (var j = 0; j < 3; j++){
 				if (j < levels[i].starsGained){
 					ctx.fillStyle = "#ffff00";
-					ctx.fillText("\uF005", x+(1.2*SC)+(j*25), y+(5.5*SC));
+					ctx.fillText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
 				}
 				ctx.strokeStyle = "#000000";
-				ctx.strokeText("\uF005", x+(1.2*SC)+(j*25), y+(5.5*SC));
+				ctx.strokeText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
 			}
 
 			if (!levels[i].unlocked){
