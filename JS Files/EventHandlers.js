@@ -5,7 +5,7 @@ function handleMouseDown(){
 		clearIntervals();
 		resetGameState();
 		selectedLevel = -1;
-		drawMenu(ctx1);
+		drawMenu();
 	}
 
 	updateSelectedGate();

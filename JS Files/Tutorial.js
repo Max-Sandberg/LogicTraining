@@ -106,7 +106,7 @@ var tutDialogues = [
 ]
 
 function startTutorial(){
-	startGame(0);
+	startLevel(0);
 	pause = true;
 	displayTutorialDialogue(0);
 }
@@ -226,7 +226,7 @@ function displayTutorialDialogue(dlgIdx){
 					resetGameState();
 					selectedLevel = -1;
 					levels[1].unlocked = true;
-					drawMenu(ctx1);
+					drawMenu();
 				}
 			}
 		}

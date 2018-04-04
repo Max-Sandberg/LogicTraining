@@ -1,25 +1,25 @@
 var selectedLevel = -1;
 
-function drawMenu(ctx){
+function drawMenu(){
 	// Clear the area.
-	ctx.clearRect(0, 0, cvs1.width, cvs1.height);
+	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 
 	// Draw dark green background
-	ctx.fillStyle = "#184e32";
-	ctx.beginPath();
-	ctx.rect(0, 0, cvs1.width, cvs1.height);
-	ctx.fill();
-	ctx.stroke();
-	ctx.closePath();
+	ctx1.fillStyle = "#184e32";
+	ctx1.beginPath();
+	ctx1.rect(0, 0, cvs1.width, cvs1.height);
+	ctx1.fill();
+	ctx1.stroke();
+	ctx1.closePath();
 
 	// Draw title
-	ctx.font = (3*SC) + "pt Impact";
-	ctx.fillStyle = "#FFFFFF";
-	ctx.fillText("Logic Training", (cvs1.width/2) - (11.5*SC) + 2, (cvs1.height/2) - (6*SC) + 2);
-	ctx.fillStyle = "#000000";
-	ctx.fillText("Logic Training", (cvs1.width/2) - (11.5*SC), (cvs1.height/2) - (6*SC));
+	ctx1.font = (3*SC) + "pt Impact";
+	ctx1.fillStyle = "#FFFFFF";
+	ctx1.fillText("Logic Training", (cvs1.width/2) - (11.5*SC) + 2, (cvs1.height/2) - (6*SC) + 2);
+	ctx1.fillStyle = "#000000";
+	ctx1.fillText("Logic Training", (cvs1.width/2) - (11.5*SC), (cvs1.height/2) - (6*SC));
 
-	drawLevels(ctx);
+	drawLevels(ctx1);
 
 	cvs2.onmousedown = handleMenuMouseDown;
 	cvs2.onmousemove = handleMenuMouseMove;
@@ -97,7 +97,7 @@ function handleMenuMouseMove(){
 	var lvl = getSelectedLevel();
 	if (lvl != selectedLevel){
 		selectedLevel = lvl;
-		drawMenu(ctx1);
+		drawMenu();
 	}
 }
 
@@ -106,7 +106,7 @@ function handleMenuMouseDown(){
 	if (selectedLevel == 0){
 		startTutorial();
 	} else if (selectedLevel != -1 && levels[selectedLevel].unlocked){
-		startGame(selectedLevel);
+		startLevel(selectedLevel);
 	}
 }
 

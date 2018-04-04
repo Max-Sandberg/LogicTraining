@@ -169,14 +169,14 @@ function handleEndScreenMouseDown(){
 			if (selectedLevel == 0){
 				startTutorial();
 			} else {
-				startGame(selectedLevel);
+				startLevel(selectedLevel);
 			}
 		} else {
 			selectedButton = null;
 			selectedLevel = -1;
 			cvs2.onmousedown = handleMenuMouseDown;
 			cvs2.onmousemove = handleMenuMouseMove;
-			drawMenu(ctx1);
+			drawMenu();
 		}
 	}
 }

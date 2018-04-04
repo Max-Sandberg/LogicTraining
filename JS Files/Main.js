@@ -13,12 +13,16 @@ var frameNo = 0;
 var moves = 0;
 var pause = false;
 
-function startGame(level) {
+function startGame(){
+	createCanvases();
+	document.body.onresize = handleResize;
+	loadFontAwesome(drawMenu, 200);
+}
+
+function startLevel(level) {
 	// Check for a bug where the canvas size is bigger than the window size.
 	if (cvs1.width != window.innerWidth){
-		document.body.removeChild(document.body.children[2]);
-		document.body.removeChild(document.body.children[1]);
-		createCanvases();
+		handleResize();
 	}
 
 	// Assign event handlers.
@@ -82,7 +86,7 @@ function startGame(level) {
 }
 
 // Waits for font awesome to load before continuing. This code is not mine - taken from https://stackoverflow.com/questions/35570801/how-to-draw-font-awesome-icons-onto-html-canvas
-function loadFontAwesome(callback,failAfterMS,arg){
+function loadFontAwesome(callback,failAfterMS){
 	var c=document.createElement("canvas");
 	var cctx=c.getContext("2d");
 	var ccw,cch;
@@ -102,11 +106,11 @@ function loadFontAwesome(callback,failAfterMS,arg){
 	function fontOnload(time){
 		var currentCount=pixcount();
 		if(time>failtime){
-			callback(arg);
+			callback();
 		}else if(currentCount==startCount){
 			requestAnimationFrame(fontOnload);
 		}else{
-			callback(arg);
+			callback();
 		}
 	}
 
@@ -123,7 +127,7 @@ function loadFontAwesome(callback,failAfterMS,arg){
 }
 
 // Create the canvases that the game will be drawn to.
-function createCanvases(menu){
+function createCanvases(){
 	// Create the main canvas.
 	cvs1 = document.createElement("canvas");
 	ctx1 = cvs1.getContext("2d");
@@ -142,9 +146,27 @@ function createCanvases(menu){
 
 	// Calculate the scale to use for the UI based on the screen size.
 	SC = Math.round((cvs1.height/50)/5) * 5;
+}
 
-	// If menu is true (only used in the index.html start function), draw the menu.
-	if (menu){
-		drawMenu(ctx1);
+// Handles the window being resized.
+function handleResize(){
+	// Temporarily store all the existing canvas event handlers.
+	var tempMouseDown = cvs2.onmousedown,
+		tempMouseUp = cvs2.onmouseup,
+		tempMouseMove = cvs2.onmousemove;
+	// Remove the current canvases, and use createCanvases to create new ones of the correct size, and recalculate SC.
+	document.body.removeChild(document.body.children[1]);
+	document.body.removeChild(document.body.children[0]);
+	createCanvases();
+	// Restore the old event handlers.
+	cvs2.onmousedown = tempMouseDown;
+	cvs2.onmouseup = tempMouseUp;
+	cvs2.onmousemove = tempMouseMove;
+	// Redraw the game or menu.
+	if (selectedLevel != -1){
+		drawMenuBar();
+		drawGameArea();
+	} else {
+		drawMenu();
 	}
 }

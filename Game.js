@@ -13,12 +13,16 @@ var frameNo = 0;
 var moves = 0;
 var pause = false;
 
-function startGame(level) {
+function startGame(){
+	createCanvases();
+	document.body.onresize = handleResize;
+	loadFontAwesome(drawMenu, 200);
+}
+
+function startLevel(level) {
 	// Check for a bug where the canvas size is bigger than the window size.
 	if (cvs1.width != window.innerWidth){
-		document.body.removeChild(document.body.children[2]);
-		document.body.removeChild(document.body.children[1]);
-		createCanvases();
+		handleResize();
 	}
 
 	// Assign event handlers.
@@ -82,7 +86,7 @@ function startGame(level) {
 }
 
 // Waits for font awesome to load before continuing. This code is not mine - taken from https://stackoverflow.com/questions/35570801/how-to-draw-font-awesome-icons-onto-html-canvas
-function loadFontAwesome(callback,failAfterMS,arg){
+function loadFontAwesome(callback,failAfterMS){
 	var c=document.createElement("canvas");
 	var cctx=c.getContext("2d");
 	var ccw,cch;
@@ -102,11 +106,11 @@ function loadFontAwesome(callback,failAfterMS,arg){
 	function fontOnload(time){
 		var currentCount=pixcount();
 		if(time>failtime){
-			callback(arg);
+			callback();
 		}else if(currentCount==startCount){
 			requestAnimationFrame(fontOnload);
 		}else{
-			callback(arg);
+			callback();
 		}
 	}
 
@@ -123,7 +127,7 @@ function loadFontAwesome(callback,failAfterMS,arg){
 }
 
 // Create the canvases that the game will be drawn to.
-function createCanvases(menu){
+function createCanvases(){
 	// Create the main canvas.
 	cvs1 = document.createElement("canvas");
 	ctx1 = cvs1.getContext("2d");
@@ -142,34 +146,52 @@ function createCanvases(menu){
 
 	// Calculate the scale to use for the UI based on the screen size.
 	SC = Math.round((cvs1.height/50)/5) * 5;
+}
 
-	// If menu is true (only used in the index.html start function), draw the menu.
-	if (menu){
-		drawMenu(ctx1);
+// Handles the window being resized.
+function handleResize(){
+	// Temporarily store all the existing canvas event handlers.
+	var tempMouseDown = cvs2.onmousedown,
+		tempMouseUp = cvs2.onmouseup,
+		tempMouseMove = cvs2.onmousemove;
+	// Remove the current canvases, and use createCanvases to create new ones of the correct size, and recalculate SC.
+	document.body.removeChild(document.body.children[1]);
+	document.body.removeChild(document.body.children[0]);
+	createCanvases();
+	// Restore the old event handlers.
+	cvs2.onmousedown = tempMouseDown;
+	cvs2.onmouseup = tempMouseUp;
+	cvs2.onmousemove = tempMouseMove;
+	// Redraw the game or menu.
+	if (selectedLevel != -1){
+		drawMenuBar();
+		drawGameArea();
+	} else {
+		drawMenu();
 	}
 }
 var selectedLevel = -1;
 
-function drawMenu(ctx){
+function drawMenu(){
 	// Clear the area.
-	ctx.clearRect(0, 0, cvs1.width, cvs1.height);
+	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 
 	// Draw dark green background
-	ctx.fillStyle = "#184e32";
-	ctx.beginPath();
-	ctx.rect(0, 0, cvs1.width, cvs1.height);
-	ctx.fill();
-	ctx.stroke();
-	ctx.closePath();
+	ctx1.fillStyle = "#184e32";
+	ctx1.beginPath();
+	ctx1.rect(0, 0, cvs1.width, cvs1.height);
+	ctx1.fill();
+	ctx1.stroke();
+	ctx1.closePath();
 
 	// Draw title
-	ctx.font = (3*SC) + "pt Impact";
-	ctx.fillStyle = "#FFFFFF";
-	ctx.fillText("Logic Training", (cvs1.width/2) - (11.5*SC) + 2, (cvs1.height/2) - (6*SC) + 2);
-	ctx.fillStyle = "#000000";
-	ctx.fillText("Logic Training", (cvs1.width/2) - (11.5*SC), (cvs1.height/2) - (6*SC));
+	ctx1.font = (3*SC) + "pt Impact";
+	ctx1.fillStyle = "#FFFFFF";
+	ctx1.fillText("Logic Training", (cvs1.width/2) - (11.5*SC) + 2, (cvs1.height/2) - (6*SC) + 2);
+	ctx1.fillStyle = "#000000";
+	ctx1.fillText("Logic Training", (cvs1.width/2) - (11.5*SC), (cvs1.height/2) - (6*SC));
 
-	drawLevels(ctx);
+	drawLevels(ctx1);
 
 	cvs2.onmousedown = handleMenuMouseDown;
 	cvs2.onmousemove = handleMenuMouseMove;
@@ -247,7 +269,7 @@ function handleMenuMouseMove(){
 	var lvl = getSelectedLevel();
 	if (lvl != selectedLevel){
 		selectedLevel = lvl;
-		drawMenu(ctx1);
+		drawMenu();
 	}
 }
 
@@ -256,7 +278,7 @@ function handleMenuMouseDown(){
 	if (selectedLevel == 0){
 		startTutorial();
 	} else if (selectedLevel != -1 && levels[selectedLevel].unlocked){
-		startGame(selectedLevel);
+		startLevel(selectedLevel);
 	}
 }
 
@@ -1638,7 +1660,7 @@ function handleMouseDown(){
 		clearIntervals();
 		resetGameState();
 		selectedLevel = -1;
-		drawMenu(ctx1);
+		drawMenu();
 	}
 
 	updateSelectedGate();
@@ -1873,14 +1895,14 @@ function handleEndScreenMouseDown(){
 			if (selectedLevel == 0){
 				startTutorial();
 			} else {
-				startGame(selectedLevel);
+				startLevel(selectedLevel);
 			}
 		} else {
 			selectedButton = null;
 			selectedLevel = -1;
 			cvs2.onmousedown = handleMenuMouseDown;
 			cvs2.onmousemove = handleMenuMouseMove;
-			drawMenu(ctx1);
+			drawMenu();
 		}
 	}
 }
@@ -2005,7 +2027,7 @@ var tutDialogues = [
 ]
 
 function startTutorial(){
-	startGame(0);
+	startLevel(0);
 	pause = true;
 	displayTutorialDialogue(0);
 }
@@ -2125,7 +2147,7 @@ function displayTutorialDialogue(dlgIdx){
 					resetGameState();
 					selectedLevel = -1;
 					levels[1].unlocked = true;
-					drawMenu(ctx1);
+					drawMenu();
 				}
 			}
 		}
