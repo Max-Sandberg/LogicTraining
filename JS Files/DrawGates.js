@@ -118,34 +118,38 @@ function drawDraggedGate(){
 
 //#region - Functions to draw the specific gates.
 function drawAND(x, y, input1, input2, output, ctx){
+	drawWire(x, y+SC, x+(0.6*SC), y+SC, input1, ctx);
+	drawWire(x, y+(3*SC), x+(0.6*SC), y+(3*SC), input2, ctx);
+	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
+
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ffffff";
 
 	ctx.beginPath();
-	ctx.moveTo(x+(0.5*SC), y+(0.4*SC));
+	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
 	ctx.lineTo(x+(1.6*SC), y+(0.4*SC));
 	ctx.bezierCurveTo(x+(4.1*SC), y+(0.4*SC), x+(4.1*SC), y+(3.6*SC), x+(1.6*SC), y+(3.6*SC));
-	ctx.lineTo(x+(0.5*SC), y+(3.6*SC));
-	ctx.lineTo(x+(0.5*SC), y+(0.4*SC));
+	ctx.lineTo(x+(0.6*SC), y+(3.6*SC));
+	ctx.lineTo(x+(0.6*SC), y+(0.4*SC));
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
-
-	drawWire(x, y+SC, x+(0.5*SC), y+SC, input1, ctx);
-	drawWire(x, y+(3*SC), x+(0.5*SC), y+(3*SC), input2, ctx);
-	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 }
 
 function drawNAND(x, y, input1, input2, output, ctx){
+	drawWire(x, y+SC, x+(0.6*SC), y+SC, input1, ctx);
+	drawWire(x, y+(3*SC), x+(0.6*SC), y+(3*SC), input2, ctx);
+	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
+
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ffffff";
 
 	ctx.beginPath();
-	ctx.moveTo(x+(0.5*SC), y+(0.4*SC));
+	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
 	ctx.lineTo(x+(1.4*SC), y+(0.4*SC));
 	ctx.bezierCurveTo(x+(3.9*SC), y+(0.4*SC), x+(3.9*SC), y+(3.6*SC), x+(1.4*SC), y+(3.6*SC));
-	ctx.lineTo(x+(0.5*SC), y+(3.6*SC));
-	ctx.lineTo(x+(0.5*SC), y+(0.4*SC));
+	ctx.lineTo(x+(0.6*SC), y+(3.6*SC));
+	ctx.lineTo(x+(0.6*SC), y+(0.4*SC));
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
@@ -155,13 +159,13 @@ function drawNAND(x, y, input1, input2, output, ctx){
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
-
-	drawWire(x, y+SC, x+(0.5*SC), y+SC, input1, ctx);
-	drawWire(x, y+(3*SC), x+(0.5*SC), y+(3*SC), input2, ctx);
-	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 }
 
 function drawOR(x, y, input1, input2, output, ctx){
+	drawWire(x, y+SC, x+(0.8*SC), y+SC, input1, ctx);
+	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC), input2, ctx);
+	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
+
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ffffff";
 
@@ -173,13 +177,13 @@ function drawOR(x, y, input1, input2, output, ctx){
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
-
-	drawWire(x, y+SC, x+(0.8*SC), y+SC, input1, ctx);
-	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC), input2, ctx);
-	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 }
 
 function drawNOR(x, y, input1, input2, output, ctx){
+	drawWire(x, y+SC, x+(0.8*SC), y+SC, input1, ctx);
+	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC), input2, ctx);
+	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
+
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ffffff";
 
@@ -197,13 +201,13 @@ function drawNOR(x, y, input1, input2, output, ctx){
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
-
-	drawWire(x, y+SC, x+(0.8*SC), y+SC, input1, ctx);
-	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC), input2, ctx);
-	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 }
 
 function drawXOR(x, y, input1, input2, output, ctx){
+	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
+	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
+	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
+
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ffffff";
 
@@ -221,13 +225,13 @@ function drawXOR(x, y, input1, input2, output, ctx){
 	ctx.bezierCurveTo(x+(1.1*SC), y+(1*SC), x+(1.1*SC), y+(3*SC), x+(0.3*SC), y+(3.6*SC));
 	ctx.stroke();
 	ctx.closePath();
-
-	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
-	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
-	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 }
 
 function drawXNOR(x, y, input1, input2, output, ctx){
+	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
+	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
+	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
+	
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ffffff";
 
@@ -251,10 +255,6 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
-
-	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
-	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
-	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 }
 
 function drawBulb(x, y, live, ctx){

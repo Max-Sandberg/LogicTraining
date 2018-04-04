@@ -139,24 +139,26 @@ function displayTutorialDialogue(dlgIdx){
 	var dlg = tutDialogues[dlgIdx];
 
 	// Calculate the height the dialogue box should be.
-	var topTextHeight, botTextHeight, textHeight, boxHeight;
+	var topTextHeight, botTextHeight, textHeight, boxHeight,
+		boxWidth = (dlg.getDiagramWidth == undefined) ? 500 : Math.max(dlg.getDiagramWidth() + 80, 500);
 	ctx1.font = "14pt Arial";
 	if (dlg.text == undefined){
-		topTextHeight = wrapText(ctx1, dlg.topText, 0, 0, 480, 24, true);
-		botTextHeight = wrapText(ctx1, dlg.botText, 0, 0, 480, 24, true);
+		topTextHeight = wrapText(ctx1, dlg.topText, 0, 0, (0.95*boxWidth), 24, true);
+		botTextHeight = wrapText(ctx1, dlg.botText, 0, 0, (0.95*boxWidth), 24, true);
 		boxHeight = 15 + topTextHeight + 35 + dlg.getDiagramHeight() + 25 + botTextHeight + 68;
 	} else {
 		textHeight = wrapText(ctx1, dlg.text, 0, 0, 480, 24, true);
 		boxHeight = 15 + textHeight + 58;
 	}
 
-	var startx = (cvs1.width/2) - 250,
-		starty = (cvs1.height/2) - (boxHeight/2);
+	var startx = Math.round((cvs1.width/2) - (boxWidth/2)),
+		starty = Math.round((cvs1.height/2) - (boxHeight/2));
 
 	// Draw the rectangle.
 	ctx1.beginPath();
+	ctx1.lineWidth = 1;
 	ctx1.fillStyle = "#2a8958";
-	ctx1.rect(startx, starty, 500, boxHeight);
+	ctx1.rect(startx+0.5, starty+0.5, boxWidth, boxHeight);
 	ctx1.fill();
 	ctx1.stroke();
 	ctx1.closePath();
@@ -166,26 +168,26 @@ function displayTutorialDialogue(dlgIdx){
 	ctx1.fillStyle = "#000000";
 	ctx1.textAlign = "center";
 	if (dlg.text == undefined){
-		wrapText(ctx1, dlg.topText, cvs1.width/2, starty+39, 470, 24);
-		wrapText(ctx1, dlg.botText, cvs1.width/2, starty+30+topTextHeight+35+dlg.getDiagramHeight()+25+24, 470, 24);
+		wrapText(ctx1, dlg.topText, cvs1.width/2, starty+39, 0.95*boxWidth, 24);
+		wrapText(ctx1, dlg.botText, cvs1.width/2, starty+30+topTextHeight+35+dlg.getDiagramHeight()+25+24, 0.95*boxWidth, 24);
 	} else {
-		wrapText(ctx1, dlg.text, cvs1.width/2, starty+39, 470, 24);
+		wrapText(ctx1, dlg.text, cvs1.width/2, starty+39, 0.95*boxWidth, 24);
 	}
 
 	// Draw the diagram if there is one.
 	if (dlg.drawDiagram != undefined){
-		var dgrmX = startx+250-(dlg.getDiagramWidth()/2),
-			dgrmY = starty+20+topTextHeight+35+4;
+		var dgrmX = Math.round(startx+(boxWidth/2)-(dlg.getDiagramWidth()/2)),
+			dgrmY = Math.round(starty+20+topTextHeight+35+4);
 		ctx1.clearRect(dgrmX-20, dgrmY-20, dlg.getDiagramWidth()+40, dlg.getDiagramHeight()+40);
 		ctx1.strokeStyle = "#000000";
 		ctx1.lineWidth = 1;
-		ctx1.strokeRect(dgrmX-20, dgrmY-20, dlg.getDiagramWidth()+40, dlg.getDiagramHeight()+40);
+		ctx1.strokeRect(dgrmX-20.5, dgrmY-20.5, dlg.getDiagramWidth()+40, dlg.getDiagramHeight()+40);
 		dlg.drawDiagram(dgrmX, dgrmY);
 	}
 
 	// Draw the continue button.
 	var highlight = false,
-		btnX = startx+394,
+		btnX = startx+boxWidth-104,
 		btnY = starty+boxHeight-34;
 	ctx1.font = "18pt Impact";
 	ctx1.textAlign = "left";
@@ -210,7 +212,7 @@ function displayTutorialDialogue(dlgIdx){
 			ctx1.fillText("CONTINUE", btnX, btnY+20);
 			// If the mouse is hovering over the button, change the mousedown handler to go to the next message.
 			cvs2.onmousedown = function(){
-				ctx1.clearRect(startx-3, starty-3, 506, boxHeight+6);
+				ctx1.clearRect(startx-3, starty-3, boxWidth+6, boxHeight+6);
 				clearInterval(btnHoverIntervalId);
 				btnHoverIntervalId = undefined;
 				if (dlgIdx+1 < tutDialogues.length){
@@ -252,13 +254,14 @@ function startTestCircuit(){
 	ctx1.font = "14pt Arial";
 	textWidth = ctx1.measureText(dlg.text).width;
 	boxWidth = textWidth + 40;
-	var startx = (cvs1.width/2) - (2.5*SC) - (boxWidth/2),
-		starty = (6*SC) + 40;
+	var startx = Math.floor((cvs1.width/2) - (2.5*SC) - (boxWidth/2)),
+		starty = Math.floor((6*SC) + 40);
 
 	// Draw the dialogue box.
 	ctx1.beginPath();
+	ctx1.lineWidth = 1;
 	ctx1.fillStyle = "#2a8958";
-	ctx1.rect(startx, starty, boxWidth, 34);
+	ctx1.rect(startx+0.5, starty+0.5, boxWidth, 34);
 	ctx1.fill();
 	ctx1.stroke();
 	ctx1.closePath();
@@ -269,20 +272,20 @@ function startTestCircuit(){
 	ctx1.fillText(dlg.text, startx + 20, starty + 24);
 
 	// Draw an arrow pointing to the OR gate in the menu bar.
-	var x = (cvs1.width/2) - (2.5*SC),
-		y = (5.3*SC);
+	var x = Math.floor((cvs1.width/2) - (2.5*SC))+0.5,
+		y = Math.floor(5.3*SC)+0.5;
 	ctx1.fillStyle = "#ff0000";
 	ctx1.beginPath();
 	ctx1.moveTo(x, y);
 	ctx1.lineTo(x-20, y+20);
 	ctx1.lineTo(x-8, y+20);
-	ctx1.lineTo(x-8, (5.6*SC)+40);
-	ctx1.lineTo(x+8, (5.6*SC)+40);
+	ctx1.lineTo(x-8, Math.floor(5.6*SC)+40.5);
+	ctx1.lineTo(x+8, Math.floor(5.6*SC)+40.5);
 	ctx1.lineTo(x+8, y+20);
 	ctx1.lineTo(x+20, y+20);
 	ctx1.lineTo(x,y);
-	ctx1.stroke();
 	ctx1.fill();
+	ctx1.stroke();
 
 	// Start moving the circuit
 	var gameAreaHeight = cvs1.height - (6*SC) - 60;

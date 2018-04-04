@@ -45,6 +45,8 @@ function drawMenuBar(){
 	}
 
 	// Draw a partially transparent grey box and a lock symbol on any locked gates.
+	ctx1.save();
+	ctx1.textAlign = "center";
 	for (var i = 1; i < 7; i++){
 		if (!allowedGates.includes(i)){
 			// Draw transparent grey box.
@@ -55,12 +57,13 @@ function drawMenuBar(){
 			// Draw lock icon.
 			ctx1.font = 2*SC + "px FontAwesome";
 			ctx1.fillStyle = "#000000";
-			ctx1.fillText("\uf023", startx+(1.45*SC), y+(2.8*SC));
+			ctx1.fillText("\uf023", startx+(2*SC)+3, y+(2.7*SC)+3);
 			ctx1.font = 2*SC + "px FontAwesome";
 			ctx1.fillStyle = "#ffffff";
-			ctx1.fillText("\uf023", startx+(1.3*SC), y+(2.65*SC));
+			ctx1.fillText("\uf023", startx+(2*SC), y+(2.7*SC));
 		}
 	}
+	ctx1.restore();
 
 	// Draw the menu button.
 	ctx1.save();
