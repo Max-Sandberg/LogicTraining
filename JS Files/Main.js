@@ -14,6 +14,13 @@ var moves = 0;
 var pause = false;
 
 function startGame(level) {
+	// Check for a bug where the canvas size is bigger than the window size.
+	if (cvs1.width != window.innerWidth){
+		document.body.removeChild(document.body.children[2]);
+		document.body.removeChild(document.body.children[1]);
+		createCanvases();
+	}
+
 	// Assign event handlers.
 	cvs2.onmousedown = handleMouseDown;
 	cvs2.onmouseup = handleMouseUp;
@@ -42,14 +49,17 @@ function startGame(level) {
 	// Assign hotkeys.
 	document.onkeypress = function (e) {
 		e = e || window.event;
-		var key = event.which || event.keyCode;  // Use either which or keyCode, depending on browser support
+		// Find which key was pressed. Use either which or keyCode, depending on browser support.
+		var key = event.which || event.keyCode;
 		if (String.fromCharCode(key) == " "){
-			// Uncomment to allow pausing
-			//pause = !pause;
+			// If key was space, pause the game - comment as appropriate.
+			pause = !pause;
 		} else {
+			// If the key was a number, find which gate that number corresponds to.
 			var gate = parseInt(String.fromCharCode(key));
 			if (gate > 0 && gate < 7){
 				if (allowedGates.includes(gate)){
+					// If that gate is allowed to be used, set it as the dragged gate and start the necessary intervals.
 					draggedGate = gate;
 					if (drawDraggedIntervalId == undefined && updateSelectedIntervalId == undefined){
 						drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
@@ -65,13 +75,14 @@ function startGame(level) {
 		pause = true;
 		introduceGates(allowedGates[0]);
 	} else if (level == 7){
+		// Level 7 introduces gate changes, which is done by the introduceGates function, but with parameter 7.
 		pause = true;
 		introduceGates(7);
 	}
 }
 
 // Waits for font awesome to load before continuing. This code is not mine - taken from https://stackoverflow.com/questions/35570801/how-to-draw-font-awesome-icons-onto-html-canvas
-function loadFontAwesome(callback,failAfterMS){
+function loadFontAwesome(callback,failAfterMS,arg){
 	var c=document.createElement("canvas");
 	var cctx=c.getContext("2d");
 	var ccw,cch;
@@ -91,11 +102,11 @@ function loadFontAwesome(callback,failAfterMS){
 	function fontOnload(time){
 		var currentCount=pixcount();
 		if(time>failtime){
-			callback();
+			callback(arg);
 		}else if(currentCount==startCount){
 			requestAnimationFrame(fontOnload);
 		}else{
-			callback();
+			callback(arg);
 		}
 	}
 
@@ -108,5 +119,32 @@ function loadFontAwesome(callback,failAfterMS){
 			if(data[i]>10){count++;}
 		}
 		return(count);
+	}
+}
+
+// Create the canvases that the game will be drawn to.
+function createCanvases(menu){
+	// Create the main canvas.
+	cvs1 = document.createElement("canvas");
+	ctx1 = cvs1.getContext("2d");
+	cvs1.width = window.innerWidth;
+	cvs1.height = window.innerHeight;
+	cvs1.style = "position: absolute; left: 0; top: 0; z-index: 0; background-color: #d8f3e6; border:0px solid #d3d3d3;";
+	document.body.insertBefore(cvs1, document.body.childNodes[0]);
+
+	// Create the layer 2 canvas - things on this canvas are drawn in front of canvas 1.
+	cvs2 = document.createElement("canvas");
+	ctx2 = cvs2.getContext("2d");
+	cvs2.width = window.innerWidth;
+	cvs2.height = window.innerHeight;
+	cvs2.style = "position: absolute; left: 0; top: 0; z-index: 1;";
+	document.body.insertBefore(cvs2, document.body.childNodes[0]);
+
+	// Calculate the scale to use for the UI based on the screen size.
+	SC = Math.round((cvs1.height/50)/5) * 5;
+
+	// If menu is true (only used in the index.html start function), draw the menu.
+	if (menu){
+		drawMenu(ctx1);
 	}
 }

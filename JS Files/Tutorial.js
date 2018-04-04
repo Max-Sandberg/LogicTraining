@@ -108,8 +108,7 @@ var tutDialogues = [
 function startTutorial(){
 	startGame(0);
 	pause = true;
-
-	displayDialogue(0);
+	displayTutorialDialogue(0);
 }
 
 function wrapText(ctx, text, x, y, maxWidth, lineHeight, noPrint) {
@@ -136,7 +135,7 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight, noPrint) {
 	return lineCount * lineHeight;
 }
 
-function displayDialogue(dlgIdx){
+function displayTutorialDialogue(dlgIdx){
 	var dlg = tutDialogues[dlgIdx];
 
 	// Calculate the height the dialogue box should be.
@@ -217,7 +216,7 @@ function displayDialogue(dlgIdx){
 				if (dlgIdx+1 < tutDialogues.length){
 					cvs2.onmousedown = handleMouseDown;
 					if (dlgIdx+1 != 3){
-						displayDialogue(dlgIdx+1);
+						displayTutorialDialogue(dlgIdx+1);
 					} else {
 						startTestCircuit();
 					}
@@ -295,7 +294,7 @@ function startTestCircuit(){
 function handleTestCircuit(){
 	ctx1.clearRect((cvs1.width/2)-200, 6*SC, 400, 100);
 	drawMenuBar();
-	displayDialogue(4);
+	displayTutorialDialogue(4);
 }
 
 // Displays dialogues to introduce and explain any of the 3 gate pairs.

@@ -14,6 +14,13 @@ var moves = 0;
 var pause = false;
 
 function startGame(level) {
+	// Check for a bug where the canvas size is bigger than the window size.
+	if (cvs1.width != window.innerWidth){
+		document.body.removeChild(document.body.children[2]);
+		document.body.removeChild(document.body.children[1]);
+		createCanvases();
+	}
+
 	// Assign event handlers.
 	cvs2.onmousedown = handleMouseDown;
 	cvs2.onmouseup = handleMouseUp;
@@ -42,14 +49,17 @@ function startGame(level) {
 	// Assign hotkeys.
 	document.onkeypress = function (e) {
 		e = e || window.event;
-		var key = event.which || event.keyCode;  // Use either which or keyCode, depending on browser support
+		// Find which key was pressed. Use either which or keyCode, depending on browser support.
+		var key = event.which || event.keyCode;
 		if (String.fromCharCode(key) == " "){
-			// Uncomment to allow pausing
-			//pause = !pause;
+			// If key was space, pause the game - comment as appropriate.
+			pause = !pause;
 		} else {
+			// If the key was a number, find which gate that number corresponds to.
 			var gate = parseInt(String.fromCharCode(key));
 			if (gate > 0 && gate < 7){
 				if (allowedGates.includes(gate)){
+					// If that gate is allowed to be used, set it as the dragged gate and start the necessary intervals.
 					draggedGate = gate;
 					if (drawDraggedIntervalId == undefined && updateSelectedIntervalId == undefined){
 						drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
@@ -65,13 +75,14 @@ function startGame(level) {
 		pause = true;
 		introduceGates(allowedGates[0]);
 	} else if (level == 7){
+		// Level 7 introduces gate changes, which is done by the introduceGates function, but with parameter 7.
 		pause = true;
 		introduceGates(7);
 	}
 }
 
 // Waits for font awesome to load before continuing. This code is not mine - taken from https://stackoverflow.com/questions/35570801/how-to-draw-font-awesome-icons-onto-html-canvas
-function loadFontAwesome(callback,failAfterMS){
+function loadFontAwesome(callback,failAfterMS,arg){
 	var c=document.createElement("canvas");
 	var cctx=c.getContext("2d");
 	var ccw,cch;
@@ -91,11 +102,11 @@ function loadFontAwesome(callback,failAfterMS){
 	function fontOnload(time){
 		var currentCount=pixcount();
 		if(time>failtime){
-			callback();
+			callback(arg);
 		}else if(currentCount==startCount){
 			requestAnimationFrame(fontOnload);
 		}else{
-			callback();
+			callback(arg);
 		}
 	}
 
@@ -110,10 +121,10 @@ function loadFontAwesome(callback,failAfterMS){
 		return(count);
 	}
 }
-var selectedLevel = -1;
 
-function prepareGame(){
-	// Create the main canvas
+// Create the canvases that the game will be drawn to.
+function createCanvases(menu){
+	// Create the main canvas.
 	cvs1 = document.createElement("canvas");
 	ctx1 = cvs1.getContext("2d");
 	cvs1.width = window.innerWidth;
@@ -121,7 +132,7 @@ function prepareGame(){
 	cvs1.style = "position: absolute; left: 0; top: 0; z-index: 0; background-color: #d8f3e6; border:0px solid #d3d3d3;";
 	document.body.insertBefore(cvs1, document.body.childNodes[0]);
 
-	// Create the layer 2 canvas
+	// Create the layer 2 canvas - things on this canvas are drawn in front of canvas 1.
 	cvs2 = document.createElement("canvas");
 	ctx2 = cvs2.getContext("2d");
 	cvs2.width = window.innerWidth;
@@ -129,11 +140,15 @@ function prepareGame(){
 	cvs2.style = "position: absolute; left: 0; top: 0; z-index: 1;";
 	document.body.insertBefore(cvs2, document.body.childNodes[0]);
 
+	// Calculate the scale to use for the UI based on the screen size.
 	SC = Math.round((cvs1.height/50)/5) * 5;
 
-	// Draw a dark green box over the whole screen
-	drawMenu(ctx1);
+	// If menu is true (only used in the index.html start function), draw the menu.
+	if (menu){
+		drawMenu(ctx1);
+	}
 }
+var selectedLevel = -1;
 
 function drawMenu(ctx){
 	// Clear the area.
@@ -1992,8 +2007,7 @@ var tutDialogues = [
 function startTutorial(){
 	startGame(0);
 	pause = true;
-
-	displayDialogue(0);
+	displayTutorialDialogue(0);
 }
 
 function wrapText(ctx, text, x, y, maxWidth, lineHeight, noPrint) {
@@ -2020,7 +2034,7 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight, noPrint) {
 	return lineCount * lineHeight;
 }
 
-function displayDialogue(dlgIdx){
+function displayTutorialDialogue(dlgIdx){
 	var dlg = tutDialogues[dlgIdx];
 
 	// Calculate the height the dialogue box should be.
@@ -2101,7 +2115,7 @@ function displayDialogue(dlgIdx){
 				if (dlgIdx+1 < tutDialogues.length){
 					cvs2.onmousedown = handleMouseDown;
 					if (dlgIdx+1 != 3){
-						displayDialogue(dlgIdx+1);
+						displayTutorialDialogue(dlgIdx+1);
 					} else {
 						startTestCircuit();
 					}
@@ -2179,7 +2193,7 @@ function startTestCircuit(){
 function handleTestCircuit(){
 	ctx1.clearRect((cvs1.width/2)-200, 6*SC, 400, 100);
 	drawMenuBar();
-	displayDialogue(4);
+	displayTutorialDialogue(4);
 }
 
 // Displays dialogues to introduce and explain any of the 3 gate pairs.
@@ -2385,7 +2399,7 @@ var levels = [
 
 	//#region Level 1 - AND/NAND, Easy
 	{
-		unlocked : false,
+		unlocked : true, //Change me back!
 		starsGained : 0,
 		allowedGates : [1, 2],
 		newGates : true,
@@ -2743,7 +2757,7 @@ var levels = [
 
 	//#region Level 2 - AND/NAND, Medium
 	{
-		unlocked : false,
+		unlocked : true, //Change me back!
 		starsGained : 0,
 		allowedGates : [1, 2],
 		newGates : false,
@@ -3261,7 +3275,7 @@ var levels = [
 
 	//#region Level 3 - OR/NOR, Easy
 	{
-		unlocked : false,
+		unlocked : true, //Change me back!
 		starsGained : 0,
 		allowedGates : [3,4],
 		newGates : true,
@@ -3619,7 +3633,7 @@ var levels = [
 
 	//#region Level 4 - OR/NOR, Medium
 	{
-		unlocked : false,
+		unlocked : true, //Change me back!
 		starsGained : 0,
 		allowedGates : [3,4],
 		enableGateChanges : false,
@@ -4136,7 +4150,7 @@ var levels = [
 
 	//#region Level 5 - XOR/XNOR, Easy
 	{
-		unlocked : false,
+		unlocked : true, //Change me back!
 		starsGained : 0,
 		allowedGates : [5,6],
 		newGates : true,
@@ -4494,7 +4508,7 @@ var levels = [
 
 	//#region Level 6 - XOR/XNOR, Medium
 	{
-		unlocked : false,
+		unlocked : true, //Change me back!
 		starsGained : 0,
 		allowedGates : [5,6],
 		newGates : false,
@@ -5012,7 +5026,7 @@ var levels = [
 
 	//#region Level 7 - All gates, Medium, Gate changes
 	{
-		unlocked : false,
+		unlocked : true, //Change me back!
 		starsGained : 0,
 		allowedGates : [1,2,3],
 		newGates : false,
@@ -5530,7 +5544,7 @@ var levels = [
 
 	//#region Level 8 - All gates, Hard, Gate changes
 	{
-		unlocked : false,
+		unlocked : true, //Change me back!
 		starsGained : 0,
 		allowedGates : [1,2,3],
 		newGates : false,

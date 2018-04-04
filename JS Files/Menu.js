@@ -1,28 +1,5 @@
 var selectedLevel = -1;
 
-function prepareGame(){
-	// Create the main canvas
-	cvs1 = document.createElement("canvas");
-	ctx1 = cvs1.getContext("2d");
-	cvs1.width = window.innerWidth;
-	cvs1.height = window.innerHeight;
-	cvs1.style = "position: absolute; left: 0; top: 0; z-index: 0; background-color: #d8f3e6; border:0px solid #d3d3d3;";
-	document.body.insertBefore(cvs1, document.body.childNodes[0]);
-
-	// Create the layer 2 canvas
-	cvs2 = document.createElement("canvas");
-	ctx2 = cvs2.getContext("2d");
-	cvs2.width = window.innerWidth;
-	cvs2.height = window.innerHeight;
-	cvs2.style = "position: absolute; left: 0; top: 0; z-index: 1;";
-	document.body.insertBefore(cvs2, document.body.childNodes[0]);
-
-	SC = Math.round((cvs1.height/50)/5) * 5;
-
-	// Draw a dark green box over the whole screen
-	drawMenu(ctx1);
-}
-
 function drawMenu(ctx){
 	// Clear the area.
 	ctx.clearRect(0, 0, cvs1.width, cvs1.height);
