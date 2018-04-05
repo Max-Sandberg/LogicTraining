@@ -123,7 +123,7 @@ function drawAND(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	ctx.fillStyle = "#ffffff";
+	ctx.fillStyle = "#8080ff"; // blue
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
@@ -142,7 +142,7 @@ function drawNAND(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	ctx.fillStyle = "#ffffff";
+	ctx.fillStyle = "#ffd280"; // orange
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
@@ -167,7 +167,7 @@ function drawOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	ctx.fillStyle = "#ffffff";
+	ctx.fillStyle = "#80ff80"; // green
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
@@ -185,7 +185,7 @@ function drawNOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	ctx.fillStyle = "#ffffff";
+	ctx.fillStyle = "#ff8080"; // red
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
@@ -209,7 +209,7 @@ function drawXOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	ctx.fillStyle = "#ffffff";
+	ctx.fillStyle = "#ffff80"; // yellow
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
@@ -233,7 +233,7 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	ctx.fillStyle = "#ffffff";
+	ctx.fillStyle = "#ff80ff"; // purple
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
