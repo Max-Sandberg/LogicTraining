@@ -102,7 +102,7 @@ function drawMenuBar(){
 					ctx1.restore();
 				}
 			}
-		}, 50);
+		}, 80);
 	}
 }
 
@@ -117,9 +117,9 @@ function drawGameArea(ctx){
 		if (!pause){
 			// Normal circuits move 1 pixel, star circuits move two pixels.
 			if (circuits[i].type == gatesEnum.star && circuits[i].startx < cvs1.width){
-				circuits[i].startx -= 1.5;
+				circuits[i].startx -= 1.6 * scrollSpeed;
 			} else {
-				circuits[i].startx -= 1;
+				circuits[i].startx -= scrollSpeed;
 			}
 		}
 		drawCircuit(circuits[i], ctx);

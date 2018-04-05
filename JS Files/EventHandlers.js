@@ -21,7 +21,7 @@ function handleMouseDown(){
 				if (allowedGates.includes(i) && (mousex > startX+((i-1)*5*SC)) && (mousex < startX+((i-1)*5*SC)+(4*SC))){
 					// Sets draggedGate to the selected gate, and puts drawDraggedGate on an interval, so that it can be redrawn to snap to nearby gates even if the mouse doesn't move.
 					draggedGate = i;
-					drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
+					drawDraggedIntervalId = setInterval(drawDraggedGate, 1000/60);
 					updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
 				}
 			}
@@ -32,7 +32,7 @@ function handleMouseDown(){
 				draggedGate = gate.type;
 				gate.type = 0;
 				updateCircuitValues(gate.idx);
-				drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
+				drawDraggedIntervalId = setInterval(drawDraggedGate, 1000/60);
 				updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
 			}
 		}

@@ -12,6 +12,7 @@ var mousex, mousey;
 var frameNo = 0;
 var moves = 0;
 var pause = false;
+var scrollSpeed;
 
 function startGame(){
 	createCanvases();
@@ -44,7 +45,7 @@ function startLevel(level) {
 	ctx1.strokeStyle = "#000000";
 	ctx1.strokeRect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-1);
 	pause = false;
-	drawIntervalId = setInterval(drawGameArea, 10, ctx1);
+	drawIntervalId = setInterval(drawGameArea, 1000/60, ctx1);
 	updateIntervalId = setInterval(updateGameArea, 50);
 	if (enableGateChanges && selectedLevel != 7){
 		gateChangeIntervalId = setInterval(changeLockedGates, 20000);
@@ -66,7 +67,7 @@ function startLevel(level) {
 					// If that gate is allowed to be used, set it as the dragged gate and start the necessary intervals.
 					draggedGate = gate;
 					if (drawDraggedIntervalId == undefined && updateSelectedIntervalId == undefined){
-						drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
+						drawDraggedIntervalId = setInterval(drawDraggedGate, 1000/60);
 						updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
 					}
 				}
@@ -147,6 +148,10 @@ function createCanvases(){
 	// Calculate the scale to use for the UI based on the screen size.
 	SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
 	SC = Math.min(SC, 22);
+
+	// Calculate the scoll speed based on the screen size.
+	//scrollSpeed = cvs1.width / 1800;
+	scrollSpeed = 2;
 }
 
 // Handles the window being resized.
@@ -166,7 +171,7 @@ function handleResize(){
 	// Redraw the game or menu.
 	if (selectedLevel != -1){
 		drawMenuBar();
-		drawGameArea();
+		drawGameArea(ctx1);
 	} else {
 		drawMenu();
 	}
@@ -345,6 +350,8 @@ function checkWinOrLose(){
 
 	// If the game is won or lost, stop the game and display the relevant message.
 	if (gameState == "won" || gameState == "lost"){
+		drawGameArea(ctx1);
+
 		if (selectedLevel != 0 || gameState == "lost"){
 			clearIntervals();
 			won = (gameState == "won");
@@ -421,7 +428,7 @@ function changeLockedGates(){
 	 	xOffset = Math.round(cvs1.width / 2) + (26*SC),
 		yOffset = SC,
 		opacity,
-		id = setInterval(animateCountdown, 10);
+		id = setInterval(animateCountdown, 20);
 
 	function animateCountdown(){
 		frame++;
@@ -430,19 +437,19 @@ function changeLockedGates(){
 			ctx1.fillStyle = "#2a8958";
 			ctx1.fillRect(xOffset-(4*SC), yOffset, (8*SC), (4*SC));
 
-			if (frame != 300){
+			if (frame != 150){
 				// Draw the number.
 				ctx1.textAlign = "center";
-				opacity = 1-(frame%100)/100;
+				opacity = 1-(frame%50)/50;
 				ctx1.font = "italic " + (2*SC) + "pt Impact";
 				ctx1.fillStyle = "rgba(180, 214, 197, " + opacity + ")";
-				ctx1.fillText(3-Math.floor(frame/100), xOffset+2, yOffset+(3*SC)+2);
+				ctx1.fillText(3-Math.floor(frame/50), xOffset+2, yOffset+(3*SC)+2);
 				ctx1.fillStyle = "rgba(17, 55, 35, " + opacity + ")";
-				ctx1.fillText(3-Math.floor(frame/100), xOffset, yOffset+(3*SC));
+				ctx1.fillText(3-Math.floor(frame/50), xOffset, yOffset+(3*SC));
 				ctx1.textAlign = "left";
 			}
 		}
-		if (frame == 300){
+		if (frame == 150){
 			// Update the allowed gates and redraw the menu bar, then display the "Gate change!" animation.
 			clearInterval(id);
 			if (won == undefined){
@@ -450,7 +457,7 @@ function changeLockedGates(){
 				drawMenuBar();
 			}
 			frame = -1;
-			id = setInterval(animateGateChange, 10);
+			id = setInterval(animateGateChange, 20);
 		}
 	}
 
@@ -461,10 +468,10 @@ function changeLockedGates(){
 			ctx1.fillStyle = "#2a8958";
 			ctx1.fillRect(xOffset-(10*SC), yOffset, (20*SC), (4*SC));
 
-			if (frame != 150){
+			if (frame != 75){
 				// Draw "GATE CHANGE!".
 				ctx1.textAlign = "center";
-				opacity = (frame < 100) ? 1 : (150-frame)/50;
+				opacity = (frame < 50) ? 1 : (75-frame)/25;
 				ctx1.font = "italic " + (2*SC) + "pt Impact";
 				ctx1.fillStyle = "rgba(180, 214, 197, " + opacity + ")";
 				ctx1.fillText("GATE CHANGE!", xOffset+2, yOffset + (3*SC) + 2);
@@ -473,7 +480,7 @@ function changeLockedGates(){
 				ctx1.textAlign = "left";
 			}
 		}
-		if (frame == 150){
+		if (frame == 75){
 			clearInterval(id);
 		}
 	}
@@ -599,7 +606,7 @@ function drawMenuBar(){
 					ctx1.restore();
 				}
 			}
-		}, 50);
+		}, 80);
 	}
 }
 
@@ -614,9 +621,9 @@ function drawGameArea(ctx){
 		if (!pause){
 			// Normal circuits move 1 pixel, star circuits move two pixels.
 			if (circuits[i].type == gatesEnum.star && circuits[i].startx < cvs1.width){
-				circuits[i].startx -= 1.5;
+				circuits[i].startx -= 1.6 * scrollSpeed;
 			} else {
-				circuits[i].startx -= 1;
+				circuits[i].startx -= scrollSpeed;
 			}
 		}
 		drawCircuit(circuits[i], ctx);
@@ -902,9 +909,9 @@ function prepareCircuits(){
 function findCircuitPosition(idx){
 	var y, vertGap,
 		circuit = circuits[idx],
-		horzGap = (Array(1,3,5).includes(selectedLevel)) ? 18*SC : 16*SC;
+		horzGap = 18*SC;
 
-	// Calculate the x position. Easier levels get slightly more spaced out circuits.
+	// Calculate the x position.
 	circuit.startx = (idx == 0) ? cvs1.width + 50 :
 	 				 (circuits[idx-1].type != gatesEnum.star) ? circuits[idx-1].endx + horzGap :
 					 circuits[idx-2].endx + horzGap;
@@ -1221,13 +1228,27 @@ function drawWires(circuit, ctx){
 				var live = group.live;
 				for (var k = 0; k < group.wires.length; k++){
 					var wire = group.wires[k];
-					drawWire(wire.x1+startx, wire.y1+starty, wire.x2+startx, wire.y2+starty, live, ctx);
+					drawWire(
+						wire.x1+startx,
+						wire.y1+starty,
+						wire.x2+startx,
+						wire.y2+starty,
+						live,
+						ctx
+					);
 				}
 			} else {
 				// Draw signal group.
 				for (var k = 0; k < group.wires.length; k++){
 					var wire = group.wires[k];
-					drawWire(wire.x1+startx, wire.y1+starty, wire.x2+startx, wire.y2+starty, wire.live, ctx);
+					drawWire(
+						wire.x1+startx,
+						wire.y1+starty,
+						wire.x2+startx,
+						wire.y2+starty,
+						wire.live,
+						ctx
+					);
 					var sig = group.signals[k];
 					drawSignal(sig.x+startx, sig.y+starty, sig.val, ctx);
 				}
@@ -1574,7 +1595,7 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
 	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
-	
+
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ffffff";
 
@@ -1689,7 +1710,7 @@ function handleMouseDown(){
 				if (allowedGates.includes(i) && (mousex > startX+((i-1)*5*SC)) && (mousex < startX+((i-1)*5*SC)+(4*SC))){
 					// Sets draggedGate to the selected gate, and puts drawDraggedGate on an interval, so that it can be redrawn to snap to nearby gates even if the mouse doesn't move.
 					draggedGate = i;
-					drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
+					drawDraggedIntervalId = setInterval(drawDraggedGate, 1000/60);
 					updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
 				}
 			}
@@ -1700,7 +1721,7 @@ function handleMouseDown(){
 				draggedGate = gate.type;
 				gate.type = 0;
 				updateCircuitValues(gate.idx);
-				drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
+				drawDraggedIntervalId = setInterval(drawDraggedGate, 1000/60);
 				updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
 			}
 		}
@@ -1748,22 +1769,22 @@ function showEndScreen(){
 
 	// Animation to slowly fade the screen.
 	var frame = -1;
-	var id = setInterval(fadeScreen, 10);
+	var id = setInterval(fadeScreen, 1000/60);
 
 	function fadeScreen(){
 		frame++;
-		if (frame < 80){
+		if (frame < 40){
 			ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
-			ctx2.fillStyle = "rgba(0, 0, 0, " + ((frame/80)*0.8) + ")";
+			ctx2.fillStyle = "rgba(0, 0, 0, " + ((frame/40)*0.8) + ")";
 			ctx2.fillRect(0, 0, cvs1.width, cvs1.height);
-		} else if (frame == 80){
+		} else if (frame == 40){
 			ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
-			ctx1.fillStyle = "rgba(0, 0, 0, " + ((frame/80)*0.8) + ")";
+			ctx1.fillStyle = "rgba(0, 0, 0, " + ((frame/40)*0.8) + ")";
 			ctx1.fillRect(0, 0, cvs1.width, cvs1.height);
-		} else if (frame > 160){
+		} else if (frame > 80){
 			clearInterval(id);
 			frame = -1;
-			id = setInterval(slideEndMessage, 10);
+			id = setInterval(slideEndMessage, 1000/60);
 		}
 	}
 
@@ -1771,24 +1792,25 @@ function showEndScreen(){
 		height = won ? 260 : 200,
 		x = (cvs1.width/2) - (width/2);
 		y = -height;
+	var starX, starY, size;
 	function slideEndMessage(){
 		frame++;
-		y = (frame/100) * ((cvs1.height/2)+(height/2)) - height;
+		y = (frame/50) * ((cvs1.height/2)+(height/2)) - height;
 		ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
-		if (frame < 100){
+		if (frame < 50){
 			drawEndMessage(x, y, ctx2);
-		} else if (frame == 100){
+		} else if (frame == 50){
 			drawEndMessage(x, y, ctx1);
 			clearInterval(id);
 			if (won){
 				frame = -1;
-				starX = x+100;
+				starX = x+0.3*width;
 				starY = y+128;
 				ctx2.fillStyle = "#FFFF00";
 				ctx2.strokeStyle = "#000000";
 				ctx2.lineWidth = 1.5;
 				if (starsGained > 0){
-					id = setInterval(animateStars, 10);
+					id = setInterval(animateStars, 1000/60);
 				} else {
 					cvs2.onmousedown = handleEndScreenMouseDown;
 					cvs2.onmousemove = handleEndScreenMouseMove;
@@ -1800,21 +1822,27 @@ function showEndScreen(){
 		}
 	}
 
-	var starX, starY, size;
 	function animateStars(){
 		frame++;
-		if (frame == 50 || frame == 100 || frame == 150){
-			if (starsGained > frame/50){
-				starX += 80;
+		if (frame == 25 || frame == 50 || frame == 75){
+			if (starsGained > frame/25){
+				// ctx2.fillStyle = "#184e32";
+				// ctx2.fillRect()
+				starX += 0.2*width;
 			} else {
 				cvs2.onmousedown = handleEndScreenMouseDown;
 				cvs2.onmousemove = handleEndScreenMouseMove;
 				clearInterval(id);
 			}
 		}
-		size = Math.ceil(((frame % 50)/50) * 36);
+		size = (((frame % 25)+1)/25) * 40;
 		ctx2.font = size + "pt FontAwesome";
+		ctx2.fillStyle = "#FFFF00";
 		ctx2.fillText("\uF005", starX, starY+(size/2));
+		if (size == 40){
+			ctx2.strokeStyle = "#000000";
+			ctx2.strokeText("\uF005", starX, starY+(size/2));
+		}
 	}
 }
 
@@ -1826,7 +1854,7 @@ function drawEndMessage(x, y, ctx){
 	ctx.lineWidth = 2;
 	ctx.fillStyle = "#184e32";
 	ctx.beginPath();
-	ctx.rect(x, y, width, height);
+	ctx.rect(Math.round(x), Math.round(y), width, height);
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
@@ -1842,16 +1870,19 @@ function drawEndMessage(x, y, ctx){
 
 	// If the game was won, draw the number of stars earned (empty for now).
 	if (won){
+		ctx.save();
+		ctx.textAlign = "center";
 		ctx.lineWidth = 1.5;
 		ctx.font = "40pt FontAwesome"
 		for (var i = 0; i < 3; i++){
-			ctx.strokeText("\uF005", x+100+(i*80), y+148);
+			ctx.strokeText("\uF005", x+(0.3*width)+(i*0.2*width), y+148);
 		}
+		ctx.restore();
 	}
 
 	// Draw the retry and menu buttons.
-	xOffset = won ? 75 : 45;
-	yOffset = won ? 180 : 120;
+	xOffset = won ? 75.5 : 45.5;
+	yOffset = won ? 180.5 : 120.5;
 	drawButton("RETRY", x+xOffset, y+yOffset, false, ctx);
 	drawButton("MENU", x+xOffset+130, y+yOffset, false, ctx);
 }
@@ -1865,7 +1896,7 @@ function drawButton(text, x, y, selected, ctx){
 	// Draw the retry or menu button.
 	ctx.fillStyle = selected ? "#7D9C8D" : "#5D8370";
 	ctx.lineWidth = selected ? 3 : 1;
-	ctx.rect(x, y, 80, 40);
+	ctx.rect(Math.floor(x)+0.5, Math.floor(y)+0.5, 80, 40);
 	ctx.fill();
 	ctx.stroke();
 	ctx.fillStyle = "#000000";
@@ -1921,7 +1952,7 @@ function handleEndScreenMouseDown(){
 }
 
 function getSelectedButton(){
-	var btnX = (cvs1.width/2)-105;
+	var btnX = (cvs1.width/2)-114;
 		btnY = won ? (cvs1.height/2)+50 : (cvs1.height/2)+20;
 
 	for (var i = 0; i < 2; i++){
@@ -1951,7 +1982,7 @@ var tutDialogues = [
 	{
 		idx : 1,
 		topText : "So we have two 0 or 1 inputs. To get an output, complete the circuit by dragging a logic gate from the top of the screen into the empty box.",
-		botText : "This is what a circuit with a logic gate in looks like. The output will be either 0 or 1, depending on on what the inputs are, and which logic gate we used.",
+		botText : "This is what a circuit with a logic gate in looks like. The output will be either 0 or 1, depending on what the inputs are, and which logic gate we used.",
 		drawDiagram : function(x, y){
 			drawSignal(x+2, y+SC+9, 0, ctx1);
 			drawSignal(x+2, y+(3*SC)+9, 1, ctx1);

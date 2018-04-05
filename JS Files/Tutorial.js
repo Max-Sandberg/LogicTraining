@@ -17,7 +17,7 @@ var tutDialogues = [
 	{
 		idx : 1,
 		topText : "So we have two 0 or 1 inputs. To get an output, complete the circuit by dragging a logic gate from the top of the screen into the empty box.",
-		botText : "This is what a circuit with a logic gate in looks like. The output will be either 0 or 1, depending on on what the inputs are, and which logic gate we used.",
+		botText : "This is what a circuit with a logic gate in looks like. The output will be either 0 or 1, depending on what the inputs are, and which logic gate we used.",
 		drawDiagram : function(x, y){
 			drawSignal(x+2, y+SC+9, 0, ctx1);
 			drawSignal(x+2, y+(3*SC)+9, 1, ctx1);

@@ -15,9 +15,9 @@ function prepareCircuits(){
 function findCircuitPosition(idx){
 	var y, vertGap,
 		circuit = circuits[idx],
-		horzGap = (Array(1,3,5).includes(selectedLevel)) ? 18*SC : 16*SC;
+		horzGap = 18*SC;
 
-	// Calculate the x position. Easier levels get slightly more spaced out circuits.
+	// Calculate the x position.
 	circuit.startx = (idx == 0) ? cvs1.width + 50 :
 	 				 (circuits[idx-1].type != gatesEnum.star) ? circuits[idx-1].endx + horzGap :
 					 circuits[idx-2].endx + horzGap;

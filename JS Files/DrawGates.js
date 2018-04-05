@@ -231,7 +231,7 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
 	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
-	
+
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ffffff";
 

@@ -12,6 +12,7 @@ var mousex, mousey;
 var frameNo = 0;
 var moves = 0;
 var pause = false;
+var scrollSpeed;
 
 function startGame(){
 	createCanvases();
@@ -44,7 +45,7 @@ function startLevel(level) {
 	ctx1.strokeStyle = "#000000";
 	ctx1.strokeRect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-1);
 	pause = false;
-	drawIntervalId = setInterval(drawGameArea, 10, ctx1);
+	drawIntervalId = setInterval(drawGameArea, 1000/60, ctx1);
 	updateIntervalId = setInterval(updateGameArea, 50);
 	if (enableGateChanges && selectedLevel != 7){
 		gateChangeIntervalId = setInterval(changeLockedGates, 20000);
@@ -66,7 +67,7 @@ function startLevel(level) {
 					// If that gate is allowed to be used, set it as the dragged gate and start the necessary intervals.
 					draggedGate = gate;
 					if (drawDraggedIntervalId == undefined && updateSelectedIntervalId == undefined){
-						drawDraggedIntervalId = setInterval(drawDraggedGate, 10);
+						drawDraggedIntervalId = setInterval(drawDraggedGate, 1000/60);
 						updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
 					}
 				}
@@ -147,6 +148,10 @@ function createCanvases(){
 	// Calculate the scale to use for the UI based on the screen size.
 	SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
 	SC = Math.min(SC, 22);
+
+	// Calculate the scoll speed based on the screen size.
+	//scrollSpeed = cvs1.width / 1800;
+	scrollSpeed = 2;
 }
 
 // Handles the window being resized.
@@ -166,7 +171,7 @@ function handleResize(){
 	// Redraw the game or menu.
 	if (selectedLevel != -1){
 		drawMenuBar();
-		drawGameArea();
+		drawGameArea(ctx1);
 	} else {
 		drawMenu();
 	}

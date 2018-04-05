@@ -31,13 +31,27 @@ function drawWires(circuit, ctx){
 				var live = group.live;
 				for (var k = 0; k < group.wires.length; k++){
 					var wire = group.wires[k];
-					drawWire(wire.x1+startx, wire.y1+starty, wire.x2+startx, wire.y2+starty, live, ctx);
+					drawWire(
+						wire.x1+startx,
+						wire.y1+starty,
+						wire.x2+startx,
+						wire.y2+starty,
+						live,
+						ctx
+					);
 				}
 			} else {
 				// Draw signal group.
 				for (var k = 0; k < group.wires.length; k++){
 					var wire = group.wires[k];
-					drawWire(wire.x1+startx, wire.y1+starty, wire.x2+startx, wire.y2+starty, wire.live, ctx);
+					drawWire(
+						wire.x1+startx,
+						wire.y1+starty,
+						wire.x2+startx,
+						wire.y2+starty,
+						wire.live,
+						ctx
+					);
 					var sig = group.signals[k];
 					drawSignal(sig.x+startx, sig.y+starty, sig.val, ctx);
 				}

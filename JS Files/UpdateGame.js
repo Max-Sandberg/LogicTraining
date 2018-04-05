@@ -42,6 +42,8 @@ function checkWinOrLose(){
 
 	// If the game is won or lost, stop the game and display the relevant message.
 	if (gameState == "won" || gameState == "lost"){
+		drawGameArea(ctx1);
+
 		if (selectedLevel != 0 || gameState == "lost"){
 			clearIntervals();
 			won = (gameState == "won");
@@ -118,7 +120,7 @@ function changeLockedGates(){
 	 	xOffset = Math.round(cvs1.width / 2) + (26*SC),
 		yOffset = SC,
 		opacity,
-		id = setInterval(animateCountdown, 10);
+		id = setInterval(animateCountdown, 20);
 
 	function animateCountdown(){
 		frame++;
@@ -127,19 +129,19 @@ function changeLockedGates(){
 			ctx1.fillStyle = "#2a8958";
 			ctx1.fillRect(xOffset-(4*SC), yOffset, (8*SC), (4*SC));
 
-			if (frame != 300){
+			if (frame != 150){
 				// Draw the number.
 				ctx1.textAlign = "center";
-				opacity = 1-(frame%100)/100;
+				opacity = 1-(frame%50)/50;
 				ctx1.font = "italic " + (2*SC) + "pt Impact";
 				ctx1.fillStyle = "rgba(180, 214, 197, " + opacity + ")";
-				ctx1.fillText(3-Math.floor(frame/100), xOffset+2, yOffset+(3*SC)+2);
+				ctx1.fillText(3-Math.floor(frame/50), xOffset+2, yOffset+(3*SC)+2);
 				ctx1.fillStyle = "rgba(17, 55, 35, " + opacity + ")";
-				ctx1.fillText(3-Math.floor(frame/100), xOffset, yOffset+(3*SC));
+				ctx1.fillText(3-Math.floor(frame/50), xOffset, yOffset+(3*SC));
 				ctx1.textAlign = "left";
 			}
 		}
-		if (frame == 300){
+		if (frame == 150){
 			// Update the allowed gates and redraw the menu bar, then display the "Gate change!" animation.
 			clearInterval(id);
 			if (won == undefined){
@@ -147,7 +149,7 @@ function changeLockedGates(){
 				drawMenuBar();
 			}
 			frame = -1;
-			id = setInterval(animateGateChange, 10);
+			id = setInterval(animateGateChange, 20);
 		}
 	}
 
@@ -158,10 +160,10 @@ function changeLockedGates(){
 			ctx1.fillStyle = "#2a8958";
 			ctx1.fillRect(xOffset-(10*SC), yOffset, (20*SC), (4*SC));
 
-			if (frame != 150){
+			if (frame != 75){
 				// Draw "GATE CHANGE!".
 				ctx1.textAlign = "center";
-				opacity = (frame < 100) ? 1 : (150-frame)/50;
+				opacity = (frame < 50) ? 1 : (75-frame)/25;
 				ctx1.font = "italic " + (2*SC) + "pt Impact";
 				ctx1.fillStyle = "rgba(180, 214, 197, " + opacity + ")";
 				ctx1.fillText("GATE CHANGE!", xOffset+2, yOffset + (3*SC) + 2);
@@ -170,7 +172,7 @@ function changeLockedGates(){
 				ctx1.textAlign = "left";
 			}
 		}
-		if (frame == 150){
+		if (frame == 75){
 			clearInterval(id);
 		}
 	}

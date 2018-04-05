@@ -9,22 +9,22 @@ function showEndScreen(){
 
 	// Animation to slowly fade the screen.
 	var frame = -1;
-	var id = setInterval(fadeScreen, 10);
+	var id = setInterval(fadeScreen, 1000/60);
 
 	function fadeScreen(){
 		frame++;
-		if (frame < 80){
+		if (frame < 40){
 			ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
-			ctx2.fillStyle = "rgba(0, 0, 0, " + ((frame/80)*0.8) + ")";
+			ctx2.fillStyle = "rgba(0, 0, 0, " + ((frame/40)*0.8) + ")";
 			ctx2.fillRect(0, 0, cvs1.width, cvs1.height);
-		} else if (frame == 80){
+		} else if (frame == 40){
 			ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
-			ctx1.fillStyle = "rgba(0, 0, 0, " + ((frame/80)*0.8) + ")";
+			ctx1.fillStyle = "rgba(0, 0, 0, " + ((frame/40)*0.8) + ")";
 			ctx1.fillRect(0, 0, cvs1.width, cvs1.height);
-		} else if (frame > 160){
+		} else if (frame > 80){
 			clearInterval(id);
 			frame = -1;
-			id = setInterval(slideEndMessage, 10);
+			id = setInterval(slideEndMessage, 1000/60);
 		}
 	}
 
@@ -32,24 +32,25 @@ function showEndScreen(){
 		height = won ? 260 : 200,
 		x = (cvs1.width/2) - (width/2);
 		y = -height;
+	var starX, starY, size;
 	function slideEndMessage(){
 		frame++;
-		y = (frame/100) * ((cvs1.height/2)+(height/2)) - height;
+		y = (frame/50) * ((cvs1.height/2)+(height/2)) - height;
 		ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
-		if (frame < 100){
+		if (frame < 50){
 			drawEndMessage(x, y, ctx2);
-		} else if (frame == 100){
+		} else if (frame == 50){
 			drawEndMessage(x, y, ctx1);
 			clearInterval(id);
 			if (won){
 				frame = -1;
-				starX = x+100;
+				starX = x+0.3*width;
 				starY = y+128;
 				ctx2.fillStyle = "#FFFF00";
 				ctx2.strokeStyle = "#000000";
 				ctx2.lineWidth = 1.5;
 				if (starsGained > 0){
-					id = setInterval(animateStars, 10);
+					id = setInterval(animateStars, 1000/60);
 				} else {
 					cvs2.onmousedown = handleEndScreenMouseDown;
 					cvs2.onmousemove = handleEndScreenMouseMove;
@@ -61,21 +62,27 @@ function showEndScreen(){
 		}
 	}
 
-	var starX, starY, size;
 	function animateStars(){
 		frame++;
-		if (frame == 50 || frame == 100 || frame == 150){
-			if (starsGained > frame/50){
-				starX += 80;
+		if (frame == 25 || frame == 50 || frame == 75){
+			if (starsGained > frame/25){
+				// ctx2.fillStyle = "#184e32";
+				// ctx2.fillRect()
+				starX += 0.2*width;
 			} else {
 				cvs2.onmousedown = handleEndScreenMouseDown;
 				cvs2.onmousemove = handleEndScreenMouseMove;
 				clearInterval(id);
 			}
 		}
-		size = Math.ceil(((frame % 50)/50) * 36);
+		size = (((frame % 25)+1)/25) * 40;
 		ctx2.font = size + "pt FontAwesome";
+		ctx2.fillStyle = "#FFFF00";
 		ctx2.fillText("\uF005", starX, starY+(size/2));
+		if (size == 40){
+			ctx2.strokeStyle = "#000000";
+			ctx2.strokeText("\uF005", starX, starY+(size/2));
+		}
 	}
 }
 
@@ -87,7 +94,7 @@ function drawEndMessage(x, y, ctx){
 	ctx.lineWidth = 2;
 	ctx.fillStyle = "#184e32";
 	ctx.beginPath();
-	ctx.rect(x, y, width, height);
+	ctx.rect(Math.round(x), Math.round(y), width, height);
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
@@ -103,16 +110,19 @@ function drawEndMessage(x, y, ctx){
 
 	// If the game was won, draw the number of stars earned (empty for now).
 	if (won){
+		ctx.save();
+		ctx.textAlign = "center";
 		ctx.lineWidth = 1.5;
 		ctx.font = "40pt FontAwesome"
 		for (var i = 0; i < 3; i++){
-			ctx.strokeText("\uF005", x+100+(i*80), y+148);
+			ctx.strokeText("\uF005", x+(0.3*width)+(i*0.2*width), y+148);
 		}
+		ctx.restore();
 	}
 
 	// Draw the retry and menu buttons.
-	xOffset = won ? 75 : 45;
-	yOffset = won ? 180 : 120;
+	xOffset = won ? 75.5 : 45.5;
+	yOffset = won ? 180.5 : 120.5;
 	drawButton("RETRY", x+xOffset, y+yOffset, false, ctx);
 	drawButton("MENU", x+xOffset+130, y+yOffset, false, ctx);
 }
@@ -126,7 +136,7 @@ function drawButton(text, x, y, selected, ctx){
 	// Draw the retry or menu button.
 	ctx.fillStyle = selected ? "#7D9C8D" : "#5D8370";
 	ctx.lineWidth = selected ? 3 : 1;
-	ctx.rect(x, y, 80, 40);
+	ctx.rect(Math.floor(x)+0.5, Math.floor(y)+0.5, 80, 40);
 	ctx.fill();
 	ctx.stroke();
 	ctx.fillStyle = "#000000";
@@ -182,7 +192,7 @@ function handleEndScreenMouseDown(){
 }
 
 function getSelectedButton(){
-	var btnX = (cvs1.width/2)-105;
+	var btnX = (cvs1.width/2)-114;
 		btnY = won ? (cvs1.height/2)+50 : (cvs1.height/2)+20;
 
 	for (var i = 0; i < 2; i++){
