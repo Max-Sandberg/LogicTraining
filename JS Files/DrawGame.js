@@ -65,44 +65,69 @@ function drawMenuBar(){
 	}
 	ctx1.restore();
 
-	// Draw the menu button.
-	ctx1.save();
-	ctx1.font = "16pt Impact";
-	ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
-	ctx1.textAlign = "left";
-	ctx1.fillText("MENU", 10, 28);
-	ctx1.restore();
+	// Function to draw the menu button.
+	function drawMenuButton(colour){
+		ctx1.save();
+		// Draw over whatever is already here.
+		ctx1.font = (SC+2) + "pt Impact";
+		menuButtonWidth = ctx1.measureText("MENU").width;
+		ctx1.fillStyle = "#2A8958";
+		ctx1.fillRect((0.5*SC)-3, (0.5*SC)-4, menuButtonWidth+6, SC+8);
+		// Draw the MENU text in the given colour.
+		ctx1.textAlign = "left";
+		ctx1.fillStyle = colour;
+		ctx1.fillText("MENU", 0.5*SC, (1.5*SC)+2);
+		ctx1.restore();
+	}
+	var menuButtonWidth;
+	drawMenuButton("rgba(0, 0, 0, 0.5)");
+
+	// If there isn't already an interval checking if the mouse is hovering over the menu, create one.
 	if (menuHoverIntervalId == undefined){
-		var highlightMenu = false;
-		menuHoverIntervalId = setInterval(function(){
+		var highlightMenu = false,
+			btnStartX = 0.5*SC,
+			btnEndX = (0.5*SC)+menuButtonWidth,
+			btnStartY = (0.5*SC)-2,
+			btnEndY = 1.5*SC+2;
+
+		// Function to check if the mouse is hovering over the menu button.
+		function checkMenuHover(){
+			return (mousex > btnStartX && mousex < btnEndX && mousey > btnStartY && mousey < btnEndY);
+		}
+		var onBtn = checkMenuHover();
+
+		// Function to check the menu button is in the correct state, to be called on an interval.
+		function updateMenuButton(){
 			// Clear this interval if we go back to the menu.
 			if (selectedLevel == -1){
 				clearInterval(menuHoverIntervalId);
 				menuHoverIntervalId = undefined;
 			} else {
-				// Highlight or un-highlight the button.
-
-				if ((mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && !highlightMenu){
+				mouseOverBtn = checkMenuHover();
+				if (!highlightMenu && mouseOverBtn){
+					// If the mouse is over the button and it isn't highlighted, highlight it.
 					highlightMenu = true;
-					ctx1.fillStyle="#2a8958";
-					ctx1.fillRect(10, 10, 50, 18);
-					ctx1.fillStyle = "rgba(0, 0, 0, 1)";
-					ctx1.font = "16pt Impact";
-					ctx1.fillText("MENU", 10, 28);
+					drawMenuButton("rgba(0, 0, 0, 1)");
+					cvs2.onmousedown = handleMenuButtonClick;
 				}
-				else if (!(mousex > 10 && mousex < 60 && mousey > 10 && mousey < 28) && highlightMenu){
+				else if (highlightMenu && !mouseOverBtn){
+					// If the mouse isn't over the button and it's still highlighted, unhighlight it.
 					highlightMenu = false;
-					ctx1.save();
-					ctx1.textAlign = "left";
-					ctx1.fillStyle="#2a8958";
-					ctx1.fillRect(10, 10, 50, 18);
-					ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
-					ctx1.font = "16pt Impact";
-					ctx1.fillText("MENU", 10, 28);
-					ctx1.restore();
+					drawMenuButton("rgba(0, 0, 0, 0.5)");
+					cvs2.onmousedown = handleMouseDown;
 				}
 			}
-		}, 80);
+		}
+
+		// Function to stop the game and return to the menu.
+		function handleMenuButtonClick(){
+			clearIntervals();
+			resetGameState();
+			selectedLevel = -1;
+			drawMenu();
+		}
+
+		menuHoverIntervalId = setInterval(updateMenuButton, 80);
 	}
 }
 
