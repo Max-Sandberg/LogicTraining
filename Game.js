@@ -1065,15 +1065,23 @@ function findWirePositions(circuit){
 						wire.gate = j;
 
 						// Checks if there is already a wire in the first column from this group.
-						var firstColFree = true;
+						var firstColFree = true,
+							firstColIdx;
 						for (var m = 0; m < firstWireCol.length; m++){
 							if (firstWireCol[m].gate == wire.gate){
 								firstColFree = false;
+								firstColIdx = m;
 							}
 						}
 
+						// Finds the length of this wire, and compares it to the length of any wires already in the first column
+						var similarLength;
+						if (!firstColFree){
+							similarLength = (((Math.abs(wire.y2 - outputY)) - (Math.abs(firstWireCol[firstColIdx].y2 - outputY))) < 5);
+						}
+
 						// If there is no wire from this group in the first column for this section, or if the gate this wire leads to is the same height as the gate we're starting from, use the first column. Else, create a new column for this wire.
-						if (firstColFree || (gate.yOffset == nextGate.yOffset)){
+						if (firstColFree || (gate.yOffset == nextGate.yOffset) || similarLength == true){
 							firstWireCol.push(wire);
 						} else {
 							wireCols.push([wire]);
