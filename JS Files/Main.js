@@ -13,6 +13,7 @@ var frameNo = 0;
 var moves = 0;
 var pause = false;
 var scrollSpeed;
+var level;
 
 function startGame(){
 	createCanvases();
@@ -20,7 +21,7 @@ function startGame(){
 	loadFontAwesome(drawMenu, 200);
 }
 
-function startLevel(level) {
+function startLevel(levelIdx) {
 	// Check for a bug where the canvas size is bigger than the window size.
 	if (cvs1.width != window.innerWidth){
 		handleResize();
@@ -31,9 +32,10 @@ function startLevel(level) {
 	cvs2.onmouseup = handleMouseUp;
 	cvs2.onmousemove = handleMouseMove;
 
-	circuits = levels[level].circuits;
-	enableGateChanges = levels[level].enableGateChanges;
-	allowedGates = levels[level].allowedGates;
+	level = levels[levelIdx];
+	circuits = level.circuits;
+	enableGateChanges = level.enableGateChanges;
+	allowedGates = level.allowedGates;
 
 	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 	drawMenuBar();
@@ -47,7 +49,7 @@ function startLevel(level) {
 	pause = false;
 	drawIntervalId = setInterval(drawGameArea, 1000/60, ctx1);
 	updateIntervalId = setInterval(updateGameArea, 50);
-	if (enableGateChanges && selectedLevel != 7){
+	if (enableGateChanges && !level.introduceGateChanges){
 		gateChangeIntervalId = setInterval(changeLockedGates, 20000);
 	}
 
@@ -76,10 +78,10 @@ function startLevel(level) {
 	};
 
 	// If this level introduces new gates, show the intro dialogue for those gates.
-	if (levels[level].newGates){
+	if (level.newGates){
 		pause = true;
 		introduceGates(allowedGates[0]);
-	} else if (level == 7){
+	} else if (level.introduceGateChanges){
 		// Level 7 introduces gate changes, which is done by the introduceGates function, but with parameter 7.
 		pause = true;
 		introduceGates(7);
@@ -150,8 +152,7 @@ function createCanvases(){
 	SC = Math.min(SC, 22);
 
 	// Calculate the scoll speed based on the screen size.
-	//scrollSpeed = cvs1.width / 1800;
-	scrollSpeed = 2;
+	scrollSpeed = cvs1.width / 1000;
 }
 
 // Handles the window being resized.

@@ -16,7 +16,7 @@ var tutDialogues = [
 	},
 	{
 		idx : 1,
-		topText : "So we have two 0 or 1 inputs. To get an output, complete the circuit by dragging a logic gate from the top of the screen into the empty box.",
+		topText : "So we have two 0 or 1 inputs. To get an output, we need to complete the circuit by putting a logic gate in the empty box. You can click and drag these from the top of the screen, or use numbers 1-6 as hotkeys.",
 		botText : "This is what a circuit with a logic gate in looks like. The output will be either 0 or 1, depending on what the inputs are, and which logic gate we used.",
 		drawDiagram : function(x, y){
 			drawSignal(x+2, y+SC+9, 0, ctx1);
@@ -310,7 +310,7 @@ function introduceGates(gate){
 		"The NOR gate does the exact opposite of the OR gate. It only outputs 1 if both inputs are 0.",
 		"The XOR gate only outputs 1 if both the inputs are different. If they are both 0 or both 1, the output is 0.",
 		"The XNOR gate does the exact opposite of the XOR gate. It outputs 1 if both inputs are the same.",
-		"This level adds a new mechanic: Gate changes. The gates you are allowed to use will periodically change, so you'll have to adapt to use what you've got. Good luck!"
+		"Congrats on getting to the final level! You'll need to think fast, as the gates you are allowed to use will change as you play. This one is tough, good luck!"
 	];
 
 	// Calculate box size and position.

@@ -3,7 +3,7 @@ var selectedButton = null;
 
 function showEndScreen(){
 	// Give an extra star if they completed the level in less moves than the par.
-	if (won && moves <= levels[selectedLevel].par){
+	if (won && moves <= level.par){
 		starsGained++;
 	}
 
@@ -165,8 +165,8 @@ function handleEndScreenMouseDown(){
 			if (selectedLevel < levels.length-1){
 				levels[selectedLevel+1].unlocked = true;
 			}
-			if (levels[selectedLevel].starsGained < starsGained){
-				levels[selectedLevel].starsGained = starsGained;
+			if (level.starsGained < starsGained){
+				level.starsGained = starsGained;
 			}
 		}
 

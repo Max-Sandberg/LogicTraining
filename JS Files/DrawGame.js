@@ -51,7 +51,7 @@ function drawMenuBar(){
 		if (!allowedGates.includes(i)){
 			// Draw transparent grey box.
 			var startx = x+((i-1)*5*SC);
-			ctx1.fillStyle = "rgba(0, 0, 0, 0.4)";
+			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
 			ctx1.fillRect(startx, y, 4*SC, 4*SC);
 
 			// Draw lock icon.
@@ -219,10 +219,10 @@ function drawMoves(){
 	ctx1.font = "18pt Impact";
 	ctx1.fillStyle = "#000000";
 	ctx1.fillText("MOVES: " + moves, cvs1.width/2, cvs1.height-30);
-	ctx1.fillStyle = (moves > levels[selectedLevel].par) ? "#B4301F" : "#C4EDD8";
+	ctx1.fillStyle = (moves > level.par) ? "#B4301F" : "#C4EDD8";
 	ctx1.font = "12pt Tahoma";
 	ctx1.fontWeight = "bold"
-	ctx1.fillText("(PAR: " + levels[selectedLevel].par + ")", cvs1.width/2, cvs1.height-10);
+	ctx1.fillText("(PAR: " + level.par + ")", cvs1.width/2, cvs1.height-10);
 	ctx1.fontWeight = "normal"
 	ctx1.textAlign = "left";
 }

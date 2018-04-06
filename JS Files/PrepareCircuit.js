@@ -1,5 +1,7 @@
 // Prepares a circuit for drawing, by finding the positions of it's gates and wires.
 function prepareCircuits(){
+	chooseCircuits();
+
 	for (var i = 0; i < circuits.length; i++){
 		findGatePositions(i);
 	}
@@ -9,6 +11,39 @@ function prepareCircuits(){
 		findWirePositions(circuits[i]);
 		updateCircuitValues([i, 0, 0]);
 		stopWireAnimations(circuits[i]);
+	}
+}
+
+// Populates the circuits array for this level. Takes the order of the circuits for this level in terms of difficulty, and the circuit pool to choose from. For each circuit, chooses randomly from a pool of circuits of that difficulty.
+function chooseCircuits(){
+	// The JSON parse and stringify is a (slightly hacky) way of copying by val rather than by ref, so the original isn't changed.
+	var difficulties = level.circuitDifficulties,
+		allPools = JSON.parse(JSON.stringify(level.circuitPool)),
+		diffPools = [],
+		diff, diffPool, idx;
+	circuits = [];
+
+	diffPools[0] = allPools.diff1;
+	diffPools[1] = allPools.diff2;
+	diffPools[2] = allPools.diff3;
+	diffPools[3] = allPools.diff4;
+	diffPools[4] = allPools.diff5;
+
+	for (var i = 0; i < difficulties.length; i++){
+		// For each circuit, find the correct circuit pool to choose from based on the difficulty.
+		diff = difficulties[i];
+		diffPool = diffPools[diff-1];
+
+		// Randomly chooses a circuit from diffPool, removes it from the pool, and adds it to circuits.
+		idx = Math.floor(Math.random()*(diffPool.length));
+		circuits.push(diffPool.splice(idx,1)[0]);
+	}
+
+	// Circuits 4 and 8 are always star circuits, so change these now.
+	if (!level.tutorial){
+		for (var i = 3; i <= 7; i += 4){
+			circuits[i].gateSections[circuits[i].gateSections.length-1][0].type = gatesEnum.star;
+		}
 	}
 }
 

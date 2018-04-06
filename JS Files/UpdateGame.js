@@ -179,16 +179,13 @@ function changeLockedGates(){
 }
 
 function findLevelPar(){
-	var lvl = levels[selectedLevel],
-		circuits = lvl.circuits;
-
-	lvl.par = 0;
+	level.par = 0;
 
 	for (var i = 0; i < circuits.length; i++){
 		for (var j = 0; j < circuits[i].gateSections.length; j++){
 			for (var k = 0; k < circuits[i].gateSections[j].length; k++){
 				if (!circuits[i].gateSections[j][k].fixed){
-					lvl.par++;
+					level.par++;
 				}
 			}
 		}
