@@ -64,7 +64,7 @@ function startLevel(lvlIdx) {
 		var key = event.which || event.keyCode;
 		if (String.fromCharCode(key) == " "){
 			// If key was space, pause the game - comment as appropriate.
-			pause = !pause;
+			// pause = !pause;
 		} else {
 			// If the key was a number, find which gate that number corresponds to.
 			var gate = parseInt(String.fromCharCode(key));
@@ -219,7 +219,7 @@ function createAllLevelButtons(starty){
 	for (var i = 0; i < Math.ceil(levels.length / 6); i++){
 		// For each row of levels, draw the individual levels.
 		var levelCount = Math.min(6, levels.length-(i*6)),
-			startx = (cvs1.width/2) - (((levelCount*6*SC) + ((levelCount-1)*3*SC))/2);
+			startx = Math.round((cvs1.width/2) - (((levelCount*6*SC) + ((levelCount-1)*3*SC))/2));
 		for (var j = 0; j < levelCount; j++){
 			createLevelButton(startx+(j*9*SC), starty+(i*9*SC), (i*6)+j);
 		}
@@ -270,16 +270,19 @@ function drawLevelButton(x, y, levelIdx, selected){
 
 		if (!levels[levelIdx].unlocked){
 			// If the level is locked, draw a transparent grey box over it.
+			ctx1.save();
 			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-			ctx1.fillRect(x, y, 6*SC, 6*SC);
+			ctx1.fillRect(x+1, y+1, (6*SC)-1, (6*SC)-1);
 
 			// Draw lock icon.
+			ctx1.textAlign = "left";
 			ctx1.font = 1.5*SC + "px FontAwesome";
-			ctx1.fillStyle = "#262626";
+			ctx1.fillStyle = "#000000";
 			ctx1.fillText("\uf023", x+8, y+(1.5*SC)+2);
 			ctx1.font = 1.5*SC + "px FontAwesome";
-			ctx1.fillStyle = "#f2f2f2";
+			ctx1.fillStyle = "#ffffff";
 			ctx1.fillText("\uf023", x+6, y+(1.5*SC));
+			ctx1.restore();
 		}
 	}
 
@@ -6348,7 +6351,7 @@ var levels = [
 
 	//#region Level 1 - AND/NAND, Easy
 	{
-		unlocked : true, //Change me back!
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [1, 2],
 		newGates : true,
@@ -6363,7 +6366,7 @@ var levels = [
 
 	//#region Level 2 - AND/NAND, Medium
 	{
-		unlocked : true, //Change me back!
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [1, 2],
 		circuitDifficulties : [2, 2, 2, 3, 2, 3, 2, 3, 2, 4],
@@ -6377,7 +6380,7 @@ var levels = [
 
 	//#region Level 3 - OR/NOR, Easy
 	{
-		unlocked : true, //Change me back!
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [3,4],
 		newGates : true,
@@ -6392,7 +6395,7 @@ var levels = [
 
 	//#region Level 4 - OR/NOR, Medium
 	{
-		unlocked : true, //Change me back!
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [3,4],
 		circuitDifficulties : [2, 2, 2, 3, 2, 3, 2, 3, 2, 4],
@@ -6406,7 +6409,7 @@ var levels = [
 
 	//#region Level 5 - XOR/XNOR, Easy
 	{
-		unlocked : true, //Change me back!
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [5,6],
 		newGates : true,
@@ -6421,7 +6424,7 @@ var levels = [
 
 	//#region Level 6 - XOR/XNOR, Medium
 	{
-		unlocked : true, //Change me back!
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [5,6],
 		circuitDifficulties : [2, 2, 2, 3, 2, 3, 2, 3, 2, 4],
@@ -6435,7 +6438,7 @@ var levels = [
 
 	//#region Level 7 - AND/NAND, Hard
 	{
-		unlocked : true, //Change me back!
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [1,2],
 		circuitDifficulties : [3, 3, 3, 4, 2, 3, 3, 4, 2, 5],
@@ -6450,7 +6453,7 @@ var levels = [
 
 	//#region Level 8 - OR/NOR, Hard
 	{
-		unlocked : true, //Change me back!
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [3,4],
 		circuitDifficulties : [3, 3, 3, 4, 2, 3, 3, 4, 2, 5],
@@ -6465,7 +6468,7 @@ var levels = [
 
 	//#region Level 9 - XOR/XNOR, Hard
 	{
-		unlocked : true, //Change me back!
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [5,6],
 		circuitDifficulties : [3, 3, 3, 4, 2, 3, 3, 4, 2, 5],
@@ -6480,7 +6483,7 @@ var levels = [
 
 	//#region Level 10 - Gate changes, Hard
 	{
-		unlocked : true, //Change me back!
+		unlocked : false,
 		starsGained : 0,
 		allowedGates : [1,2,3,4,5,6],
 		introduceGateChanges : true,

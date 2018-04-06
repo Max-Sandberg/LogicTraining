@@ -64,7 +64,7 @@ function startLevel(lvlIdx) {
 		var key = event.which || event.keyCode;
 		if (String.fromCharCode(key) == " "){
 			// If key was space, pause the game - comment as appropriate.
-			pause = !pause;
+			// pause = !pause;
 		} else {
 			// If the key was a number, find which gate that number corresponds to.
 			var gate = parseInt(String.fromCharCode(key));

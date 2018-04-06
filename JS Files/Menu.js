@@ -35,7 +35,7 @@ function createAllLevelButtons(starty){
 	for (var i = 0; i < Math.ceil(levels.length / 6); i++){
 		// For each row of levels, draw the individual levels.
 		var levelCount = Math.min(6, levels.length-(i*6)),
-			startx = (cvs1.width/2) - (((levelCount*6*SC) + ((levelCount-1)*3*SC))/2);
+			startx = Math.round((cvs1.width/2) - (((levelCount*6*SC) + ((levelCount-1)*3*SC))/2));
 		for (var j = 0; j < levelCount; j++){
 			createLevelButton(startx+(j*9*SC), starty+(i*9*SC), (i*6)+j);
 		}
@@ -86,16 +86,19 @@ function drawLevelButton(x, y, levelIdx, selected){
 
 		if (!levels[levelIdx].unlocked){
 			// If the level is locked, draw a transparent grey box over it.
+			ctx1.save();
 			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-			ctx1.fillRect(x, y, 6*SC, 6*SC);
+			ctx1.fillRect(x+1, y+1, (6*SC)-1, (6*SC)-1);
 
 			// Draw lock icon.
+			ctx1.textAlign = "left";
 			ctx1.font = 1.5*SC + "px FontAwesome";
-			ctx1.fillStyle = "#262626";
+			ctx1.fillStyle = "#000000";
 			ctx1.fillText("\uf023", x+8, y+(1.5*SC)+2);
 			ctx1.font = 1.5*SC + "px FontAwesome";
-			ctx1.fillStyle = "#f2f2f2";
+			ctx1.fillStyle = "#ffffff";
 			ctx1.fillText("\uf023", x+6, y+(1.5*SC));
+			ctx1.restore();
 		}
 	}
 
