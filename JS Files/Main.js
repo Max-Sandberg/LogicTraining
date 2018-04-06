@@ -13,7 +13,8 @@ var frameNo = 0;
 var moves = 0;
 var pause = false;
 var scrollSpeed;
-var level;
+var level, levelIdx;
+var currentScreen, screens = Object.freeze({"menu":0, "game":1});
 
 function startGame(){
 	createCanvases();
@@ -21,7 +22,9 @@ function startGame(){
 	loadFontAwesome(drawMenu, 200);
 }
 
-function startLevel(levelIdx) {
+function startLevel(lvlIdx) {
+	currentScreen = screens.game;
+
 	// Check for a bug where the canvas size is bigger than the window size.
 	if (cvs1.width != window.innerWidth){
 		handleResize();
@@ -32,6 +35,7 @@ function startLevel(levelIdx) {
 	cvs2.onmouseup = handleMouseUp;
 	cvs2.onmousemove = handleMouseMove;
 
+	levelIdx = lvlIdx;
 	level = levels[levelIdx];
 	circuits = level.circuits;
 	enableGateChanges = level.enableGateChanges;
@@ -146,6 +150,7 @@ function createCanvases(){
 	cvs2.height = window.innerHeight;
 	cvs2.style = "position: absolute; left: 0; top: 0; z-index: 1;";
 	document.body.insertBefore(cvs2, document.body.childNodes[0]);
+	cvs2.onmousemove = handleMouseMove;
 
 	// Calculate the scale to use for the UI based on the screen size.
 	SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
@@ -170,10 +175,10 @@ function handleResize(){
 	cvs2.onmouseup = tempMouseUp;
 	cvs2.onmousemove = tempMouseMove;
 	// Redraw the game or menu.
-	if (selectedLevel != -1){
+	if (currentScreen == screens.menu){
 		drawMenuBar();
 		drawGameArea(ctx1);
-	} else {
+	} else if (currentScreen == screens.game){
 		drawMenu();
 	}
 }

@@ -13,7 +13,8 @@ var frameNo = 0;
 var moves = 0;
 var pause = false;
 var scrollSpeed;
-var level;
+var level, levelIdx;
+var currentScreen, screens = Object.freeze({"menu":0, "game":1});
 
 function startGame(){
 	createCanvases();
@@ -21,7 +22,9 @@ function startGame(){
 	loadFontAwesome(drawMenu, 200);
 }
 
-function startLevel(levelIdx) {
+function startLevel(lvlIdx) {
+	currentScreen = screens.game;
+
 	// Check for a bug where the canvas size is bigger than the window size.
 	if (cvs1.width != window.innerWidth){
 		handleResize();
@@ -32,6 +35,7 @@ function startLevel(levelIdx) {
 	cvs2.onmouseup = handleMouseUp;
 	cvs2.onmousemove = handleMouseMove;
 
+	levelIdx = lvlIdx;
 	level = levels[levelIdx];
 	circuits = level.circuits;
 	enableGateChanges = level.enableGateChanges;
@@ -146,6 +150,7 @@ function createCanvases(){
 	cvs2.height = window.innerHeight;
 	cvs2.style = "position: absolute; left: 0; top: 0; z-index: 1;";
 	document.body.insertBefore(cvs2, document.body.childNodes[0]);
+	cvs2.onmousemove = handleMouseMove;
 
 	// Calculate the scale to use for the UI based on the screen size.
 	SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
@@ -170,143 +175,256 @@ function handleResize(){
 	cvs2.onmouseup = tempMouseUp;
 	cvs2.onmousemove = tempMouseMove;
 	// Redraw the game or menu.
-	if (selectedLevel != -1){
+	if (currentScreen == screens.menu){
 		drawMenuBar();
 		drawGameArea(ctx1);
-	} else {
+	} else if (currentScreen == screens.game){
 		drawMenu();
 	}
 }
-var selectedLevel = -1;
-
+// Draws the whole menu screen.
 function drawMenu(){
-	// Clear the area.
+	// Set currentScreen to menu, and clear the area.
+	currentScreen = screens.menu;
 	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 
 	// Draw dark green background
-	ctx1.fillStyle = "#184e32";
+	ctx1.fillStyle = "#184E32";
 	ctx1.beginPath();
 	ctx1.rect(0, 0, cvs1.width, cvs1.height);
 	ctx1.fill();
 	ctx1.stroke();
 	ctx1.closePath();
 
+	// Calculate the correct y positions for the title and the levels
+	var levelRows = Math.ceil(levels.length / 6),
+		levelsHeight = (levelRows*6*SC) + ((levelRows-1)*3*SC),
+		titleHeight = 8*SC,
+		titleY = (cvs1.height/2)-((levelsHeight+titleHeight)/2)+(4*SC),
+		levelsY = titleY + (4*SC);
+
 	// Draw title
 	ctx1.font = (3.4*SC) + "pt Impact";
 	ctx1.textAlign = "center";
 	ctx1.fillStyle = "#FFFFFF";
-	ctx1.fillText("Logic Training", (cvs1.width/2) + 2, (cvs1.height/2) - (6*SC) + 2);
+	ctx1.fillText("Logic Training", (cvs1.width/2) + 2, titleY + 2);
 	ctx1.fillStyle = "#000000";
-	ctx1.fillText("Logic Training", (cvs1.width/2), (cvs1.height/2) - (6*SC));
+	ctx1.fillText("Logic Training", (cvs1.width/2), titleY);
 
-	drawLevels(ctx1);
-
-	cvs2.onmousedown = handleMenuMouseDown;
-	cvs2.onmousemove = handleMenuMouseMove;
+	createAllLevelButtons(levelsY);
 }
 
-// Draws the icons for each level.
-function drawLevels(ctx){
-	var startx, width, x, y, selected;
-	y = Math.round((cvs1.height/2) - (2*SC));
-	width = (levels.length*6*SC) + ((levels.length-1)*3*SC);
-	startx = Math.round((cvs1.width/2) - (width/2));
+// Creates the buttons for all levels in the correct positions.
+function createAllLevelButtons(starty){
+	for (var i = 0; i < Math.ceil(levels.length / 6); i++){
+		// For each row of levels, draw the individual levels.
+		var levelCount = Math.min(6, levels.length-(i*6)),
+			startx = (cvs1.width/2) - (((levelCount*6*SC) + ((levelCount-1)*3*SC))/2);
+		for (var j = 0; j < levelCount; j++){
+			createLevelButton(startx+(j*9*SC), starty+(i*9*SC), (i*6)+j);
+		}
+	}
+}
 
-	for (var i = 0; i < levels.length; i++){
-		selected = (levels[i].unlocked && selectedLevel == i);
+function drawLevelButton(x, y, levelIdx, selected){
+	ctx1.save();
 
-		// Draw rectangle around the level.
-		x = startx + (i*9*SC);
-		ctx.fillStyle = (selected) ? "#7D9C8D" : "#5D8370";
-		ctx.lineWidth = (selected) ? 3 : 1;
-		ctx.strokeStyle = "#000000";
-		ctx.fillRect(x+0.5, y+0.5, 6*SC, 6*SC);
-		ctx.strokeRect(x+0.5, y+0.5, 6*SC, 6*SC);
-		ctx.lineWidth = 1;
+	// Draw over whatever is already here.
+	ctx1.fillStyle = "#184E32";
+	ctx1.fillRect(x-4, y-4, (6*SC)+8, (6*SC)+8);
 
-		if (i == 0){
-			// Draw the tutorial button
-			ctx.font = SC + "pt Impact";
-			ctx.textAlign = "center";
-			ctx.fillStyle = "#000000";
-			ctx.fillText("TUTORIAL", x+(3*SC), y+(3*SC)+(0.4*SC));
-			ctx.textAlign = "left";
+	// Draw the box, with a thicker border and lighter colour if selected.
+	ctx1.lineWidth = (selected) ? 3 : 1;
+	ctx1.fillStyle = (selected) ? "#7D9C8D" : "#5D8370";
+	ctx1.strokeStyle = "#000000";
+	ctx1.fillRect(x+0.5, y+0.5, 6*SC, 6*SC);
+	ctx1.strokeRect(x+0.5, y+0.5, 6*SC, 6*SC);
+
+	// Draw the TUTORIAL or LEVEL text.
+	var level = levels[levelIdx],
+		text = (level.tutorial) ? "TUTORIAL" : "LEVEL",
+		fontSize = (level.tutorial) ? SC : 0.8*SC,
+		texty = (level.tutorial) ? y+(3.4*SC) : y+(1.5*SC);
+	ctx1.font = fontSize + "pt Impact";
+	ctx1.fillStyle = "#000000";
+	ctx1.textAlign = "center";
+	ctx1.fillText(text, x+(3*SC), texty);
+
+	if (!level.tutorial){
+		// Draw the level number.
+		ctx1.font = (2*SC) + "pt Impact";
+		ctx1.fillStyle = "#000000";
+		ctx1.fillText(levelIdx, x+(3*SC), y+(4.2*SC));
+
+		// Draw the stars, filling in the ones which have been earned.
+		ctx1.font = (0.8*SC) + "pt FontAwesome";
+		ctx1.lineWidth = 1;
+		for (var j = 0; j < 3; j++){
+			if (j < levels[levelIdx].starsGained){
+				ctx1.fillStyle = "#ffff00";
+				ctx1.fillText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
+			}
+			ctx1.strokeStyle = "#000000";
+			ctx1.strokeText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
+		}
+
+		if (!levels[levelIdx].unlocked){
+			// If the level is locked, draw a transparent grey box over it.
+			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
+			ctx1.fillRect(x, y, 6*SC, 6*SC);
+
+			// Draw lock icon.
+			ctx1.font = 1.5*SC + "px FontAwesome";
+			ctx1.fillStyle = "#262626";
+			ctx1.fillText("\uf023", x+8, y+(1.5*SC)+2);
+			ctx1.font = 1.5*SC + "px FontAwesome";
+			ctx1.fillStyle = "#f2f2f2";
+			ctx1.fillText("\uf023", x+6, y+(1.5*SC));
+		}
+	}
+
+	ctx1.restore();
+}
+
+// Creates a level button, drawing it and creating an interval to handle mouse hovering and clicking.
+function createLevelButton(x, y, levelIdx){
+	// Draw the button.
+	drawLevelButton(x, y, levelIdx, false);
+
+	// Function to check if the mouse is hovering over this button.
+	function checkMouseHover(){
+		return (mousex > x && mousex < x+(6*SC) && mousey > y && mousey < y+(6*SC));
+	}
+
+	// Function to be called if this button is clicked.
+	function handleLevelClick(){
+		cvs2.mousedown = undefined;
+		if (levels[levelIdx].tutorial){
+			startTutorial();
 		} else {
-			// Write the "LEVEL" text.
-			ctx1.textAlign = "center";
-			ctx.font = (0.8*SC) + "pt Impact";
-			ctx.fillStyle = "#000000";
-			ctx.fillText("LEVEL", x+(3*SC), y+(1.5*SC));
-
-			// Draw the level number.
-			ctx.font = (2*SC) + "pt Impact";
-			ctx.fillStyle = "#000000";
-			ctx.fillText(i, x+(3*SC), y+(4.2*SC));
-
-			// Draw the stars, filling in the ones which have been earned.
-			ctx.font = (0.8*SC) + "pt FontAwesome";
-			for (var j = 0; j < 3; j++){
-				if (j < levels[i].starsGained){
-					ctx.fillStyle = "#ffff00";
-					ctx.fillText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
-				}
-				ctx.strokeStyle = "#000000";
-				ctx.strokeText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
-			}
-
-			if (!levels[i].unlocked){
-				// Draw transparent grey box.
-				ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-				ctx.fillRect(x, y, 6*SC, 6*SC);
-
-				// Draw lock icon.
-				ctx.font = 1.5*SC + "px FontAwesome";
-				ctx.fillStyle = "#262626";
-				ctx.fillText("\uf023", x+8, y+(1.5*SC)+2);
-				ctx.font = 1.5*SC + "px FontAwesome";
-				ctx.fillStyle = "#f2f2f2";
-				ctx.fillText("\uf023", x+6, y+(1.5*SC));
-			}
+			startLevel(levelIdx);
 		}
 	}
-}
 
-function handleMenuMouseMove(){
-	mousex = event.clientX;
-	mousey = event.clientY;
-
-	var lvl = getSelectedLevel();
-	if (lvl != selectedLevel){
-		selectedLevel = lvl;
-		drawMenu();
-	}
-}
-
-function handleMenuMouseDown(){
-	// If the level is unlocked, start the level the user clicked on.
-	if (selectedLevel == 0){
-		startTutorial();
-	} else if (selectedLevel != -1 && levels[selectedLevel].unlocked){
-		startLevel(selectedLevel);
-	}
-}
-
-// Find which level icon the mouse is hovering over, if any.
-function getSelectedLevel(){
-	if ((mousey > (cvs1.height/2)-(2*SC)) && (mousey < (cvs1.height/2)+(4*SC))){
-		// In y range of levels
-			var width = (levels.length*6*SC) + ((levels.length-1)*3*SC),
-			startx = Math.round((cvs1.width/2)-(width/2));
-		for (var i = 0; i < levels.length; i++){
-			if ((mousex > startx+(i*9*SC)) && (mousex < startx+(i*9*SC)+(6*SC))){
-				// In x range of a level
-				return i;
+	// Function to check if the button is in the correct state, to be called on an interval.
+	var highlight = false,
+		updateButtonInterval, mouseHover;
+	function updateLevelButton(){
+		// Clear this interval if the game starts.
+		if (currentScreen == screens.game){
+			clearInterval(updateButtonInterval);
+			updateButtonInterval = undefined;
+		} else {
+			mouseHover = checkMouseHover();
+			if (!highlight && mouseHover){
+				// If the mouse is over the button and it isn't highlighted, highlight it.
+				highlight = true;
+				drawLevelButton(x, y, levelIdx, true);
+				cvs2.onmousedown = handleLevelClick;
+			}
+			else if (highlight && !mouseHover){
+				// If the mouse isn't over the button and it's still highlighted, unhighlight it.
+				highlight = false;
+				drawLevelButton(x, y, levelIdx, false);
+				cvs2.onmousedown = undefined;
 			}
 		}
 	}
 
-	return -1;
+	// If the level is unlocked, start the updateLevelButton function on an interval.
+	if (levels[levelIdx].unlocked){
+		updateButtonInterval = setInterval(updateLevelButton, 1000/60);
+	}
 }
+//
+// 	var width = (levels.length*6*SC) + ((levels.length-1)*3*SC);
+// 		startx = Math.round((cvs1.width/2) - (width/2)),
+// 		x, selected;
+//
+// 	for (var i = 0; i < levels.length; i++){
+// 		selected = (levels[i].unlocked && selectedLevel == i);
+//
+// 		// Draw rectangle around the level.
+// 		x = startx + (i*9*SC);
+// 		ctx1.fillStyle = (selected) ? "#7D9C8D" : "#5D8370";
+// 		ctx1.lineWidth = (selected) ? 3 : 1;
+// 		ctx1.strokeStyle = "#000000";
+// 		ctx1.fillRect(x+0.5, y+0.5, 6*SC, 6*SC);
+// 		ctx1.strokeRect(x+0.5, y+0.5, 6*SC, 6*SC);
+// 		ctx1.lineWidth = 1;
+//
+// 		if (i == 0){
+// 			// Draw the tutorial button
+// 			ctx1.font = SC + "pt Impact";
+// 			ctx1.textAlign = "center";
+// 			ctx1.fillStyle = "#000000";
+// 			ctx1.fillText("TUTORIAL", x+(3*SC), y+(3*SC)+(0.4*SC));
+// 			ctx1.textAlign = "left";
+// 		} else {
+// 			// Write the "LEVEL" text.
+// 			ctx1.textAlign = "center";
+// 			ctx1.font = (0.8*SC) + "pt Impact";
+// 			ctx1.fillStyle = "#000000";
+// 			ctx1.fillText("LEVEL", x+(3*SC), y+(1.5*SC));
+//
+// 			// Draw the level number.
+// 			ctx1.font = (2*SC) + "pt Impact";
+// 			ctx1.fillStyle = "#000000";
+// 			ctx1.fillText(i, x+(3*SC), y+(4.2*SC));
+//
+// 			// Draw the stars, filling in the ones which have been earned.
+// 			ctx1.font = (0.8*SC) + "pt FontAwesome";
+// 			for (var j = 0; j < 3; j++){
+// 				if (j < levels[i].starsGained){
+// 					ctx1.fillStyle = "#ffff00";
+// 					ctx1.fillText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
+// 				}
+// 				ctx1.strokeStyle = "#000000";
+// 				ctx1.strokeText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
+// 			}
+//
+// 			if (!levels[i].unlocked){
+// 				// Draw transparent grey box.
+// 				ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
+// 				ctx1.fillRect(x, y, 6*SC, 6*SC);
+//
+// 				// Draw lock icon.
+// 				ctx1.font = 1.5*SC + "px FontAwesome";
+// 				ctx1.fillStyle = "#262626";
+// 				ctx1.fillText("\uf023", x+8, y+(1.5*SC)+2);
+// 				ctx1.font = 1.5*SC + "px FontAwesome";
+// 				ctx1.fillStyle = "#f2f2f2";
+// 				ctx1.fillText("\uf023", x+6, y+(1.5*SC));
+// 			}
+// 		}
+// 	}
+// }
+//
+// function handleMenuMouseDown(){
+// 	// If the level is unlocked, start the level the user clicked on.
+// 	if (selectedLevel == 0){
+// 		startTutorial();
+// 	} else if (selectedLevel != -1 && levels[selectedLevel].unlocked){
+// 		startLevel(selectedLevel);
+// 	}
+// }
+//
+// // Find which level icon the mouse is hovering over, if any.
+// function getSelectedLevel(){
+// 	if ((mousey > (cvs1.height/2)-(2*SC)) && (mousey < (cvs1.height/2)+(4*SC))){
+// 		// In y range of levels
+// 			var width = (levels.length*6*SC) + ((levels.length-1)*3*SC),
+// 			startx = Math.round((cvs1.width/2)-(width/2));
+// 		for (var i = 0; i < levels.length; i++){
+// 			if ((mousex > startx+(i*9*SC)) && (mousex < startx+(i*9*SC)+(6*SC))){
+// 				// In x range of a level
+// 				return i;
+// 			}
+// 		}
+// 	}
+//
+// 	return -1;
+// }
 // Updates the game area. This function is called on an interval.
 function updateGameArea() {
 	// Start/stop animations if the circuit is on/off the screen.
@@ -353,13 +471,15 @@ function checkWinOrLose(){
 	if (gameState == "won" || gameState == "lost"){
 		drawGameArea(ctx1);
 
-		if (selectedLevel != 0 || gameState == "lost"){
+		if (level.tutorial && gameState == "won"){
+			// If this is the tutorial level, don't show the end screen, just continue the tutorial.
+			pause = true;
+			handleTestCircuit(won);
+		} else {
+			// Clear all intervals and show the end screen.
 			clearIntervals();
 			won = (gameState == "won");
 			showEndScreen();
-		} else {
-			pause = true;
-			handleTestCircuit(won);
 		}
 	}
 }
@@ -380,7 +500,6 @@ function clearIntervals(){
 	menuHoverIntervalId = undefined;
 	cvs2.onmousedown = undefined;
 	cvs2.onmouseup = undefined;
-	cvs2.onmousemove = undefined;
 	document.onkeypress = undefined;
 }
 
@@ -601,7 +720,7 @@ function drawMenuBar(){
 		// Function to check the menu button is in the correct state, to be called on an interval.
 		function updateMenuButton(){
 			// Clear this interval if we go back to the menu.
-			if (selectedLevel == -1){
+			if (currentScreen == screens.menu){
 				clearInterval(menuHoverIntervalId);
 				menuHoverIntervalId = undefined;
 			} else {
@@ -625,7 +744,6 @@ function drawMenuBar(){
 		function handleMenuButtonClick(){
 			clearIntervals();
 			resetGameState();
-			selectedLevel = -1;
 			drawMenu();
 		}
 
@@ -1820,9 +1938,19 @@ var won, btn;
 var selectedButton = null;
 
 function showEndScreen(){
-	// Give an extra star if they completed the level in less moves than the par.
-	if (won && moves <= level.par){
-		starsGained++;
+	if (won){
+		// Unlock the next level if they won.
+		if (levelIdx < levels.length-1){
+			levels[levelIdx+1].unlocked = true;
+		}
+		// Give an extra star if they completed the level in less moves than the par.
+		if (moves <= level.par){
+			starsGained++;
+		}
+		// If they earned more stars than they had previously earned for this level, update the stars gained.
+		if (level.starsGained < starsGained){
+			level.starsGained = starsGained;
+		}
 	}
 
 	// Animation to slowly fade the screen.
@@ -1846,7 +1974,7 @@ function showEndScreen(){
 		}
 	}
 
-	var width = won ? 360 : 300;
+	var width = won ? 400 : 300;
 		height = won ? 260 : 200,
 		x = (cvs1.width/2) - (width/2);
 		y = -height;
@@ -1869,46 +1997,42 @@ function showEndScreen(){
 				ctx2.lineWidth = 1.5;
 				if (starsGained > 0){
 					id = setInterval(animateStars, 1000/60);
-				} else {
-					cvs2.onmousedown = handleEndScreenMouseDown;
-					cvs2.onmousemove = handleEndScreenMouseMove;
 				}
-			} else {
-				cvs2.onmousedown = handleEndScreenMouseDown;
-				cvs2.onmousemove = handleEndScreenMouseMove;
 			}
 		}
 	}
 
 	function animateStars(){
 		frame++;
+		ctx1.save();
 		if (frame == 25 || frame == 50 || frame == 75){
 			if (starsGained > frame/25){
 				// ctx2.fillStyle = "#184e32";
 				// ctx2.fillRect()
 				starX += 0.2*width;
 			} else {
-				cvs2.onmousedown = handleEndScreenMouseDown;
-				cvs2.onmousemove = handleEndScreenMouseMove;
 				clearInterval(id);
 			}
 		}
 		size = (((frame % 25)+1)/25) * 40;
-		ctx2.font = size + "pt FontAwesome";
-		ctx2.fillStyle = "#FFFF00";
-		ctx2.fillText("\uF005", starX, starY+(size/2));
+		ctx1.font = size + "pt FontAwesome";
+		ctx1.fillStyle = "#FFFF00";
+		ctx1.textAlign = "center";
+		ctx1.fillText("\uF005", starX, starY+(size/2));
 		if (size == 40){
-			ctx2.strokeStyle = "#000000";
-			ctx2.strokeText("\uF005", starX, starY+(size/2));
+			ctx1.strokeStyle = "#000000";
+			ctx1.strokeText("\uF005", starX, starY+(size/2));
 		}
+		ctx1.restore()
 	}
 }
 
 function drawEndMessage(x, y, ctx){
-	var width = won ? 360 : 300;
+	var width = won ? 400 : 300;
 		height = won ? 260 : 200;
 
 	// Draw the box.
+	ctx.save();
 	ctx.lineWidth = 2;
 	ctx.fillStyle = "#184e32";
 	ctx.beginPath();
@@ -1918,7 +2042,7 @@ function drawEndMessage(x, y, ctx){
 	ctx.closePath();
 
 	// Write the win or lose message.
-	var text = won ? "LEVEL COMPLETE" : "GAME OVER";
+	var text = won ? "LEVEL " + levelIdx + " COMPLETE!" : "GAME OVER";
 	ctx.textAlign = "center";
 	ctx.font = "30pt Impact";
 	ctx.fillStyle = "#FFFFFF";
@@ -1928,99 +2052,184 @@ function drawEndMessage(x, y, ctx){
 
 	// If the game was won, draw the number of stars earned (empty for now).
 	if (won){
-		ctx.save();
 		ctx.textAlign = "center";
 		ctx.lineWidth = 1.5;
 		ctx.font = "40pt FontAwesome"
 		for (var i = 0; i < 3; i++){
 			ctx.strokeText("\uF005", x+(0.3*width)+(i*0.2*width), y+148);
 		}
-		ctx.restore();
 	}
 
-	// Draw the retry and menu buttons.
-	xOffset = won ? 75.5 : 45.5;
+	// Calculate the positions of the retry, menu, and next level buttons.
+	ctx.font = "20pt Impact";
+	var retryWidth = Math.round(ctx.measureText("RETRY").width) + 20,
+		menuWidth = Math.round(ctx.measureText("MENU").width) + 20,
+		nextWidth = Math.round(ctx.measureText("NEXT LEVEL").width) + 20,
+		retryx, menux, nextx, yOffset;
+	if (won && levelIdx != levels.length-1){
+		retryx = x + ((width-retryWidth-menuWidth-nextWidth)/4);
+		menux = retryx + retryWidth + ((width-retryWidth-menuWidth-nextWidth)/4);
+		nextx = menux + menuWidth + ((width-retryWidth-menuWidth-nextWidth)/4);
+	} else {
+		retryx = x + ((width-retryWidth-menuWidth)/3);
+		menux = retryx + retryWidth + ((width-retryWidth-menuWidth)/3);
+	}
 	yOffset = won ? 180.5 : 120.5;
-	drawButton("RETRY", x+xOffset, y+yOffset, false, ctx);
-	drawButton("MENU", x+xOffset+130, y+yOffset, false, ctx);
+
+	// Draw the buttons.
+	if (ctx == ctx2){
+		// If we are using ctx2, this means the box is still in the sliding animation, so just draw the button.
+		drawEndScreenButton("RETRY", retryx, y+yOffset, false, ctx);
+		drawEndScreenButton("MENU", menux, y+yOffset, false, ctx);
+		if (won && levelIdx != levels.length-1){
+			drawEndScreenButton("NEXT LEVEL", nextx, y+yOffset, false, ctx);
+		}
+	} else if (ctx == ctx1){
+		// If we are using ctx1 the animation has finished, and we want to be able to interact with the buttons, so we create them instead of just drawing.
+		createEndScreenButton("RETRY", retryx, y+yOffset, false, ctx);
+		createEndScreenButton("MENU", menux, y+yOffset, false, ctx);
+		if (won && levelIdx != levels.length-1){
+			createEndScreenButton("NEXT LEVEL", nextx, y+yOffset, false, ctx);
+		}
+	}
+	ctx.restore();
 }
 
-function drawButton(text, x, y, selected, ctx){
-	// Draw a flat green box over whatever was here before.
-	ctx.beginPath();
+function drawEndScreenButton(text, x, y, selected, ctx){
+	// Calculate the width of this button.
+	ctx.save();
+	ctx.font = "20pt Impact";
+	var btnWidth = Math.round(ctx.measureText(text).width) + 20;
+
+	// Fill over whatever was here before.
 	ctx.fillStyle = "#184E32";
-	ctx.fillRect(x-4, y-4, 88, 48);
+	ctx.fillRect(x-4, y-4, btnWidth+8, 48);
 
 	// Draw the retry or menu button.
 	ctx.fillStyle = selected ? "#7D9C8D" : "#5D8370";
 	ctx.lineWidth = selected ? 3 : 1;
-	ctx.rect(Math.floor(x)+0.5, Math.floor(y)+0.5, 80, 40);
-	ctx.fill();
-	ctx.stroke();
+	ctx.fillRect(Math.floor(x)+0.5, Math.floor(y)+0.5, btnWidth, 40);
+	ctx.strokeRect(Math.floor(x)+0.5, Math.floor(y)+0.5, btnWidth, 40);
+	ctx.textAlign = "center";
 	ctx.fillStyle = "#000000";
-	ctx.font = "20pt Impact";
-	ctx.fillText(text, x+40, y+30);
-	ctx.closePath();
+	ctx.fillText(text, x+(btnWidth/2), y+30);
+	ctx.restore();
 }
 
-function handleEndScreenMouseMove(){
-	mousex = event.clientX-8;
-	mousey = event.clientY-8;
+function createEndScreenButton(text, x, y){
+	// Draw the button, and calculate its width.
+	drawEndScreenButton(text, x, y, false, ctx1);
+	ctx1.font = "20pt Impact";
+	var btnWidth = Math.round(ctx1.measureText(text).width) + 20;
 
-	var newBtn = getSelectedButton();
-	if (newBtn != selectedButton){
-		var btnX = (newBtn == "RETRY" || selectedButton == "RETRY") ? (cvs1.width/2)-105 : (cvs1.width/2)+25,
-			btnY = won ? (cvs1.height/2)+50 : (cvs1.height/2)+20,
-			text = (newBtn == null) ? selectedButton : newBtn;
-		drawButton(text, btnX, btnY, (newBtn != null), ctx1);
-		selectedButton = newBtn;
+	// Function to check if the mouse is hovering over this button.
+	function checkMouseHover(){
+		return (mousex > x && mousex < x+btnWidth && mousey > y && mousey < y+40);
 	}
-}
 
-function handleEndScreenMouseDown(){
-	if (selectedButton != null){
-		if (won){
-			if (selectedLevel < levels.length-1){
-				levels[selectedLevel+1].unlocked = true;
-			}
-			if (level.starsGained < starsGained){
-				level.starsGained = starsGained;
-			}
-		}
-
+	// Function to be called if this button is clicked.
+	function handleButtonClick(){
+		// Reset the game state in preparation for the next level.
 		resetGameState();
-
-		if (selectedButton == "RETRY"){
-			selectedButton = null;
-			cvs2.onmousedown = undefined;
-			cvs2.onmousemove = undefined;
-			if (selectedLevel == 0){
+		cvs2.mousedown = undefined;
+		if (text == "RETRY"){
+			if (level.tutorial){
 				startTutorial();
 			} else {
-				startLevel(selectedLevel);
+				startLevel(levelIdx);
 			}
-		} else {
-			selectedButton = null;
-			selectedLevel = -1;
-			cvs2.onmousedown = handleMenuMouseDown;
-			cvs2.onmousemove = handleMenuMouseMove;
+		} else if (text == "MENU"){
 			drawMenu();
+		} else if (text == "NEXT LEVEL"){
+			startLevel(levelIdx+1);
 		}
 	}
-}
 
-function getSelectedButton(){
-	var btnX = (cvs1.width/2)-114;
-		btnY = won ? (cvs1.height/2)+50 : (cvs1.height/2)+20;
-
-	for (var i = 0; i < 2; i++){
-		btnX += (i * 130);
-		if ((mousex > btnX) && (mousex < btnX+80) && (mousey > btnY) && (mousey < btnY+40)){
-			return (i == 0) ? "RETRY" : "MENU";
+	// Function to check if the button is in the correct state, to be called on an interval.
+	var highlight = false,
+		updateButtonInterval, mouseHover;
+	function updateEndScreenButton(){
+		// Clear this interval if we leave the end screen (won gets reset to undefined).
+		if (won == undefined){
+			clearInterval(updateButtonInterval);
+			updateButtonInterval = undefined;
+		} else {
+			mouseHover = checkMouseHover();
+			if (!highlight && mouseHover){
+				// If the mouse is over the button and it isn't highlighted, highlight it.
+				highlight = true;
+				drawEndScreenButton(text, x, y, true, ctx1);
+				cvs2.onmousedown = handleButtonClick;
+			}
+			else if (highlight && !mouseHover){
+				// If the mouse isn't over the button and it's still highlighted, unhighlight it.
+				highlight = false;
+				drawEndScreenButton(text, x, y, false, ctx1);
+				cvs2.onmousedown = undefined;
+			}
 		}
 	}
-	return null;
+
+	// Start the updateEndScreenButton function on an interval.
+	updateButtonInterval = setInterval(updateEndScreenButton, 1000/60);
 }
+
+// function handleEndScreenMouseMove(){
+// 	mousex = event.clientX-8;
+// 	mousey = event.clientY-8;
+//
+// 	var newBtn = getSelectedButton();
+// 	if (newBtn != selectedButton){
+// 		var btnX = (newBtn == "RETRY" || selectedButton == "RETRY") ? (cvs1.width/2)-105 : (cvs1.width/2)+25,
+// 			btnY = won ? (cvs1.height/2)+50 : (cvs1.height/2)+20,
+// 			text = (newBtn == null) ? selectedButton : newBtn;
+// 		drawButton(text, btnX, btnY, (newBtn != null), ctx1);
+// 		selectedButton = newBtn;
+// 	}
+// }
+//
+// function handleEndScreenMouseDown(){
+// 	if (selectedButton != null){
+// 		if (won){
+// 			if (levelIdx < levels.length-1){
+// 				levels[levelIdx+1].unlocked = true;
+// 			}
+// 			if (level.starsGained < starsGained){
+// 				level.starsGained = starsGained;
+// 			}
+// 		}
+//
+// 		resetGameState();
+//
+// 		if (selectedButton == "RETRY"){
+// 			selectedButton = null;
+// 			cvs2.onmousedown = undefined;
+// 			cvs2.onmousemove = undefined;
+// 			if (level.tutorial){
+// 				startTutorial();
+// 			} else {
+// 				startLevel(levelIdx);
+// 			}
+// 		} else {
+// 			selectedButton = null;
+// 			cvs2.onmousedown = handleMenuMouseDown;
+// 			drawMenu();
+// 		}
+// 	}
+// }
+//
+// function getSelectedButton(){
+// 	var btnX = (cvs1.width/2)-114;
+// 		btnY = won ? (cvs1.height/2)+50 : (cvs1.height/2)+20;
+//
+// 	for (var i = 0; i < 2; i++){
+// 		btnX += (i * 130);
+// 		if ((mousex > btnX) && (mousex < btnX+80) && (mousey > btnY) && (mousey < btnY+40)){
+// 			return (i == 0) ? "RETRY" : "MENU";
+// 		}
+// 	}
+// 	return null;
+// }
 var tutDialogues = [
 	{
 		idx : 0,
@@ -2220,7 +2429,7 @@ function displayTutorialDialogue(dlgIdx){
 	// The interval to control highlighting the continue button when the mouse hovers over it.
 	var btnHoverIntervalId = setInterval(function(){
 		// Clear this interval if we go back to the menu.
-		if (selectedLevel == -1){
+		if (currentScreen == screens.menu){
 			clearInterval(btnHoverIntervalId);
 			btnHoverIntervalId = undefined;
 		}
@@ -2249,7 +2458,6 @@ function displayTutorialDialogue(dlgIdx){
 					// End the tutorial
 					clearIntervals();
 					resetGameState();
-					selectedLevel = -1;
 					levels[1].unlocked = true;
 					drawMenu();
 				}
@@ -2398,7 +2606,7 @@ function introduceGates(gate){
 	// The interval to control highlighting the continue button when the mouse hovers over it.
 	var btnHoverIntervalId = setInterval(function(){
 		// Clear this interval if we go back to the menu.
-		if (selectedLevel == -1){
+		if (currentScreen == screens.menu){
 			clearInterval(btnHoverIntervalId);
 			btnHoverIntervalId = undefined;
 		}
@@ -2482,7 +2690,7 @@ function drawTruthTable(x, y, gate){
 function introduceGateChanges(){
 
 }
-// Contains all the information about the levels: Whether it is unlocked or not; how many stars have been earned for that level; which gates are allowed; whether gate changes are enabled; whether the level introduces new gates; and most importantly, the layout of every circuit in each level.
+// This contains all of the potential circuits that can appear in the game. They are grouped by difficulty, then subdivided further based on which gates they contain. Each level specifies which pool of circuits to pick from for each difficulty.
 var circuitPools = [
 	//#region Difficulty 1
 	{
@@ -6094,6 +6302,7 @@ var circuitPools = [
 	//#endregion
 ]
 
+// Contains all the information about the levels: Whether it is unlocked or not; how many stars have been earned for that level; which gates are allowed; whether gate changes are enabled; whether the level introduces new gates; how difficult each circuit is, and which pools of circuits to choose from.
 var levels = [
 	//#region Level 0 - Tutorial
 	{
@@ -6285,1224 +6494,4 @@ var levels = [
 		}
 	},
 	//#endregion
-
-	/*
-	//#region Level 7 - All gates, Medium, Gate changes
-	{
-		unlocked : true, //Change me back!
-		starsGained : 0,
-		allowedGates : [1,2,3],
-		newGates : false,
-		enableGateChanges : true,
-		introduceGateChanges : true,
-		circuits : [
-			//#region Circuit 1 - 2 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.and,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 2 - 3 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "gate",
-							gate : [0, 1],
-						}],
-						type : gatesEnum.nor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 3 - 2 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.xnor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 4 - 1 Gate, Star
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}],
-						type : gatesEnum.star,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 5 - 3 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "gate",
-							gate : [0, 1],
-						}],
-						type : gatesEnum.and,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 6 - 2 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.nor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 7 - 3 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "gate",
-							gate : [0, 1],
-						}],
-						type : gatesEnum.xnor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 8 - 2 Gates, Star
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.nand,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.star,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 9 - 3 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.or,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "gate",
-							gate : [0, 1],
-						}],
-						type : gatesEnum.nand,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 10 - 4 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}, {
-							gateIdx : [1, 1],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "gate",
-							gate : [0, 1]
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "gate",
-							gate : [0, 0]
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.nand,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [1]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0]
-						}, {
-							type : "gate",
-							gate : [1, 1]
-						}],
-						type : gatesEnum.xor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [3, 0],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [2, 0]
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			}
-			//#endregion
-		]
-	},
-	//#endregion
-
-	//#region Level 8 - All gates, Hard, Gate changes
-	{
-		unlocked : true, //Change me back!
-		starsGained : 0,
-		allowedGates : [1,2,3],
-		newGates : false,
-		enableGateChanges : true,
-		circuits : [
-			//#region Circuit 1 - 3 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "gate",
-							gate : [0, 1],
-						}],
-						type : gatesEnum.and,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 2 - 4 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}, {
-							gateIdx : [1, 1],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "gate",
-							gate : [0, 1]
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "gate",
-							gate : [0, 0]
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.xor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [1]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0]
-						}, {
-							type : "gate",
-							gate : [1, 1]
-						}],
-						type : gatesEnum.and,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [3, 0],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [2, 0]
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 3 - 3 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "gate",
-							gate : [0, 1],
-						}],
-						type : gatesEnum.nor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 4 - 2 Gates, Star
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.nor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.star,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 5 - 4 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}, {
-							gateIdx : [1, 1],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "gate",
-							gate : [0, 1]
-						}],
-						type : gatesEnum.or,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "gate",
-							gate : [0, 0]
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [1]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0]
-						}, {
-							type : "gate",
-							gate : [1, 1]
-						}],
-						type : gatesEnum.xnor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [3, 0],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [2, 0]
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 6 - 3 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "gate",
-							gate : [0, 1],
-						}],
-						type : gatesEnum.xnor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 7 - 4 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}, {
-							gateIdx : [1, 1],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "gate",
-							gate : [0, 1]
-						}],
-						type : gatesEnum.xor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "gate",
-							gate : [0, 0]
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [1]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0]
-						}, {
-							type : "gate",
-							gate : [1, 1]
-						}],
-						type : gatesEnum.nand,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [3, 0],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [2, 0]
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 8 - 3 Gates, Star
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "gate",
-							gate : [0, 1],
-						}],
-						type : gatesEnum.and,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.star,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 9 - 5 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}, {
-							gateIdx : [1, 1],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.or,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [1, 1],
-							inputs : [1]
-						}, {
-							gateIdx : [1, 0],
-							inputs : [1]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0]
-						}, {
-							type : "gate",
-							gate : [0, 1]
-						}],
-						type : gatesEnum.or,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "gate",
-							gate : [0, 0]
-						}, {
-							type : "gate",
-							gate : [0, 1]
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [1]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0]
-						}, {
-							type : "gate",
-							gate : [1, 1]
-						}],
-						type : gatesEnum.xnor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [3, 0],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [2, 0]
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region Circuit 10 - 5 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}, {
-							gateIdx : [1, 1],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 1],
-							inputs : [1]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "gate",
-							gate : [0, 0]
-						}],
-						type : gatesEnum.xnor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}, {
-						inputs : [{
-							type : "gate",
-							gate : [0, 0]
-						}, {
-							type : "gate",
-							gate : [0, 1]
-						}],
-						type : gatesEnum.xor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [1]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0]
-						}, {
-							type : "gate",
-							gate : [1, 1]
-						}],
-						type : gatesEnum.and,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [3, 0],
-							inputs : [0]
-						}]
-					}],
-					[{
-						inputs : [{
-							type : "gate",
-							gate : [2, 0]
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			}
-			//#endregion
-		]
-	}
-	//#endregion
-	*/
 ]

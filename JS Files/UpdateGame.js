@@ -44,13 +44,15 @@ function checkWinOrLose(){
 	if (gameState == "won" || gameState == "lost"){
 		drawGameArea(ctx1);
 
-		if (selectedLevel != 0 || gameState == "lost"){
+		if (level.tutorial && gameState == "won"){
+			// If this is the tutorial level, don't show the end screen, just continue the tutorial.
+			pause = true;
+			handleTestCircuit(won);
+		} else {
+			// Clear all intervals and show the end screen.
 			clearIntervals();
 			won = (gameState == "won");
 			showEndScreen();
-		} else {
-			pause = true;
-			handleTestCircuit(won);
 		}
 	}
 }
@@ -71,7 +73,6 @@ function clearIntervals(){
 	menuHoverIntervalId = undefined;
 	cvs2.onmousedown = undefined;
 	cvs2.onmouseup = undefined;
-	cvs2.onmousemove = undefined;
 	document.onkeypress = undefined;
 }
 

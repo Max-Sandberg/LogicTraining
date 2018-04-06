@@ -99,7 +99,7 @@ function drawMenuBar(){
 		// Function to check the menu button is in the correct state, to be called on an interval.
 		function updateMenuButton(){
 			// Clear this interval if we go back to the menu.
-			if (selectedLevel == -1){
+			if (currentScreen == screens.menu){
 				clearInterval(menuHoverIntervalId);
 				menuHoverIntervalId = undefined;
 			} else {
@@ -123,7 +123,6 @@ function drawMenuBar(){
 		function handleMenuButtonClick(){
 			clearIntervals();
 			resetGameState();
-			selectedLevel = -1;
 			drawMenu();
 		}
 

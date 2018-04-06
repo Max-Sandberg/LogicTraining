@@ -197,7 +197,7 @@ function displayTutorialDialogue(dlgIdx){
 	// The interval to control highlighting the continue button when the mouse hovers over it.
 	var btnHoverIntervalId = setInterval(function(){
 		// Clear this interval if we go back to the menu.
-		if (selectedLevel == -1){
+		if (currentScreen == screens.menu){
 			clearInterval(btnHoverIntervalId);
 			btnHoverIntervalId = undefined;
 		}
@@ -226,7 +226,6 @@ function displayTutorialDialogue(dlgIdx){
 					// End the tutorial
 					clearIntervals();
 					resetGameState();
-					selectedLevel = -1;
 					levels[1].unlocked = true;
 					drawMenu();
 				}
@@ -375,7 +374,7 @@ function introduceGates(gate){
 	// The interval to control highlighting the continue button when the mouse hovers over it.
 	var btnHoverIntervalId = setInterval(function(){
 		// Clear this interval if we go back to the menu.
-		if (selectedLevel == -1){
+		if (currentScreen == screens.menu){
 			clearInterval(btnHoverIntervalId);
 			btnHoverIntervalId = undefined;
 		}
