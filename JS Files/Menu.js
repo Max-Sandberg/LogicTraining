@@ -1,33 +1,42 @@
+var levelButtonIntervals = [];
+
 // Draws the whole menu screen.
 function drawMenu(){
 	// Set currentScreen to menu, and clear the area.
 	currentScreen = screens.menu;
 	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 
-	// Draw dark green background
-	ctx1.fillStyle = "#184E32";
-	ctx1.beginPath();
-	ctx1.rect(0, 0, cvs1.width, cvs1.height);
-	ctx1.fill();
-	ctx1.stroke();
-	ctx1.closePath();
+	// If the window has been resized, correct the scale and canvas sizes now.
+	if (cvs1.width != window.innerWidth){
+		handleResize();
+	} else {
+		// Draw dark green background
+		ctx1.fillStyle = "#184E32";
+		ctx1.beginPath();
+		ctx1.rect(0, 0, cvs1.width, cvs1.height);
+		ctx1.fill();
+		ctx1.stroke();
+		ctx1.closePath();
 
-	// Calculate the correct y positions for the title and the levels
-	var levelRows = Math.ceil(levels.length / 6),
-		levelsHeight = (levelRows*6*SC) + ((levelRows-1)*3*SC),
-		titleHeight = 8*SC,
-		titleY = (cvs1.height/2)-((levelsHeight+titleHeight)/2)+(4*SC),
-		levelsY = titleY + (4*SC);
+		// Calculate the correct y positions for the title and the levels
+		var levelRows = Math.ceil(levels.length / 6),
+			levelsHeight = (levelRows*6*SC) + ((levelRows-1)*3*SC),
+			titleHeight = 8*SC,
+			titleY = (cvs1.height/2)-((levelsHeight+titleHeight)/2)+(4*SC),
+			levelsY = titleY + (4*SC);
 
-	// Draw title
-	ctx1.font = (3.4*SC) + "pt Impact";
-	ctx1.textAlign = "center";
-	ctx1.fillStyle = "#FFFFFF";
-	ctx1.fillText("Logic Training", (cvs1.width/2) + 2, titleY + 2);
-	ctx1.fillStyle = "#000000";
-	ctx1.fillText("Logic Training", (cvs1.width/2), titleY);
+		// Draw title
+		ctx1.font = (3.4*SC) + "pt Impact";
+		ctx1.textAlign = "center";
+		ctx1.fillStyle = "#FFFFFF";
+		ctx1.fillText("Logic Training", (cvs1.width/2) + 2, titleY + 2);
+		ctx1.fillStyle = "#000000";
+		ctx1.fillText("Logic Training", (cvs1.width/2), titleY);
 
-	createAllLevelButtons(levelsY);
+		// Create a button for each level (and delete any existing ones).
+		clearLevelButtonIntervals();
+		createAllLevelButtons(levelsY);
+	}
 }
 
 // Creates the buttons for all levels in the correct positions.
@@ -118,6 +127,7 @@ function createLevelButton(x, y, levelIdx){
 	// Function to be called if this button is clicked.
 	function handleLevelClick(){
 		cvs2.mousedown = undefined;
+		clearLevelButtonIntervals();
 		if (levels[levelIdx].tutorial){
 			startTutorial();
 		} else {
@@ -129,30 +139,31 @@ function createLevelButton(x, y, levelIdx){
 	var highlight = false,
 		updateButtonInterval, mouseHover;
 	function updateLevelButton(){
-		// Clear this interval if the game starts.
-		if (currentScreen == screens.game){
-			clearInterval(updateButtonInterval);
-			updateButtonInterval = undefined;
-		} else {
-			mouseHover = checkMouseHover();
-			if (!highlight && mouseHover){
-				// If the mouse is over the button and it isn't highlighted, highlight it.
-				highlight = true;
-				drawLevelButton(x, y, levelIdx, true);
-				cvs2.onmousedown = handleLevelClick;
-			}
-			else if (highlight && !mouseHover){
-				// If the mouse isn't over the button and it's still highlighted, unhighlight it.
-				highlight = false;
-				drawLevelButton(x, y, levelIdx, false);
-				cvs2.onmousedown = undefined;
-			}
+		mouseHover = checkMouseHover();
+		if (!highlight && mouseHover){
+			// If the mouse is over the button and it isn't highlighted, highlight it.
+			highlight = true;
+			drawLevelButton(x, y, levelIdx, true);
+			cvs2.onmousedown = handleLevelClick;
+		}
+		else if (highlight && !mouseHover){
+			// If the mouse isn't over the button and it's still highlighted, unhighlight it.
+			highlight = false;
+			drawLevelButton(x, y, levelIdx, false);
+			cvs2.onmousedown = undefined;
 		}
 	}
 
 	// If the level is unlocked, start the updateLevelButton function on an interval.
 	if (levels[levelIdx].unlocked){
 		updateButtonInterval = setInterval(updateLevelButton, 1000/60);
+		levelButtonIntervals.push(updateButtonInterval);
+	}
+}
+
+function clearLevelButtonIntervals(){
+	while (levelButtonIntervals.length != 0){
+		clearInterval(levelButtonIntervals.pop());
 	}
 }
 //

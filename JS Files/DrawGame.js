@@ -48,7 +48,7 @@ function drawMenuBar(){
 	ctx1.save();
 	ctx1.textAlign = "center";
 	for (var i = 1; i < 7; i++){
-		if (!allowedGates.includes(i)){
+		if (allowedGates.indexOf(i) == -1){
 			// Draw transparent grey box.
 			var startx = x+((i-1)*5*SC);
 			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";

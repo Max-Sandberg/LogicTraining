@@ -59,17 +59,17 @@ function startLevel(lvlIdx) {
 
 	// Assign hotkeys.
 	document.onkeypress = function (e) {
-		e = e || window.event;
-		// Find which key was pressed. Use either which or keyCode, depending on browser support.
-		var key = event.which || event.keyCode;
-		if (String.fromCharCode(key) == " "){
+		// e = e || window.event;
+		// // Find which key was pressed. Use either which or keyCode, depending on browser support.
+		// var key = event.which || event.keyCode;
+		if (e.key == " "){
 			// If key was space, pause the game - comment as appropriate.
 			// pause = !pause;
 		} else {
 			// If the key was a number, find which gate that number corresponds to.
-			var gate = parseInt(String.fromCharCode(key));
+			var gate = parseInt(e.key);
 			if (gate > 0 && gate < 7){
-				if (allowedGates.includes(gate)){
+				if (allowedGates.indexOf(gate) != -1){
 					// If that gate is allowed to be used, set it as the dragged gate and start the necessary intervals.
 					draggedGate = gate;
 					if (drawDraggedIntervalId == undefined && updateSelectedIntervalId == undefined){
@@ -140,45 +140,72 @@ function createCanvases(){
 	ctx1 = cvs1.getContext("2d");
 	cvs1.width = window.innerWidth;
 	cvs1.height = window.innerHeight;
-	cvs1.style = "position: absolute; left: 0; top: 0; z-index: 0; background-color: #d8f3e6; border:0px solid #d3d3d3;";
-	document.body.insertBefore(cvs1, document.body.childNodes[0]);
+	cvs1.style.position = "absolute";
+	cvs1.style.left = 0;
+	cvs1.style.top = 0;
+	cvs1.style.zIndex = 0;
+	cvs1.style.backgroundColor = "#D8F3E6";
+	cvs1.style.border = "0px solid #D3D3D3";
+	document.getElementById("container").appendChild(cvs1);
 
 	// Create the layer 2 canvas - things on this canvas are drawn in front of canvas 1.
 	cvs2 = document.createElement("canvas");
 	ctx2 = cvs2.getContext("2d");
 	cvs2.width = window.innerWidth;
 	cvs2.height = window.innerHeight;
-	cvs2.style = "position: absolute; left: 0; top: 0; z-index: 1;";
-	document.body.insertBefore(cvs2, document.body.childNodes[0]);
+	cvs2.style.position = "absolute";
+	cvs2.style.left = 0;
+	cvs2.style.top = 0;
+	cvs2.style.zIndex = 1;
+	document.getElementById("container").appendChild(cvs2);
 	cvs2.onmousemove = handleMouseMove;
 
-	// Calculate the scale to use for the UI based on the screen size.
+	// Calculate the scale to use for the UI and the scroll speed based on the window size.
 	SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
 	SC = Math.min(SC, 22);
-
-	// Calculate the scoll speed based on the screen size.
 	scrollSpeed = cvs1.width / 1000;
 }
 
 // Handles the window being resized.
 function handleResize(){
-	// Temporarily store all the existing canvas event handlers.
-	var tempMouseDown = cvs2.onmousedown,
-		tempMouseUp = cvs2.onmouseup,
-		tempMouseMove = cvs2.onmousemove;
-	// Remove the current canvases, and use createCanvases to create new ones of the correct size, and recalculate SC.
-	document.body.removeChild(document.body.children[1]);
-	document.body.removeChild(document.body.children[0]);
-	createCanvases();
-	// Restore the old event handlers.
-	cvs2.onmousedown = tempMouseDown;
-	cvs2.onmouseup = tempMouseUp;
-	cvs2.onmousemove = tempMouseMove;
-	// Redraw the game or menu.
-	if (currentScreen == screens.menu){
-		drawMenuBar();
-		drawGameArea(ctx1);
-	} else if (currentScreen == screens.game){
-		drawMenu();
+	// Don't resize if we're mid-level. That breaks things. Just deal with the size problem, and resize when we get back to the menu.
+	if (currentScreen != screens.game){
+		// Resize the canvases.
+		cvs1.width = window.innerWidth;
+		cvs1.height = window.innerHeight;
+		cvs2.width = window.innerWidth;
+		cvs2.height = window.innerHeight;
+
+		// Calculate the scale to use for the UI based on the window size.
+		SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
+		SC = Math.min(SC, 22);
+		scrollSpeed = cvs1.width / 1000;
+
+		// Redraw menu.
+		drawMenu()
 	}
+
+	// // Temporarily store all the existing canvas event handlers.
+	// var tempMouseDown = cvs2.onmousedown,
+	// 	tempMouseUp = cvs2.onmouseup,
+	// 	tempMouseMove = cvs2.onmousemove;
+	//
+	// // Remove the current canvases, and use createCanvases to create new ones of the correct size, and recalculate SC.
+	// var container = document.getElementById("container");
+	// container.removeChild(container.childNodes[0]);
+	// container.removeChild(container.childNodes[0]);
+	// createCanvases();
+	//
+	// // Restore the old event handlers.
+	// cvs2.onmousedown = tempMouseDown;
+	// cvs2.onmouseup = tempMouseUp;
+	// cvs2.onmousemove = tempMouseMove;
+	//
+	// // Redraw the game or menu.
+	// if (currentScreen == screens.game){
+	// 	drawMenuBar();
+	// 	drawGameArea(ctx1);
+	// } else if (currentScreen == screens.menu){
+	// 	drawMenu();
+	// }
 }
