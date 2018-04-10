@@ -15,77 +15,26 @@ function updateGameArea() {
 		}
 	}
 
-	checkWinOrLose();
+	// When the last two circuits are on the screen, we need to start regularly checking if all the circuits are complete or scrolled off the screen, so we can end the game.
+	if ((level.tutorial || circuits[circuits.length-2].startx <= 0) && checkAllCircuitsComplete()){
+		endLevel();
+	}
 }
 
-// Checks if the game has been won or lost based on the state of the bulbs.
-function checkWinOrLose(){
-	var allBulbsLit = true,
-		gameState;
-
-	// Goes through every gate in all circuits. If any are unlit bulbs, set allBulbsLit to false. If any are unlit bulbs that have reached the edge of the screen, gameState is set to "lost".
+// Returns true if all the circuits in a level are complete or off the screen.
+function checkAllCircuitsComplete(){
 	for (var i = 0; i < circuits.length; i++){
-		for (var j = 0; j < circuits[i].gateSections.length; j++){
-			var gateSection = circuits[i].gateSections[j];
-			for (var k = 0; k < gateSection.length; k++){
-				var gate = gateSection[k];
-				if ((gate.type == gatesEnum.bulb) && (gate.outputVal != 1)){
-					allBulbsLit = false;
-					gameState = (circuits[i].startx + gate.xOffset < 0) ? "lost" : gameState;
-				}
+		var gateSections = circuits[i].gateSections,
+			bulb = gateSections[gateSections.length-1][0];
+		if (bulb.outputVal == -1){
+			if (circuits[i].startx + circuits[i].width < 0){
+				bulb.outputVal == 0;
+			} else {
+				return false;
 			}
 		}
 	}
-
-	// If all bulbs are lit, gameState is set to "won".
-	gameState = (allBulbsLit && !pause) ? "won" : gameState;
-
-	// If the game is won or lost, stop the game and display the relevant message.
-	if (gameState == "won" || gameState == "lost"){
-		drawGameArea(ctx1);
-
-		if (level.tutorial && gameState == "won"){
-			// If this is the tutorial level, don't show the end screen, just continue the tutorial.
-			pause = true;
-			handleTestCircuit(won);
-		} else {
-			// Clear all intervals and show the end screen.
-			clearIntervals();
-			won = (gameState == "won");
-			showEndScreen();
-		}
-	}
-}
-
-function clearIntervals(){
-	// Cancel all the intervals and handlers
-	clearInterval(updateSelectedIntervalId);
-	clearInterval(drawDraggedIntervalId);
-	clearInterval(drawIntervalId);
-	clearInterval(updateIntervalId);
-	clearInterval(gateChangeIntervalId);
-	clearInterval(menuHoverIntervalId);
-	updateSelectedIntervalId = undefined;
-	drawDraggedIntervalId = undefined;
-	drawIntervalId = undefined;
-	updateIntervalId = undefined;
-	gateChangeIntervalId = undefined;
-	menuHoverIntervalId = undefined;
-	cvs2.onmousedown = undefined;
-	cvs2.onmouseup = undefined;
-	document.onkeypress = undefined;
-}
-
-function resetGameState(){
-	starsGained = 0;
-	frameNo = 0;
-	draggedGate = 0;
-	moves = 0;
-	won = undefined;
-	selectedGate = null;
-	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
-	ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
-	ctx1.textAlign = "left";
+	return true;
 }
 
 function updateSelectedGate(){

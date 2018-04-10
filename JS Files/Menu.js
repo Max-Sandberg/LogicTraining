@@ -52,9 +52,8 @@ function createAllLevelButtons(starty){
 }
 
 function drawLevelButton(x, y, levelIdx, selected){
-	ctx1.save();
-
 	// Draw over whatever is already here.
+	ctx1.save();
 	ctx1.fillStyle = "#184E32";
 	ctx1.fillRect(x-4, y-4, (6*SC)+8, (6*SC)+8);
 
@@ -85,7 +84,7 @@ function drawLevelButton(x, y, levelIdx, selected){
 		ctx1.font = (0.8*SC) + "pt FontAwesome";
 		ctx1.lineWidth = 1;
 		for (var j = 0; j < 3; j++){
-			if (j < levels[levelIdx].starsGained){
+			if (j < levels[levelIdx].starsEarned){
 				ctx1.fillStyle = "#ffff00";
 				ctx1.fillText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
 			}
@@ -205,7 +204,7 @@ function clearLevelButtonIntervals(){
 // 			// Draw the stars, filling in the ones which have been earned.
 // 			ctx1.font = (0.8*SC) + "pt FontAwesome";
 // 			for (var j = 0; j < 3; j++){
-// 				if (j < levels[i].starsGained){
+// 				if (j < levels[i].starsEarned){
 // 					ctx1.fillStyle = "#ffff00";
 // 					ctx1.fillText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
 // 				}

@@ -35,36 +35,13 @@ function updateGateOutput(gateIdx){
 	if (input1 == -1 || input2 == -1 || gate.type == 0){
 		newOutput = -1;
 	} else {
-		switch (gate.type){
-			case gatesEnum.and:
-				newOutput = (input1 && input2) ? 1 : 0;
-				break;
-			case gatesEnum.nand:
-				newOutput = !(input1 && input2) ? 1 : 0;
-				break;
-			case gatesEnum.or:
-				newOutput = (input1 || input2) ? 1 : 0;
-				break;
-			case gatesEnum.nor:
-				newOutput = !(input1 || input2) ? 1 : 0;
-				break;
-			case gatesEnum.xor:
-				newOutput = ((input1 || input2) && !(input1 && input2)) ? 1 : 0;
-				break;
-			case gatesEnum.xnor:
-				newOutput = !((input1 || input2) && !(input1 && input2)) ? 1 : 0;
-				break;
-			case gatesEnum.bulb:
-			case gatesEnum.star:
-				newOutput = (input1 == 1) ? 1 : 0;
-				break;
-		}
+		newOutput = calculateGateOutput(gate, input1, input2);
 	}
 
 	// Update the wire section, and the input values of all the gates this one connects to.
 	if (oldOutput != newOutput){
 		gate.outputVal = newOutput;
-		if (gate.type != gatesEnum.bulb && gate.type != gatesEnum.star){
+		if (gate.type != gates.bulb){
 			// If there is a wire group coming out of this gate, update it's value, and enable/disable animations.
 			var wireGroup = circuit.wireSections[gateIdx[1]+1][gateIdx[2]];
 			wireGroup.live = newOutput;
@@ -87,16 +64,39 @@ function updateGateOutput(gateIdx){
 					nextGate.inputs[nextGateInputs[j]].val = newOutput;
 				}
 			}
-		} else if (gate.type == gatesEnum.star){
-			if (newOutput == 1){
-				starsGained++;
-			} else if (oldOutput == 1){
-				starsGained--;
-			}
 		}
 	}
 
 	return gate.outputVal;
+}
+
+// Calculates what output you get with any combination of gates and inputs.
+function calculateGateOutput(gate, input1, input2){
+	var newOutput;
+	switch (gate.type){
+		case gates.and:
+			newOutput = (input1 && input2) ? 1 : 0;
+			break;
+		case gates.nand:
+			newOutput = !(input1 && input2) ? 1 : 0;
+			break;
+		case gates.or:
+			newOutput = (input1 || input2) ? 1 : 0;
+			break;
+		case gates.nor:
+			newOutput = !(input1 || input2) ? 1 : 0;
+			break;
+		case gates.xor:
+			newOutput = ((input1 || input2) && !(input1 && input2)) ? 1 : 0;
+			break;
+		case gates.xnor:
+			newOutput = !((input1 || input2) && !(input1 && input2)) ? 1 : 0;
+			break;
+		case gates.bulb:
+			newOutput = (input1 == 1) ? 1 : 0;
+			break;
+	}
+	return newOutput;
 }
 
 // Takes an x and y coordinate and looks to see if that point is within the boundaries of one of the gates in the circuits. If it is, that gate index is returned.

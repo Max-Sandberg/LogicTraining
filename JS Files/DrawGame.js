@@ -38,9 +38,10 @@ function drawMenuBar(){
 	drawXNOR(x+(25*SC), y, 0, 0, 0, ctx1);
 
 	// Draw the hotkey numbers.
+	ctx1.textAlign = "left";
+	ctx1.font = "8pt Arial";
+	ctx1.fillStyle = "#000000";
 	for (var i = 0; i < 6; i++){
-		ctx1.font = "8pt Arial";
-		ctx1.fillStyle = "#000000";
 		ctx1.fillText(i+1, x+(i*5*SC)+(4*SC)-10, y+(4*SC)-4);
 	}
 
@@ -140,10 +141,10 @@ function drawGameArea(ctx){
 	for (var i = 0; i < circuits.length; i++){
 		if (!pause){
 			// Normal circuits move 1 pixel, star circuits move two pixels.
-			if (circuits[i].type == gatesEnum.star && circuits[i].startx < cvs1.width){
-				circuits[i].startx -= 1.6 * scrollSpeed;
+			if (circuits[i].fast && circuits[i].startx < cvs1.width){
+				circuits[i].startx -= 5* 1.5 * scrollSpeed;
 			} else {
-				circuits[i].startx -= scrollSpeed;
+				circuits[i].startx -= 5* scrollSpeed;
 			}
 		}
 		drawCircuit(circuits[i], ctx);

@@ -39,10 +39,10 @@ function chooseCircuits(){
 		circuits.push(diffPool.splice(idx,1)[0]);
 	}
 
-	// Circuits 4 and 8 are always star circuits, so change these now.
+	// Circuits 4 and 8 are always fast circuits, so change these now.
 	if (!level.tutorial){
 		for (var i = 3; i <= 7; i += 4){
-			circuits[i].gateSections[circuits[i].gateSections.length-1][0].type = gatesEnum.star;
+			circuits[i].fast = true;
 		}
 	}
 }
@@ -50,52 +50,52 @@ function chooseCircuits(){
 function findCircuitPosition(idx){
 	var y, vertGap,
 		circuit = circuits[idx],
-		horzGap = 18*SC;
+		horzGap = 20*SC;
 
 	// Calculate the x position.
 	circuit.startx = (idx == 0) ? cvs1.width + 50 :
-	 				 (circuits[idx-1].type != gatesEnum.star) ? circuits[idx-1].endx + horzGap :
-					 circuits[idx-2].endx + horzGap;
+	 				 (circuits[idx-1].fast) ? circuits[idx-1].startx + 8*SC :
+					 (idx == circuits.length-1) ? circuits[idx-1].endx + (2*horzGap) :
+					 circuits[idx-1].endx + horzGap;
 	circuit.endx = circuit.startx + circuit.width;
-	delete circuit.width;
 
-	var isStar = (circuit.type == gatesEnum.star),
-		oneBeforeStar = false,
-		twoBeforeStar = false,
-		afterStar = false;
+	var isFast = (circuit.fast),
+		oneBeforeFast = false,
+		twoBeforeFast = false,
+		afterFast = false;
 	if (idx+1 < circuits.length){
-		oneBeforeStar = (circuits[idx+1].type == gatesEnum.star);
+		oneBeforeFast = (circuits[idx+1].fast);
 	}
 	if (idx+2 < circuits.length){
-		twoBeforeStar = (circuits[idx+2].type == gatesEnum.star);
+		twoBeforeFast = (circuits[idx+2].fast);
 	}
 	if (idx != 0){
-		afterStar = (circuits[idx-1].type == gatesEnum.star);
+		afterFast = (circuits[idx-1].fast);
 	}
 
 	var gameAreaHeight = cvs1.height - (6*SC) - 60;
-	if (twoBeforeStar){
+	if (twoBeforeFast){
 		do {
 			y = Math.round((0.25+(0.5*Math.round(Math.random())))*gameAreaHeight)-(4*SC);
 			vertGap = (idx != 0) ? Math.abs(circuits[idx-1].starty - y) : 1000;
 		}
 		while (vertGap < 6*SC);
 	}
-	else if (oneBeforeStar && idx != 0){
+	else if (oneBeforeFast && idx != 0){
 		y = circuits[idx-1].starty;
 	}
-	else if ((oneBeforeStar && idx == 0) || isStar){
+	else if ((oneBeforeFast && idx == 0) || isFast){
 		do {
 			y = Math.round((0.25+(0.5*Math.round(Math.random())))*gameAreaHeight)-(4*SC);
 		}
-		while (isStar && y == circuits[idx-1].starty);
+		while (isFast && y == circuits[idx-1].starty);
 	}
 	else {
 		do {
 			y = Math.round((0.25+(0.5*Math.random()))*gameAreaHeight)-(4*SC);
 			vertGap = (idx != 0) ? Math.abs(circuits[idx-1].starty - y) : 1000;
 		}
-		while ((afterStar && vertGap < 15*SC) || (!afterStar && vertGap < 8*SC));
+		while ((afterFast && vertGap < 15*SC) || (!afterFast && vertGap < 8*SC));
 	}
 
 	circuit.starty = y;
@@ -114,7 +114,7 @@ function findGatePositions(circuitIdx){
 						   (cols[i].length == 1) ? (8*SC) : 0;
 
 			// While we're here, create/tweak some other properties needed for each gate.
-			gate.type = (gate.fixed) ? gate.type : gatesEnum.blank;
+			gate.type = (gate.fixed) ? gate.type : gates.blank;
 			gate.invis = false;
 			gate.outputVal = -1;
 			for (var k = 0; k < gate.nextGates.length; k++){
@@ -128,9 +128,6 @@ function findGatePositions(circuitIdx){
 				}
 			}
 			gate.idx = [circuitIdx, i, j];
-			if (gate.type == gatesEnum.star || gate.type == gatesEnum.bulb){
-				circuit.type = gate.type;
-			}
 		}
 	}
 	circuit.width = cols.length * 8 * SC;

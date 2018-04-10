@@ -17,16 +17,16 @@ function handleMouseDown(){
 					updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
 				}
 			}
-		} else {
-			var gate = getSelectedGate(mousex, mousey, 0);
-			if (gate != null){
-				// If the user clicked and dragged a non-fixed gate in the circuit, remove that gate from the circuit.
-				draggedGate = gate.type;
-				gate.type = 0;
-				updateCircuitValues(gate.idx);
-				drawDraggedIntervalId = setInterval(drawDraggedGate, 1000/60);
-				updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
-			}
+		// } else {
+			// var gate = getSelectedGate(mousex, mousey, 0);
+			// if (gate != null){
+			// 	// If the user clicked and dragged a non-fixed gate in the circuit, remove that gate from the circuit.
+			// 	draggedGate = gate.type;
+			// 	gate.type = 0;
+			// 	updateCircuitValues(gate.idx);
+			// 	drawDraggedIntervalId = setInterval(drawDraggedGate, 1000/60);
+			// 	updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
+			// }
 		}
 	}
 }
@@ -37,6 +37,7 @@ function handleMouseUp(){
 		var gate = getSelectedGate(mousex, mousey, 12),
 			chosenGate = draggedGate;
 
+		// Clear all the gate dragging intervals, and clear whatever dragged gate is being drawn.
 		clearInterval(updateSelectedIntervalId);
 		clearInterval(drawDraggedIntervalId);
 		updateSelectedIntervalId = undefined;
@@ -44,14 +45,19 @@ function handleMouseUp(){
 		draggedGate = 0;
 		ctx2.clearRect(0, 0, cvs2.width, cvs2.height);
 
+		// If there is a gate at this position, update it with the selected gate.
 		if (gate != null){
+			moves++;
+			gate.type = chosenGate;
 			gate.invis = false;
-			if (gate.type != chosenGate){
-				moves++;
-				drawMoves();
-				gate.type = chosenGate;
-				updateCircuitValues(gate.idx);
-			}
+			gate.fixed = true;
+			drawMoves();
+			updateCircuitValues(gate.idx);
+		}
+
+		// Check if all the circuits are now complete, and end the game if so.
+		if (checkAllCircuitsComplete()){
+			endLevel();
 		}
 	}
 	selectedGate = null;

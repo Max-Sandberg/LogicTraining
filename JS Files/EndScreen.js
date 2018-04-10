@@ -1,22 +1,49 @@
-var won, btn;
-var selectedButton = null;
+var won;
 
-function showEndScreen(){
-	if (won){
-		// Unlock the next level if they won.
-		if (levelIdx < levels.length-1){
-			levels[levelIdx+1].unlocked = true;
-		}
-		// Give an extra star if they completed the level in less moves than the par.
-		if (moves <= level.par){
-			starsGained++;
-		}
-		// If they earned more stars than they had previously earned for this level, update the stars gained.
-		if (level.starsGained < starsGained){
-			level.starsGained = starsGained;
+// Checks if the player won or lost, and how many stars they earned, then displays the relevant end dialogue.
+function endLevel(){
+	// Redraw the game, just to make sure the last circuit has been updated, then clear all intervals.
+	drawGameArea(ctx1);
+	clearIntervals();
+
+	// Counts how many circuits the player got correct.
+	var circuitsSolved = 0;
+	for (var i = 0; i < circuits.length; i++){
+		var gateSections = circuits[i].gateSections,
+			bulb = gateSections[gateSections.length-1][0];
+		if (bulb.outputVal == 1){
+			circuitsSolved++;
 		}
 	}
 
+	if (level.tutorial && circuitsSolved == 1){
+		// If this is the tutorial level, don't show the end screen, just continue the tutorial.
+		pause = true;
+		handleTestCircuit();
+	} else {
+		// Calculate how many stars the player earned.
+		var starsEarned = (level.tutorial) ? 0 :
+						  (circuitsSolved == circuits.length) ? 3 :
+						  (circuitsSolved >= circuits.length - 2) ? 2 :
+				  		  (circuitsSolved >= circuits.length - 4) ? 1 : 0
+		won = (starsEarned > 0);
+
+		if (won){
+			// Unlock the next level if they won.
+			if (levelIdx < levels.length-1){
+				levels[levelIdx+1].unlocked = true;
+			}
+			// If they earned more stars than they had previously earned for this level, update the stars gained.
+			if (level.starsEarned < starsEarned){
+				level.starsEarned = starsEarned;
+			}
+		}
+
+		showEndScreen(circuitsSolved, starsEarned);
+	}
+}
+
+function showEndScreen(circuitsSolved, starsEarned){
 	// Animation to slowly fade the screen.
 	var frame = -1;
 	var id = setInterval(fadeScreen, 1000/60);
@@ -38,39 +65,42 @@ function showEndScreen(){
 		}
 	}
 
-	var width = won ? 400 : 300;
-		height = won ? 260 : 200,
+	var width = won ? 400 : 328;
+		height = (starsEarned == 0) ? 240 :
+			 	 (starsEarned < 3) ? 304 : 280;
 		x = (cvs1.width/2) - (width/2);
 		y = -height;
-	var starX, starY, size;
 	function slideEndMessage(){
 		frame++;
 		y = (frame/50) * ((cvs1.height/2)+(height/2)) - height;
 		ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
 		if (frame < 50){
-			drawEndMessage(x, y, ctx2);
+			drawEndMessage(x, y, circuitsSolved, starsEarned, ctx2);
 		} else if (frame == 50){
-			drawEndMessage(x, y, ctx1);
+			drawEndMessage(x, y, circuitsSolved, starsEarned, ctx1);
 			clearInterval(id);
 			if (won){
 				frame = -1;
 				starX = x+0.3*width;
-				starY = y+128;
+				starY = y+height-122;
 				ctx2.fillStyle = "#FFFF00";
 				ctx2.strokeStyle = "#000000";
 				ctx2.lineWidth = 1.5;
-				if (starsGained > 0){
+				if (starsEarned > 0){
 					id = setInterval(animateStars, 1000/60);
 				}
 			}
 		}
 	}
 
+	var starX = (cvs1.width/2) - (0.2*width),
+		starY = (cvs1.height/2) + (height/2) - 102,
+		size;
 	function animateStars(){
 		frame++;
 		ctx1.save();
 		if (frame == 25 || frame == 50 || frame == 75){
-			if (starsGained > frame/25){
+			if (starsEarned > frame/25){
 				// ctx2.fillStyle = "#184e32";
 				// ctx2.fillRect()
 				starX += 0.2*width;
@@ -91,9 +121,10 @@ function showEndScreen(){
 	}
 }
 
-function drawEndMessage(x, y, ctx){
-	var width = won ? 400 : 300;
-		height = won ? 260 : 200;
+function drawEndMessage(x, y, circuitsSolved, starsEarned, ctx){
+	var width = won ? 400 : 328;
+		height = (starsEarned == 0) ? 240 :
+				 (starsEarned < 3) ? 304 : 280;
 
 	// Draw the box.
 	ctx.save();
@@ -114,13 +145,33 @@ function drawEndMessage(x, y, ctx){
 	ctx.fillStyle = "#000000";
 	ctx.fillText(text, x+(width/2), y+70);
 
+	// Write how many circuits they got right, and how many they need to get right to get the next star.
+	ctx.font = "14pt Arial";
+	text = (starsEarned == 0) ? "Nice try." :
+		   (starsEarned == 1) ? "Not bad!" :
+		   (starsEarned == 2) ? "Good job!" : text + "Great work!";
+	text = text + " You solved " + circuitsSolved + "/" + circuits.length + " circuits.";
+	ctx.fillText(text, x+(width/2), y+112);
+	if (circuitsSolved < circuits.length - 4){
+		text = "Get " + (circuits.length-4-circuitsSolved) + " more to win the level!";
+	}
+	else if (circuitsSolved < circuits.length - 2){
+		text = "Get " + (circuits.length-2-circuitsSolved) + " more for the next star!";
+	}
+	else if (circuitsSolved < circuits.length){
+		text = "Get " + (circuits.length-circuitsSolved) + " more for the next star!";
+	}
+	if (starsEarned != 3 && !level.tutorial){
+		ctx.fillText(text, x+(width/2), y+134);
+	}
+
 	// If the game was won, draw the number of stars earned (empty for now).
 	if (won){
 		ctx.textAlign = "center";
 		ctx.lineWidth = 1.5;
 		ctx.font = "40pt FontAwesome"
 		for (var i = 0; i < 3; i++){
-			ctx.strokeText("\uF005", x+(0.3*width)+(i*0.2*width), y+148);
+			ctx.strokeText("\uF005", x+(0.3*width)+(i*0.2*width), y+height-102);
 		}
 	}
 
@@ -138,7 +189,7 @@ function drawEndMessage(x, y, ctx){
 		retryx = x + ((width-retryWidth-menuWidth)/3);
 		menux = retryx + retryWidth + ((width-retryWidth-menuWidth)/3);
 	}
-	yOffset = won ? 180.5 : 120.5;
+	yOffset = height - 70.5;
 
 	// Draw the buttons.
 	if (ctx == ctx2){
@@ -238,59 +289,33 @@ function createEndScreenButton(text, x, y){
 	updateButtonInterval = setInterval(updateEndScreenButton, 1000/60);
 }
 
-// function handleEndScreenMouseMove(){
-// 	mousex = event.clientX-8;
-// 	mousey = event.clientY-8;
-//
-// 	var newBtn = getSelectedButton();
-// 	if (newBtn != selectedButton){
-// 		var btnX = (newBtn == "RETRY" || selectedButton == "RETRY") ? (cvs1.width/2)-105 : (cvs1.width/2)+25,
-// 			btnY = won ? (cvs1.height/2)+50 : (cvs1.height/2)+20,
-// 			text = (newBtn == null) ? selectedButton : newBtn;
-// 		drawButton(text, btnX, btnY, (newBtn != null), ctx1);
-// 		selectedButton = newBtn;
-// 	}
-// }
-//
-// function handleEndScreenMouseDown(){
-// 	if (selectedButton != null){
-// 		if (won){
-// 			if (levelIdx < levels.length-1){
-// 				levels[levelIdx+1].unlocked = true;
-// 			}
-// 			if (level.starsGained < starsGained){
-// 				level.starsGained = starsGained;
-// 			}
-// 		}
-//
-// 		resetGameState();
-//
-// 		if (selectedButton == "RETRY"){
-// 			selectedButton = null;
-// 			cvs2.onmousedown = undefined;
-// 			cvs2.onmousemove = undefined;
-// 			if (level.tutorial){
-// 				startTutorial();
-// 			} else {
-// 				startLevel(levelIdx);
-// 			}
-// 		} else {
-// 			selectedButton = null;
-// 			cvs2.onmousedown = handleMenuMouseDown;
-// 			drawMenu();
-// 		}
-// 	}
-// }
-//
-// function getSelectedButton(){
-// 	var btnX = (cvs1.width/2)-114;
-// 		btnY = won ? (cvs1.height/2)+50 : (cvs1.height/2)+20;
-//
-// 	for (var i = 0; i < 2; i++){
-// 		btnX += (i * 130);
-// 		if ((mousex > btnX) && (mousex < btnX+80) && (mousey > btnY) && (mousey < btnY+40)){
-// 			return (i == 0) ? "RETRY" : "MENU";
-// 		}
-// 	}
-// 	return null;
-// }
+function clearIntervals(){
+	// Cancel all the intervals and handlers
+	clearInterval(updateSelectedIntervalId);
+	clearInterval(drawDraggedIntervalId);
+	clearInterval(drawIntervalId);
+	clearInterval(updateIntervalId);
+	clearInterval(gateChangeIntervalId);
+	clearInterval(menuHoverIntervalId);
+	updateSelectedIntervalId = undefined;
+	drawDraggedIntervalId = undefined;
+	drawIntervalId = undefined;
+	updateIntervalId = undefined;
+	gateChangeIntervalId = undefined;
+	menuHoverIntervalId = undefined;
+	cvs2.onmousedown = undefined;
+	cvs2.onmouseup = undefined;
+	document.onkeypress = undefined;
+}
+
+function resetGameState(){
+	starsEarned = 0;
+	frameNo = 0;
+	draggedGate = 0;
+	moves = 0;
+	won = undefined;
+	selectedGate = null;
+	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
+	ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
+	ctx1.textAlign = "left";
+}

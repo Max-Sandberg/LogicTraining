@@ -1,12 +1,11 @@
 var SC; // Scale
 var cvs1, ctx1, cvs2, ctx2;
-var circuits
-var gatesEnum = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7, "star":8});
+var circuits;
+var gates = Object.freeze({"blank":0, "and":1, "nand":2, "or":3, "nor":4, "xor":5, "xnor":6, "bulb":7});
 var allowedGates;
 var enableGateChanges;
 var draggedGate = 0;
 var selectedGate = null;
-var starsGained = 0;
 var drawDraggedIntervalId, updateSelectedIntervalId, drawIntervalId, updateIntervalId, gateChangeIntervalId, menuHoverIntervalId;
 var mousex, mousey;
 var frameNo = 0;
@@ -52,7 +51,7 @@ function startLevel(lvlIdx) {
 	ctx1.strokeRect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-1);
 	pause = false;
 	drawIntervalId = setInterval(drawGameArea, 1000/60, ctx1);
-	updateIntervalId = setInterval(updateGameArea, 50);
+	updateIntervalId = setInterval(updateGameArea, 200);
 	if (enableGateChanges && !level.introduceGateChanges){
 		gateChangeIntervalId = setInterval(changeLockedGates, 20000);
 	}
@@ -64,7 +63,7 @@ function startLevel(lvlIdx) {
 		// var key = event.which || event.keyCode;
 		if (e.key == " "){
 			// If key was space, pause the game - comment as appropriate.
-			// pause = !pause;
+			pause = !pause;
 		} else {
 			// If the key was a number, find which gate that number corresponds to.
 			var gate = parseInt(e.key);
@@ -163,7 +162,7 @@ function createCanvases(){
 	// Calculate the scale to use for the UI and the scroll speed based on the window size.
 	SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
 	SC = Math.min(SC, 22);
-	scrollSpeed = cvs1.width / 1000;
+	scrollSpeed = cvs1.width / 1200;
 }
 
 // Handles the window being resized.
@@ -184,28 +183,4 @@ function handleResize(){
 		// Redraw menu.
 		drawMenu()
 	}
-
-	// // Temporarily store all the existing canvas event handlers.
-	// var tempMouseDown = cvs2.onmousedown,
-	// 	tempMouseUp = cvs2.onmouseup,
-	// 	tempMouseMove = cvs2.onmousemove;
-	//
-	// // Remove the current canvases, and use createCanvases to create new ones of the correct size, and recalculate SC.
-	// var container = document.getElementById("container");
-	// container.removeChild(container.childNodes[0]);
-	// container.removeChild(container.childNodes[0]);
-	// createCanvases();
-	//
-	// // Restore the old event handlers.
-	// cvs2.onmousedown = tempMouseDown;
-	// cvs2.onmouseup = tempMouseUp;
-	// cvs2.onmousemove = tempMouseMove;
-	//
-	// // Redraw the game or menu.
-	// if (currentScreen == screens.game){
-	// 	drawMenuBar();
-	// 	drawGameArea(ctx1);
-	// } else if (currentScreen == screens.menu){
-	// 	drawMenu();
-	// }
 }

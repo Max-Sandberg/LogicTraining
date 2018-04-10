@@ -14,7 +14,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -25,7 +25,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -43,7 +43,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -54,7 +54,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -72,7 +72,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -83,7 +83,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -101,7 +101,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -112,7 +112,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -130,7 +130,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -141,7 +141,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -159,7 +159,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -170,7 +170,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -194,7 +194,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -208,7 +208,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -219,7 +219,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -237,7 +237,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -251,7 +251,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0],
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -262,7 +262,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -280,7 +280,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -294,7 +294,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -305,7 +305,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -323,93 +323,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}]
-					}], [{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "gate",
-							gate : [0, 0],
-						}],
-						type : gatesEnum.nand,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region - Circuit, 2 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 1
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [0, 0],
-						}, {
-							type : "signal",
-							val : 1
-						}],
-						type : gatesEnum.nand,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region - Circuit, 2 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -423,7 +337,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0],
 						}],
-						type : gatesEnum.nand,
+						type : gates.nand,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -434,7 +348,93 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region - Circuit, 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gates.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [0, 0],
+						}, {
+							type : "signal",
+							val : 1
+						}],
+						type : gates.nand,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gates.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region - Circuit, 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gates.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "signal",
+							val : 1
+						}, {
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gates.nand,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -454,7 +454,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -468,7 +468,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.or,
+						type : gates.or,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -479,7 +479,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -497,7 +497,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -511,7 +511,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0],
 						}],
-						type : gatesEnum.or,
+						type : gates.or,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -522,7 +522,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -540,7 +540,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -554,7 +554,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.or,
+						type : gates.or,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -565,7 +565,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -583,7 +583,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -597,7 +597,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0],
 						}],
-						type : gatesEnum.nor,
+						type : gates.nor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -608,7 +608,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -626,7 +626,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -640,7 +640,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.nor,
+						type : gates.nor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -651,7 +651,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -669,7 +669,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -683,7 +683,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0],
 						}],
-						type : gatesEnum.nor,
+						type : gates.nor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -694,7 +694,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -714,7 +714,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -728,7 +728,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0],
 						}],
-						type : gatesEnum.xor,
+						type : gates.xor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -739,7 +739,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -757,7 +757,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -771,7 +771,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.xor,
+						type : gates.xor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -782,7 +782,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -800,7 +800,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -814,7 +814,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.xor,
+						type : gates.xor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -825,7 +825,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -843,50 +843,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
-						fixed : false,
-						nextGates : [{
-							gateIdx : [1, 0],
-							inputs : [1]
-						}]
-					}], [{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "gate",
-							gate : [0, 0],
-						}],
-						type : gatesEnum.xnor,
-						fixed : true,
-						nextGates : [{
-							gateIdx : [2, 0],
-							inputs : [0]
-						}]
-					}], [{
-						inputs : [{
-							type : "gate",
-							gate : [1, 0],
-						}],
-						type : gatesEnum.bulb,
-						fixed : true,
-						nextGates : []
-					}]
-				]
-			},
-			//#endregion
-			//#region - Circuit, 2 Gates
-			{
-				gateSections : [
-					[{
-						inputs : [{
-							type : "signal",
-							val : 0
-						}, {
-							type : "signal",
-							val : 0
-						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -900,7 +857,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0],
 						}],
-						type : gatesEnum.xnor,
+						type : gates.xnor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -911,7 +868,50 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
+						fixed : true,
+						nextGates : []
+					}]
+				]
+			},
+			//#endregion
+			//#region - Circuit, 2 Gates
+			{
+				gateSections : [
+					[{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "signal",
+							val : 0
+						}],
+						type : gates.blank,
+						fixed : false,
+						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}]
+					}], [{
+						inputs : [{
+							type : "signal",
+							val : 0
+						}, {
+							type : "gate",
+							gate : [0, 0],
+						}],
+						type : gates.xnor,
+						fixed : true,
+						nextGates : [{
+							gateIdx : [2, 0],
+							inputs : [0]
+						}]
+					}], [{
+						inputs : [{
+							type : "gate",
+							gate : [1, 0],
+						}],
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -929,7 +929,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -943,7 +943,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.xnor,
+						type : gates.xnor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -954,7 +954,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -984,7 +984,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -998,7 +998,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1012,7 +1012,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1023,7 +1023,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1041,7 +1041,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1055,7 +1055,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1069,7 +1069,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1080,7 +1080,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1098,7 +1098,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1112,7 +1112,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1126,7 +1126,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1137,7 +1137,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1155,7 +1155,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1169,7 +1169,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1183,7 +1183,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.nand,
+						type : gates.nand,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1194,7 +1194,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1212,7 +1212,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1226,7 +1226,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1240,7 +1240,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.nand,
+						type : gates.nand,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1251,7 +1251,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1269,7 +1269,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1283,7 +1283,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1297,7 +1297,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.nand,
+						type : gates.nand,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1308,7 +1308,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1328,7 +1328,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1342,7 +1342,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1356,7 +1356,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.or,
+						type : gates.or,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1367,7 +1367,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1385,7 +1385,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1399,7 +1399,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1413,7 +1413,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.or,
+						type : gates.or,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1424,7 +1424,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1442,7 +1442,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1456,7 +1456,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1470,7 +1470,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.or,
+						type : gates.or,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1481,7 +1481,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1499,7 +1499,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1513,7 +1513,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1527,7 +1527,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.nor,
+						type : gates.nor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1538,7 +1538,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1556,7 +1556,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1570,7 +1570,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1584,7 +1584,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.nor,
+						type : gates.nor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1595,7 +1595,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1613,7 +1613,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1627,7 +1627,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1641,7 +1641,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.nor,
+						type : gates.nor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1652,7 +1652,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1672,7 +1672,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1686,7 +1686,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1700,7 +1700,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.xor,
+						type : gates.xor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1711,7 +1711,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1729,7 +1729,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1743,7 +1743,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1757,7 +1757,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.xor,
+						type : gates.xor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1768,7 +1768,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1786,7 +1786,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1800,7 +1800,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1814,7 +1814,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.xor,
+						type : gates.xor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1825,7 +1825,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1843,7 +1843,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1857,7 +1857,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1871,7 +1871,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.xnor,
+						type : gates.xnor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1882,7 +1882,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1900,7 +1900,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1914,7 +1914,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1928,7 +1928,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.xnor,
+						type : gates.xnor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1939,7 +1939,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -1957,7 +1957,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1971,7 +1971,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -1985,7 +1985,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1],
 						}],
-						type : gatesEnum.xnor,
+						type : gates.xnor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -1996,7 +1996,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -2026,7 +2026,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -2040,7 +2040,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.nand,
+						type : gates.nand,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -2054,7 +2054,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -2065,7 +2065,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -2083,7 +2083,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -2097,7 +2097,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0]
 						}],
-						type : gatesEnum.nand,
+						type : gates.nand,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -2111,7 +2111,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1,
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -2122,7 +2122,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -2140,7 +2140,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -2154,7 +2154,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.nand,
+						type : gates.nand,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -2168,7 +2168,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -2179,7 +2179,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -2197,7 +2197,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -2211,7 +2211,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0]
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -2225,7 +2225,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1,
 						}],
-						type : gatesEnum.nand,
+						type : gates.nand,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -2236,7 +2236,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -2254,7 +2254,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -2268,7 +2268,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -2282,7 +2282,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.nand,
+						type : gates.nand,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -2293,7 +2293,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -2311,7 +2311,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -2325,7 +2325,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0]
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -2339,7 +2339,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1,
 						}],
-						type : gatesEnum.nand,
+						type : gates.nand,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -2350,7 +2350,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -2370,7 +2370,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -2384,7 +2384,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.nand,
+						type : gates.nand,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -2398,7 +2398,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.or,
+						type : gates.or,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -2409,7 +2409,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -2427,7 +2427,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -2441,7 +2441,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -2455,7 +2455,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.nor,
+						type : gates.nor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -2466,7 +2466,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -2484,7 +2484,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -2498,7 +2498,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.nor,
+						type : gates.nor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -2512,7 +2512,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -2523,7 +2523,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -2541,7 +2541,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -2555,7 +2555,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.or,
+						type : gates.or,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -2569,7 +2569,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 0],
 						}],
-						type : gatesEnum.nand,
+						type : gates.nand,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -2580,7 +2580,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0],
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -2601,7 +2601,7 @@ var circuitPools = [
 								type : "signal",
 								val : 1
 							}],
-							type : gatesEnum.blank,
+							type : gates.blank,
 							fixed : false,
 							nextGates : [{
 								gateIdx : [1, 0],
@@ -2615,7 +2615,7 @@ var circuitPools = [
 								type : "signal",
 								val : 1
 							}],
-							type : gatesEnum.xnor,
+							type : gates.xnor,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [2, 0],
@@ -2629,7 +2629,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [1, 0],
 							}],
-							type : gatesEnum.or,
+							type : gates.or,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [3, 0],
@@ -2640,7 +2640,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [2, 0],
 							}],
-							type : gatesEnum.bulb,
+							type : gates.bulb,
 							fixed : true,
 							nextGates : []
 						}]
@@ -2658,7 +2658,7 @@ var circuitPools = [
 								type : "signal",
 								val : 0
 							}],
-							type : gatesEnum.blank,
+							type : gates.blank,
 							fixed : false,
 							nextGates : [{
 								gateIdx : [1, 0],
@@ -2672,7 +2672,7 @@ var circuitPools = [
 								type : "signal",
 								val : 0
 							}],
-							type : gatesEnum.xor,
+							type : gates.xor,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [2, 0],
@@ -2686,7 +2686,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [1, 0],
 							}],
-							type : gatesEnum.nor,
+							type : gates.nor,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [3, 0],
@@ -2697,7 +2697,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [2, 0],
 							}],
-							type : gatesEnum.bulb,
+							type : gates.bulb,
 							fixed : true,
 							nextGates : []
 						}]
@@ -2715,7 +2715,7 @@ var circuitPools = [
 								type : "signal",
 								val : 1
 							}],
-							type : gatesEnum.blank,
+							type : gates.blank,
 							fixed : false,
 							nextGates : [{
 								gateIdx : [1, 0],
@@ -2729,7 +2729,7 @@ var circuitPools = [
 								type : "signal",
 								val : 0
 							}],
-							type : gatesEnum.nor,
+							type : gates.nor,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [2, 0],
@@ -2743,7 +2743,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [1, 0],
 							}],
-							type : gatesEnum.xor,
+							type : gates.xor,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [3, 0],
@@ -2754,7 +2754,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [2, 0],
 							}],
-							type : gatesEnum.bulb,
+							type : gates.bulb,
 							fixed : true,
 							nextGates : []
 						}]
@@ -2772,7 +2772,7 @@ var circuitPools = [
 								type : "signal",
 								val : 0
 							}],
-							type : gatesEnum.blank,
+							type : gates.blank,
 							fixed : false,
 							nextGates : [{
 								gateIdx : [1, 0],
@@ -2786,7 +2786,7 @@ var circuitPools = [
 								type : "signal",
 								val : 0
 							}],
-							type : gatesEnum.or,
+							type : gates.or,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [2, 0],
@@ -2800,7 +2800,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [1, 0],
 							}],
-							type : gatesEnum.xnor,
+							type : gates.xnor,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [3, 0],
@@ -2811,7 +2811,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [2, 0],
 							}],
-							type : gatesEnum.bulb,
+							type : gates.bulb,
 							fixed : true,
 							nextGates : []
 						}]
@@ -2829,7 +2829,7 @@ var circuitPools = [
 								type : "signal",
 								val : 1
 							}],
-							type : gatesEnum.blank,
+							type : gates.blank,
 							fixed : false,
 							nextGates : [{
 								gateIdx : [1, 0],
@@ -2843,7 +2843,7 @@ var circuitPools = [
 								type : "signal",
 								val : 1
 							}],
-							type : gatesEnum.nand,
+							type : gates.nand,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [2, 0],
@@ -2857,7 +2857,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [1, 0],
 							}],
-							type : gatesEnum.xor,
+							type : gates.xor,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [3, 0],
@@ -2868,7 +2868,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [2, 0],
 							}],
-							type : gatesEnum.bulb,
+							type : gates.bulb,
 							fixed : true,
 							nextGates : []
 						}]
@@ -2886,7 +2886,7 @@ var circuitPools = [
 								type : "signal",
 								val : 0
 							}],
-							type : gatesEnum.blank,
+							type : gates.blank,
 							fixed : false,
 							nextGates : [{
 								gateIdx : [1, 0],
@@ -2900,7 +2900,7 @@ var circuitPools = [
 								type : "signal",
 								val : 1
 							}],
-							type : gatesEnum.and,
+							type : gates.and,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [2, 0],
@@ -2914,7 +2914,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [1, 0],
 							}],
-							type : gatesEnum.xnor,
+							type : gates.xnor,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [3, 0],
@@ -2925,7 +2925,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [2, 0],
 							}],
-							type : gatesEnum.bulb,
+							type : gates.bulb,
 							fixed : true,
 							nextGates : []
 						}]
@@ -2943,7 +2943,7 @@ var circuitPools = [
 								type : "signal",
 								val : 1
 							}],
-							type : gatesEnum.blank,
+							type : gates.blank,
 							fixed : false,
 							nextGates : [{
 								gateIdx : [1, 0],
@@ -2957,7 +2957,7 @@ var circuitPools = [
 								type : "signal",
 								val : 1
 							}],
-							type : gatesEnum.xnor,
+							type : gates.xnor,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [2, 0],
@@ -2971,7 +2971,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [1, 0],
 							}],
-							type : gatesEnum.and,
+							type : gates.and,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [3, 0],
@@ -2982,7 +2982,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [2, 0],
 							}],
-							type : gatesEnum.bulb,
+							type : gates.bulb,
 							fixed : true,
 							nextGates : []
 						}]
@@ -3000,7 +3000,7 @@ var circuitPools = [
 								type : "signal",
 								val : 0
 							}],
-							type : gatesEnum.blank,
+							type : gates.blank,
 							fixed : false,
 							nextGates : [{
 								gateIdx : [1, 0],
@@ -3014,7 +3014,7 @@ var circuitPools = [
 								type : "signal",
 								val : 1
 							}],
-							type : gatesEnum.xor,
+							type : gates.xor,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [2, 0],
@@ -3028,7 +3028,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [1, 0],
 							}],
-							type : gatesEnum.nand,
+							type : gates.nand,
 							fixed : true,
 							nextGates : [{
 								gateIdx : [3, 0],
@@ -3039,7 +3039,7 @@ var circuitPools = [
 								type : "gate",
 								gate : [2, 0],
 							}],
-							type : gatesEnum.bulb,
+							type : gates.bulb,
 							fixed : true,
 							nextGates : []
 						}]
@@ -3064,7 +3064,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -3081,7 +3081,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 1],
@@ -3099,7 +3099,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1]
 						}],
-						type : gatesEnum.or,
+						type : gates.or,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -3113,7 +3113,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1]
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -3128,7 +3128,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 1]
 						}],
-						type : gatesEnum.xor,
+						type : gates.xor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -3140,7 +3140,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0]
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -3158,7 +3158,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -3175,7 +3175,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 1],
@@ -3190,7 +3190,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0]
 						}],
-						type : gatesEnum.xnor,
+						type : gates.xnor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -3204,7 +3204,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1]
 						}],
-						type : gatesEnum.xor,
+						type : gates.xor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -3219,7 +3219,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 1]
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -3231,7 +3231,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0]
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -3249,7 +3249,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -3263,7 +3263,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 1],
@@ -3278,7 +3278,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 0]
 						}],
-						type : gatesEnum.xnor,
+						type : gates.xnor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -3292,7 +3292,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.or,
+						type : gates.or,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -3307,7 +3307,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 1]
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -3319,7 +3319,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0]
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -3337,7 +3337,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -3354,7 +3354,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 1],
@@ -3372,7 +3372,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1]
 						}],
-						type : gatesEnum.nand,
+						type : gates.nand,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -3386,7 +3386,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1]
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -3401,7 +3401,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 1]
 						}],
-						type : gatesEnum.xor,
+						type : gates.xor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -3413,7 +3413,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0]
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -3431,7 +3431,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 0],
@@ -3448,7 +3448,7 @@ var circuitPools = [
 							type : "signal",
 							val : 1
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 1],
@@ -3466,7 +3466,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1]
 						}],
-						type : gatesEnum.or,
+						type : gates.or,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -3480,7 +3480,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1]
 						}],
-						type : gatesEnum.and,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -3495,7 +3495,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 1]
 						}],
-						type : gatesEnum.nor,
+						type : gates.nor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -3507,7 +3507,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0]
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -3525,7 +3525,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 1],
@@ -3539,7 +3539,7 @@ var circuitPools = [
 							type : "signal",
 							val : 0
 						}],
-						type : gatesEnum.blank,
+						type : gates.blank,
 						fixed : false,
 						nextGates : [{
 							gateIdx : [1, 1],
@@ -3557,7 +3557,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1]
 						}],
-						type : gatesEnum.nor,
+						type : gates.nor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -3571,7 +3571,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1]
 						}],
-						type : gatesEnum.xor,
+						type : gates.xor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -3586,7 +3586,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 1]
 						}],
-						type : gatesEnum.or,
+						type : gates.or,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],
@@ -3598,7 +3598,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [2, 0]
 						}],
-						type : gatesEnum.bulb,
+						type : gates.bulb,
 						fixed : true,
 						nextGates : []
 					}]
@@ -3631,7 +3631,7 @@ var levels = [
 								type : "signal",
 								val : 1
 							}],
-							type : gatesEnum.blank,
+							type : gates.blank,
 							fixed : false,
 							nextGates : [{
 								gateIdx : [1, 0],
@@ -3642,7 +3642,7 @@ var levels = [
 								type : "gate",
 								gate : [0, 0],
 							}],
-							type : gatesEnum.bulb,
+							type : gates.bulb,
 							fixed : true,
 							nextGates : []
 						}]
@@ -3656,8 +3656,8 @@ var levels = [
 
 	//#region Level 1 - AND/NAND, Easy
 	{
-		unlocked : false,
-		starsGained : 0,
+		unlocked : true, //change me!
+		starsEarned : 0,
 		allowedGates : [1, 2],
 		newGates : true,
 		circuitDifficulties : [1, 1, 1, 2, 1, 2, 1, 2, 1, 3],
@@ -3671,8 +3671,8 @@ var levels = [
 
 	//#region Level 2 - AND/NAND, Medium
 	{
-		unlocked : false,
-		starsGained : 0,
+		unlocked : true, //change me!
+		starsEarned : 0,
 		allowedGates : [1, 2],
 		circuitDifficulties : [2, 2, 2, 3, 2, 3, 2, 3, 2, 4],
 		circuitPool : {
@@ -3685,8 +3685,8 @@ var levels = [
 
 	//#region Level 3 - OR/NOR, Easy
 	{
-		unlocked : false,
-		starsGained : 0,
+		unlocked : true, //change me!
+		starsEarned : 0,
 		allowedGates : [3,4],
 		newGates : true,
 		circuitDifficulties : [1, 1, 1, 2, 1, 2, 1, 2, 1, 3],
@@ -3700,8 +3700,8 @@ var levels = [
 
 	//#region Level 4 - OR/NOR, Medium
 	{
-		unlocked : false,
-		starsGained : 0,
+		unlocked : true, //change me!
+		starsEarned : 0,
 		allowedGates : [3,4],
 		circuitDifficulties : [2, 2, 2, 3, 2, 3, 2, 3, 2, 4],
 		circuitPool : {
@@ -3714,8 +3714,8 @@ var levels = [
 
 	//#region Level 5 - XOR/XNOR, Easy
 	{
-		unlocked : false,
-		starsGained : 0,
+		unlocked : true, //change me!
+		starsEarned : 0,
 		allowedGates : [5,6],
 		newGates : true,
 		circuitDifficulties : [1, 1, 1, 2, 1, 2, 1, 2, 1, 3],
@@ -3729,8 +3729,8 @@ var levels = [
 
 	//#region Level 6 - XOR/XNOR, Medium
 	{
-		unlocked : false,
-		starsGained : 0,
+		unlocked : true, //change me!
+		starsEarned : 0,
 		allowedGates : [5,6],
 		circuitDifficulties : [2, 2, 2, 3, 2, 3, 2, 3, 2, 4],
 		circuitPool : {
@@ -3743,8 +3743,8 @@ var levels = [
 
 	//#region Level 7 - AND/NAND, Hard
 	{
-		unlocked : false,
-		starsGained : 0,
+		unlocked : true, //change me!
+		starsEarned : 0,
 		allowedGates : [1,2],
 		circuitDifficulties : [3, 3, 3, 4, 2, 3, 3, 4, 2, 5],
 		circuitPool : {
@@ -3758,8 +3758,8 @@ var levels = [
 
 	//#region Level 8 - OR/NOR, Hard
 	{
-		unlocked : false,
-		starsGained : 0,
+		unlocked : true, //change me!
+		starsEarned : 0,
 		allowedGates : [3,4],
 		circuitDifficulties : [3, 3, 3, 4, 2, 3, 3, 4, 2, 5],
 		circuitPool : {
@@ -3773,8 +3773,8 @@ var levels = [
 
 	//#region Level 9 - XOR/XNOR, Hard
 	{
-		unlocked : false,
-		starsGained : 0,
+		unlocked : true, //change me!
+		starsEarned : 0,
 		allowedGates : [5,6],
 		circuitDifficulties : [3, 3, 3, 4, 2, 3, 3, 4, 2, 5],
 		circuitPool : {
@@ -3788,8 +3788,8 @@ var levels = [
 
 	//#region Level 10 - Gate changes, Hard
 	{
-		unlocked : false,
-		starsGained : 0,
+		unlocked : true, //change me!
+		starsEarned : 0,
 		allowedGates : [1,2,3,4,5,6],
 		introduceGateChanges : true,
 		enableGateChanges : true,

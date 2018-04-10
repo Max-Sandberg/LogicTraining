@@ -1,14 +1,14 @@
 var tutDialogues = [
 	{
 		idx : 0,
-		topText : "Welcome to Logic Training! This tutorial will teach you what logic gates are and how to play the game.",
+		topText : "Welcome to Logic Training! This tutorial will teach you what logic gates are, and how to play the game.",
 		botText : "This is an empty circuit. The lines either side of the box are wires, each of which has a voltage. The blue wires have voltage 1, and the black wires have voltage 0.",
 		drawDiagram : function(x, y){
-			drawSignal(x+2, y+SC+9, 0, ctx1);
-			drawSignal(x+2, y+(3*SC)+9, 1, ctx1);
+			drawSignal(x, y+SC+9, 0, ctx1);
+			drawSignal(x, y+(3*SC)+9, 1, ctx1);
 			drawDottedBox(x+(2*SC), y, ctx1);
-			drawWire(x+14, y+SC, x+(2*SC), y+SC, 0, ctx1);
-			drawWire(x+14, y+(3*SC), x+(2*SC), y+(3*SC), 1, ctx1);
+			drawWire(x+16, y+SC, x+(2*SC), y+SC, 0, ctx1);
+			drawWire(x+16, y+(3*SC), x+(2*SC), y+(3*SC), 1, ctx1);
 			drawWire(x+(6*SC), y+(2*SC), x+(8*SC), y+(2*SC), -1, ctx1);
 		},
 		getDiagramWidth : function () { return (8*SC); },
@@ -17,13 +17,13 @@ var tutDialogues = [
 	{
 		idx : 1,
 		topText : "So we have two 0 or 1 inputs. To get an output, we need to complete the circuit by putting a logic gate in the empty box. You can click and drag these from the top of the screen, or use numbers 1-6 as hotkeys.",
-		botText : "This is what a circuit with a logic gate in looks like. The output will be either 0 or 1, depending on what the inputs are, and which logic gate we used.",
+		botText : "This is what that circuit looks like after we put a gate in it. The output will be either 0 or 1, depending on which gate we used. You'll learn which gates give which outputs later.",
 		drawDiagram : function(x, y){
-			drawSignal(x+2, y+SC+9, 0, ctx1);
-			drawSignal(x+2, y+(3*SC)+9, 1, ctx1);
-			drawDottedBox(x+(2*SC), y, ctx1);
-			drawWire(x+14, y+SC, x+(2*SC), y+SC, 0, ctx1);
-			drawWire(x+14, y+(3*SC), x+(2*SC), y+(3*SC), 1, ctx1);
+			drawSignal(x, y+SC+9, 0, ctx1);
+			drawSignal(x, y+(3*SC)+9, 1, ctx1);
+			drawFixedBox(x+(2*SC), y, ctx1);
+			drawWire(x+16, y+SC, x+(2*SC), y+SC, 0, ctx1);
+			drawWire(x+16, y+(3*SC), x+(2*SC), y+(3*SC), 1, ctx1);
 			drawOR(x+(2*SC), y, 0, 1, 1, ctx1);
 			drawWire(x+(6*SC), y+(2*SC), x+(8*SC), y+(2*SC), 1, ctx1);
 		},
@@ -32,14 +32,14 @@ var tutDialogues = [
 	},
 	{
 		idx : 2,
-		topText : "This circuit has a lightbulb at the end of it. To turn the lightbulb on, the wire leading into it must be a 1.",
-		botText : "In each level, circuits will slide across the screen to the left. You need to light the bulbs before they reach the edge of the screen, or else it's game over! Do this by dragging gates into the circuits. Lets give it a go.",
+		topText : "Circuits have lightbulbs at the end of them. To turn the lightbulb on, the wire leading into it must be a 1.",
+		botText : "In each level, circuits will slide across the screen to the left. If a circuit slides off the screen and hasn't been solved yet, that counts as getting it wrong, so you'll have to think fast! Lets give it a go.",
 		drawDiagram : function(x, y){
-			drawSignal(x+2, y+SC+9, 0, ctx1);
-			drawSignal(x+2, y+(3*SC)+9, 1, ctx1);
-			drawDottedBox(x+(2*SC), y, ctx1);
-			drawWire(x+14, y+SC, x+(2*SC), y+SC, 0, ctx1);
-			drawWire(x+14, y+(3*SC), x+(2*SC), y+(3*SC), 1, ctx1);
+			drawSignal(x, y+SC+9, 0, ctx1);
+			drawSignal(x, y+(3*SC)+9, 1, ctx1);
+			drawFixedBox(x+(2*SC), y, ctx1);
+			drawWire(x+16, y+SC, x+(2*SC), y+SC, 0, ctx1);
+			drawWire(x+16, y+(3*SC), x+(2*SC), y+(3*SC), 1, ctx1);
 			drawOR(x+(2*SC), y, 0, 1, 1, ctx1);
 			drawWire(x+(6*SC), y+(2*SC), x+(10*SC), y+(2*SC), 1, ctx1);
 			drawFixedBox(x+(10*SC), y, ctx1);
@@ -54,13 +54,17 @@ var tutDialogues = [
 	},
 	{
 		idx : 4,
-		topText : "Nice one! Sometimes the circuits will have fixed gates in them. These gates can't be changed.",
-		botText : "You'll have to decide what output you want the gate to have, and figure out what the inputs should be in order to get that output!",
+		text : "Nice one! When you drag a gate into a circuit, that gate becomes fixed and can't be changed again. This means you only get one attempt per circuit, so think hard before you put a gate in!"
+	},
+	{
+		idx : 5,
+		topText : "Circuits will often already have fixed gates in them, like this one. In the circuit below, the output of the first gate is the input for the fixed gate.",
+		botText : "To solve these circuits, you'll have to consider what inputs the fixed gate needs in order to get the output you want.",
 		drawDiagram : function(x, y){
-			drawSignal(x+2, y+SC+9, 0, ctx1);
-			drawWire(x+14, y+SC, x+(2*SC), y+SC, 0, ctx1);
-			drawSignal(x+2, y+(3*SC)+9, 1, ctx1);
-			drawWire(x+14, y+(3*SC), x+(2*SC), y+(3*SC), 1, ctx1);
+			drawSignal(x, y+SC+9, 0, ctx1);
+			drawWire(x+16, y+SC, x+(2*SC), y+SC, 0, ctx1);
+			drawSignal(x, y+(3*SC)+9, 1, ctx1);
+			drawWire(x+16, y+(3*SC), x+(2*SC), y+(3*SC), 1, ctx1);
 			drawDottedBox(x+(2*SC), y, ctx1);
 			drawWire(x+(6*SC), y+(2*SC), x+(7.2*SC), y+(2*SC), -1, ctx1);
 			drawWire(x+(7.2*SC), y+(2*SC), x+(7.2*SC), y+(1*SC), -1, ctx1);
@@ -77,31 +81,8 @@ var tutDialogues = [
 		getDiagramHeight : function () { return (4*SC); }
 	},
 	{
-		idx : 5,
-		topText : "Some circuits end in a star rather than a lightbulb. Lighting a star works the same way as lighting a bulb, we just make the input wire a 1.",
-		botText : "Each level has 2 star circuits. You won't lose if you don't complete these, but you'll earn a star for that level if you do. They're a bit quicker than the other circuits though, so you'll have to be fast!",
-		drawDiagram : function(x, y){
-			drawSignal(x+2, y+SC+9, 0, ctx1);
-			drawSignal(x+2, y+(3*SC)+9, 1, ctx1);
-			drawDottedBox(x+(2*SC), y, ctx1);
-			drawWire(x+14, y+SC, x+(2*SC), y+SC, 0, ctx1);
-			drawWire(x+14, y+(3*SC), x+(2*SC), y+(3*SC), 1, ctx1);
-			drawOR(x+(2*SC), y, 0, 1, 1, ctx1);
-			drawWire(x+(6*SC), y+(2*SC), x+(10*SC), y+(2*SC), 1, ctx1);
-			drawFixedBox(x+(10*SC), y, ctx1);
-			ctx1.textAlign = "left";
-			drawStar(x+(10*SC), y, 1, ctx1);
-		},
-		getDiagramWidth : function () { return (14*SC); },
-		getDiagramHeight : function () { return (4*SC); }
-	},
-	{
 		idx : 6,
-		text : "One more thing. Each level has a third star, which you get for completing the level in the minimum number of moves. This means completing every circuit first try! You can see the number of moves you've made (and the par for the level) at the bottom of the screen."
-	},
-	{
-		idx : 7,
-		text : "Thats it for the tutorial. You're now ready for level 1, where you'll learn about the AND and NAND gates!"
+		text : "That's all there is to it. You're now ready for level 1, where you'll learn about the AND and NAND gates!"
 	}
 ]
 
@@ -115,7 +96,6 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight, noPrint) {
 	var words = text.split(" "),
 		line = "",
 		lineCount = 1;
-
 
 	for (var i = 0; i < words.length; i++) {
 		var testLine = line + words[i] + " ",
@@ -140,14 +120,14 @@ function displayTutorialDialogue(dlgIdx){
 
 	// Calculate the height the dialogue box should be.
 	var topTextHeight, botTextHeight, textHeight, boxHeight,
-		boxWidth = (dlg.getDiagramWidth == undefined) ? 500 : Math.max(dlg.getDiagramWidth() + 80, 500);
+		boxWidth = (dlg.getDiagramWidth == undefined) ? 600 : Math.max(dlg.getDiagramWidth() + 80, 600);
 	ctx1.font = "14pt Arial";
 	if (dlg.text == undefined){
 		topTextHeight = wrapText(ctx1, dlg.topText, 0, 0, (0.95*boxWidth), 24, true);
 		botTextHeight = wrapText(ctx1, dlg.botText, 0, 0, (0.95*boxWidth), 24, true);
 		boxHeight = 15 + topTextHeight + 35 + dlg.getDiagramHeight() + 25 + botTextHeight + 68;
 	} else {
-		textHeight = wrapText(ctx1, dlg.text, 0, 0, 480, 24, true);
+		textHeight = wrapText(ctx1, dlg.text, 0, 0, (0.95*boxWidth), 24, true);
 		boxHeight = 15 + textHeight + 58;
 	}
 
@@ -166,12 +146,12 @@ function displayTutorialDialogue(dlgIdx){
 	// Write the tutorial messages.
 	ctx1.font = "14pt Arial";
 	ctx1.fillStyle = "#000000";
-	ctx1.textAlign = "center";
+	ctx1.textAlign = "left";
 	if (dlg.text == undefined){
-		wrapText(ctx1, dlg.topText, cvs1.width/2, starty+39, 0.95*boxWidth, 24);
-		wrapText(ctx1, dlg.botText, cvs1.width/2, starty+30+topTextHeight+35+dlg.getDiagramHeight()+25+24, 0.95*boxWidth, 24);
+		wrapText(ctx1, dlg.topText, startx+(0.03*boxWidth), starty+39, 0.95*boxWidth, 24);
+		wrapText(ctx1, dlg.botText, startx+(0.03*boxWidth), starty+30+topTextHeight+35+dlg.getDiagramHeight()+25+24, 0.95*boxWidth, 24);
 	} else {
-		wrapText(ctx1, dlg.text, cvs1.width/2, starty+39, 0.95*boxWidth, 24);
+		wrapText(ctx1, dlg.text, startx+(0.03*boxWidth), starty+39, 0.95*boxWidth, 24);
 	}
 
 	// Draw the diagram if there is one.
@@ -327,7 +307,7 @@ function introduceGates(gate){
 	ctx1.strokeRect(startx, starty, width, height);
 
 	// Draw the title.
-	var name = Object.keys(gatesEnum)[gate].toUpperCase(),
+	var name = Object.keys(gates)[gate].toUpperCase(),
 		text = (gate != 7) ? "New gate: " + name : "New mechanic: GATE CHANGES";
 	ctx1.font = "30pt Impact";
 	ctx1.textAlign = "center";
@@ -446,15 +426,11 @@ function drawTruthTable(x, y, gate){
 	ctx1.fillText("0     0", x+40, y+135);
 
 	// Fill in the outputs.
-	var output1 = (gate == gatesEnum.and || gate == gatesEnum.or || gate == gatesEnum.xnor) ? 1 : 0,
-		output2 = (gate == gatesEnum.or || gate == gatesEnum.nand || gate == gatesEnum.xor) ? 1 : 0,
-		output3 = (gate == gatesEnum.nand || gate == gatesEnum.nor || gate == gatesEnum.xnor) ? 1 : 0;
+	var output1 = (gate == gates.and || gate == gates.or || gate == gates.xnor) ? 1 : 0,
+		output2 = (gate == gates.or || gate == gates.nand || gate == gates.xor) ? 1 : 0,
+		output3 = (gate == gates.nand || gate == gates.nor || gate == gates.xnor) ? 1 : 0;
 	ctx1.fillText(output1, x+120, y+54);
 	ctx1.fillText(output2, x+120, y+81);
 	ctx1.fillText(output2, x+120, y+108);
 	ctx1.fillText(output3, x+120, y+135);
-}
-
-function introduceGateChanges(){
-
 }

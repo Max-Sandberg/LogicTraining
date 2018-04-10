@@ -36,29 +36,26 @@ function drawGate(x, y, type, inputs, output, fixed, ctx) {
 
 	// Draw the actual gate inside the box.
 	switch (type){
-		case gatesEnum.and:
+		case gates.and:
 			drawAND(x, y, input1, input2, output, ctx);
 			break;
-		case gatesEnum.nand:
+		case gates.nand:
 			drawNAND(x, y, input1, input2, output, ctx);
 			break;
-		case gatesEnum.or:
+		case gates.or:
 			drawOR(x, y, input1, input2, output, ctx);
 			break;
-		case gatesEnum.nor:
+		case gates.nor:
 			drawNOR(x, y, input1, input2, output, ctx);
 			break;
-		case gatesEnum.xor:
+		case gates.xor:
 			drawXOR(x, y, input1, input2, output, ctx);
 			break;
-		case gatesEnum.xnor:
+		case gates.xnor:
 			drawXNOR(x, y, input1, input2, output, ctx);
 			break;
-		case gatesEnum.bulb:
+		case gates.bulb:
 			drawBulb(x, y, input1, ctx);
-			break;
-		case gatesEnum.star:
-			drawStar(x, y, input1, ctx);
 			break;
 	}
 }
@@ -95,22 +92,22 @@ function drawDraggedGate(){
 	// Clear the canvas and draw the correct gate.
 	ctx2.clearRect(0, 0, cvs2.width, cvs2.height);
 	switch(draggedGate){
-		case gatesEnum.and:
+		case gates.and:
 			drawAND(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
 			break;
-		case gatesEnum.nand:
+		case gates.nand:
 			drawNAND(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
 			break;
-		case gatesEnum.or:
+		case gates.or:
 			drawOR(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
 			break;
-		case gatesEnum.nor:
+		case gates.nor:
 			drawNOR(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
 			break;
-		case gatesEnum.xor:
+		case gates.xor:
 			drawXOR(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
 			break;
-		case gatesEnum.xnor:
+		case gates.xnor:
 			drawXNOR(x-(2*SC), y-(2*SC), 0, 0, 0, ctx2);
 			break;
 	}
@@ -306,20 +303,5 @@ function drawBulb(x, y, live, ctx){
 		ctx.strokeStyle = "#000000";
 		ctx.closePath();
 	}
-}
-
-function drawStar(x, y, live, ctx){
-	ctx.font = 3*SC + "px FontAwesome";
-	// if (live == 1){
-	// 	ctx.fillStyle = "#ffff00";
-	// 	ctx.fillText("\uF005", x+(0.65*SC), y+(3.1*SC));
-	// 	ctx.fillStyle = "black";
-	// }
-	ctx.lineWidth = 2;
-	ctx.fillStyle = (live == 1) ? "#FFFF00" : "#FFFFFF";
-	ctx.fillText("\uF005", x+(0.65*SC), y+(3.1*SC));
-	ctx.strokeText("\uF005", x+(0.65*SC), y+(3.1*SC));
-	//ctx.font = "26px Arial";
-	ctx.lineWidth = 1;
 }
 //#endregion
