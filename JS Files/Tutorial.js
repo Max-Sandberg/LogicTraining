@@ -1,4 +1,5 @@
-var tutDialogues = [
+var currentTutDialogue,
+	tutDialogues = [
 	{
 		idx : 0,
 		topText : "Welcome to Logic Training! This tutorial will teach you what logic gates are, and how to play the game.",
@@ -12,7 +13,8 @@ var tutDialogues = [
 			drawWire(x+(6*SC), y+(2*SC), x+(8*SC), y+(2*SC), -1, ctx1);
 		},
 		getDiagramWidth : function () { return (8*SC); },
-		getDiagramHeight : function () { return (4*SC); }
+		getDiagramHeight : function () { return (4*SC); },
+		btnText : "CONTINUE"
 	},
 	{
 		idx : 1,
@@ -28,7 +30,8 @@ var tutDialogues = [
 			drawWire(x+(6*SC), y+(2*SC), x+(8*SC), y+(2*SC), 1, ctx1);
 		},
 		getDiagramWidth : function () { return (8*SC); },
-		getDiagramHeight : function () { return (4*SC); }
+		getDiagramHeight : function () { return (4*SC); },
+		btnText : "CONTINUE"
 	},
 	{
 		idx : 2,
@@ -46,7 +49,8 @@ var tutDialogues = [
 			drawBulb(x+(10*SC), y, 1, ctx1);
 		},
 		getDiagramWidth : function () { return (14*SC); },
-		getDiagramHeight : function () { return (4*SC); }
+		getDiagramHeight : function () { return (4*SC); },
+		btnText : "I'M READY"
 	},
 	{
 		idx : 3,
@@ -54,7 +58,8 @@ var tutDialogues = [
 	},
 	{
 		idx : 4,
-		text : "Nice one! When you drag a gate into a circuit, that gate becomes fixed and can't be changed again. This means you only get one attempt per circuit, so think hard before you put a gate in!"
+		text : "Nice one! When you drag a gate into a circuit, that gate becomes fixed and can't be changed again. This means you only get one attempt per circuit, so think hard before you put a gate in!",
+		btnText : "CONTINUE"
 	},
 	{
 		idx : 5,
@@ -78,11 +83,13 @@ var tutDialogues = [
 			drawBulb(x+(18*SC), y, -1, ctx1);
 		},
 		getDiagramWidth : function () { return (22*SC); },
-		getDiagramHeight : function () { return (4*SC); }
+		getDiagramHeight : function () { return (4*SC); },
+		btnText : "CONTINUE"
 	},
 	{
 		idx : 6,
-		text : "That's all there is to it. You're now ready for level 1, where you'll learn about the AND and NAND gates!"
+		text : "That's all there is to it. You're now ready for level 1, where you'll learn about the AND and NAND gates!",
+		btnText : "END TUTORIAL"
 	}
 ]
 
@@ -92,6 +99,7 @@ function startTutorial(){
 	displayTutorialDialogue(0);
 }
 
+// Function which writes text to the canvas, wrapping at the desired width. If noPrint is specified, it instead just returns the height of the block of text this function would produce.
 function wrapText(ctx, text, x, y, maxWidth, lineHeight, noPrint) {
 	var words = text.split(" "),
 		line = "",
@@ -115,6 +123,7 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight, noPrint) {
 	return lineCount * lineHeight;
 }
 
+// Function to display the tutorial dialogues.
 function displayTutorialDialogue(dlgIdx){
 	var dlg = tutDialogues[dlgIdx];
 
@@ -122,22 +131,25 @@ function displayTutorialDialogue(dlgIdx){
 	var topTextHeight, botTextHeight, textHeight, boxHeight,
 		boxWidth = (dlg.getDiagramWidth == undefined) ? 600 : Math.max(dlg.getDiagramWidth() + 80, 600);
 	ctx1.font = "14pt Arial";
-	if (dlg.text == undefined){
+	if (dlg.drawDiagram != undefined){
+		// If the dialogue box features a diagram and two text boxes, we need to include the height of all of these in the height of the box.
 		topTextHeight = wrapText(ctx1, dlg.topText, 0, 0, (0.95*boxWidth), 24, true);
 		botTextHeight = wrapText(ctx1, dlg.botText, 0, 0, (0.95*boxWidth), 24, true);
 		boxHeight = 15 + topTextHeight + 35 + dlg.getDiagramHeight() + 25 + botTextHeight + 68;
 	} else {
+		// If the dialogue box doesn't have a diagram, we only need to measure the one text box.
 		textHeight = wrapText(ctx1, dlg.text, 0, 0, (0.95*boxWidth), 24, true);
 		boxHeight = 15 + textHeight + 58;
 	}
 
+	// Calculate the start position of the dialogue box.
 	var startx = Math.round((cvs1.width/2) - (boxWidth/2)),
 		starty = Math.round((cvs1.height/2) - (boxHeight/2));
 
 	// Draw the rectangle.
 	ctx1.beginPath();
 	ctx1.lineWidth = 1;
-	ctx1.fillStyle = "#2a8958";
+	ctx1.fillStyle = "#2A8958";
 	ctx1.rect(startx+0.5, starty+0.5, boxWidth, boxHeight);
 	ctx1.fill();
 	ctx1.stroke();
@@ -165,65 +177,37 @@ function displayTutorialDialogue(dlgIdx){
 		dlg.drawDiagram(dgrmX, dgrmY);
 	}
 
-	// Draw the continue button.
-	var highlight = false,
-		btnX = startx+boxWidth-104,
-		btnY = starty+boxHeight-34;
+	// Function to call if the button is clicked.
+	var buttonInterval;
+	function handleClick(){
+		// Clear this dialogue box and the button interval.
+		ctx1.clearRect(startx-3, starty-3, boxWidth+6, boxHeight+6);
+		clearInterval(buttonInterval);
+		cvs2.onmousedown = handleMouseDown;
+
+		if (dlgIdx+1 == 3){
+			// If the next dialogue is the 4th one, start the test circuit instead.
+			startTestCircuit();
+		} else if (dlgIdx+1 < tutDialogues.length){
+			// If there is another dialogue, display that.
+			displayTutorialDialogue(dlgIdx+1);
+		} else {
+			// If this is the last dialogue, end the tutorial.
+			clearIntervals();
+			resetGameState();
+			levels[1].unlocked = true;
+			drawMenu();
+		}
+	}
+
+	// Calculate the button width and position.
 	ctx1.font = "18pt Impact";
-	ctx1.textAlign = "left";
-	ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-	ctx1.fillText("CONTINUE", btnX, btnY+20);
+	var btnWidth = ctx1.measureText(dlg.btnText).width,
+		btnX = startx + boxWidth - btnWidth - 10,
+		btnY = starty + boxHeight - 30;
 
-	// The interval to control highlighting the continue button when the mouse hovers over it.
-	var btnHoverIntervalId = setInterval(function(){
-		// Clear this interval if we go back to the menu.
-		if (currentScreen == screens.menu){
-			clearInterval(btnHoverIntervalId);
-			btnHoverIntervalId = undefined;
-		}
-
-		// If the mouse is over the button, and it isn't already highlighted.
-		if ((mousex > btnX-4 && mousex < btnX+98  && mousey > btnY-2 && mousey < btnY+24) && !highlight){
-			highlight = true;
-			ctx1.fillStyle="#2a8958";
-			ctx1.fillRect(btnX, btnY-2, 94, 24);
-			ctx1.fillStyle = "rgba(0, 0, 0, 1)";
-			ctx1.font = "18pt Impact";
-			ctx1.fillText("CONTINUE", btnX, btnY+20);
-			// If the mouse is hovering over the button, change the mousedown handler to go to the next message.
-			cvs2.onmousedown = function(){
-				ctx1.clearRect(startx-3, starty-3, boxWidth+6, boxHeight+6);
-				clearInterval(btnHoverIntervalId);
-				btnHoverIntervalId = undefined;
-				if (dlgIdx+1 < tutDialogues.length){
-					cvs2.onmousedown = handleMouseDown;
-					if (dlgIdx+1 != 3){
-						displayTutorialDialogue(dlgIdx+1);
-					} else {
-						startTestCircuit();
-					}
-				} else {
-					// End the tutorial
-					clearIntervals();
-					resetGameState();
-					levels[1].unlocked = true;
-					drawMenu();
-				}
-			}
-		}
-		// If the mouse isn't over the button, but it is still highlighted.
-		else if (!(mousex > btnX-4 && mousex < btnX+98  && mousey > btnY-2 && mousey < btnY+24) && highlight){
-			highlight = false;
-			ctx1.fillStyle="#2a8958";
-			ctx1.fillRect(btnX, btnY-2, 94, 24);
-			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-			ctx1.font = "18pt Impact";
-			ctx1.fillText("CONTINUE", btnX, btnY+20);
-			cvs2.onmousedown = handleMouseDown;
-		}
-	}, 50);
-
-	ctx1.textAlign = "left";
+	// Create the button.
+	buttonInterval = createTextButton(btnX, btnY, dlg.btnText, 18, "left", "#2A8958", handleClick, screens.game);
 }
 
 // Scroll a single test circuit across the screen, and show prompts for the player.
@@ -239,7 +223,7 @@ function startTestCircuit(){
 	// Draw the dialogue box.
 	ctx1.beginPath();
 	ctx1.lineWidth = 1;
-	ctx1.fillStyle = "#2a8958";
+	ctx1.fillStyle = "#2A8958";
 	ctx1.rect(startx+0.5, starty+0.5, boxWidth, 34);
 	ctx1.fill();
 	ctx1.stroke();
@@ -301,7 +285,7 @@ function introduceGates(gate){
 		starty = Math.round((cvs1.height/2)-(height/2));
 
 	// Draw the rectangle.
-	ctx1.fillStyle = "#2a8958";
+	ctx1.fillStyle = "#2A8958";
 	ctx1.lineWidth = 2;
 	ctx1.fillRect(startx, starty, width, height);
 	ctx1.strokeRect(startx, starty, width, height);
@@ -342,59 +326,34 @@ function introduceGates(gate){
 	ctx1.textAlign = "center";
 	wrapText(ctx1, gateExplanations[gate], cvs1.width/2, starty+height-textHeight-36, 0.9*width, 26)
 
-	// Draw the continue button.
-	var highlight = false,
-		btnX = startx+width-106,
-		btnY = starty+height-34;
-	ctx1.font = "18pt Impact";
-	ctx1.textAlign = "left";
-	ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-	ctx1.fillText("CONTINUE", btnX, btnY+20);
+	// Function to call when the button is clicked.
+	var buttonInterval;
+	function handleClick(){
+		// Clear the dialogue box and this interval.
+		ctx1.clearRect(startx-3, starty-3, width+6, height+6);
+		clearInterval(buttonInterval);
 
-	// The interval to control highlighting the continue button when the mouse hovers over it.
-	var btnHoverIntervalId = setInterval(function(){
-		// Clear this interval if we go back to the menu.
-		if (currentScreen == screens.menu){
-			clearInterval(btnHoverIntervalId);
-			btnHoverIntervalId = undefined;
-		}
-
-		// If the mouse is over the button, and it isn't already highlighted.
-		if ((mousex > btnX-4 && mousex < btnX+98  && mousey > btnY-2 && mousey < btnY+24) && !highlight){
-			highlight = true;
-			ctx1.fillStyle="#2a8958";
-			ctx1.fillRect(btnX, btnY-2, 94, 24);
-			ctx1.fillStyle = "rgba(0, 0, 0, 1)";
-			ctx1.font = "18pt Impact";
-			ctx1.fillText("CONTINUE", btnX, btnY+20);
-			// If the mouse is hovering over the button, change the mousedown handler to go to the next message.
-			cvs2.onmousedown = function(){
-				ctx1.clearRect(startx-3, starty-3, width+6, height+6);
-				clearInterval(btnHoverIntervalId);
-				btnHoverIntervalId = undefined;
-				// Display the next gate introduction, or start the game
-				if (gate % 2 == 1 && gate != 7){
-					introduceGates(gate+1);
-				} else {
-					cvs2.onmousedown = handleMouseDown;
-					pause = false;
-					if (gate == 7){
-						gateChangeIntervalId = setInterval(changeLockedGates, 20000);
-					}
-				}
+		// Display the next gate introduction, or start the game.
+		if (gate % 2 == 1 && !level.introduceGateChanges){
+			introduceGates(gate+1);
+		} else {
+			cvs2.onmousedown = handleMouseDown;
+			pause = false;
+			if (level.introduceGateChanges){
+				gateChangeInterval = setInterval(changeLockedGates, 20000);
 			}
 		}
-		// If the mouse isn't over the button, but it is still highlighted.
-		else if (!(mousex > btnX-4 && mousex < btnX+98  && mousey > btnY-2 && mousey < btnY+24) && highlight){
-			highlight = false;
-			ctx1.fillStyle="#2a8958";
-			ctx1.fillRect(btnX, btnY-2, 94, 24);
-			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-			ctx1.font = "18pt Impact";
-			ctx1.fillText("CONTINUE", btnX, btnY+20);
-			cvs2.onmousedown = handleMouseDown;
-		}
-	}, 50);
+	}
+
+	// Calculate the button width and position.
+	ctx1.font = "18pt Impact";
+	var text = (gate % 2 == 0 || level.introduceGateChanges) ? "START LEVEL" : "CONTINUE",
+		btnWidth = ctx1.measureText(text).width,
+		btnX = startx + width - btnWidth - 10,
+		btnY = starty + height - 30;
+
+	// Create the button.
+	buttonInterval = createTextButton(btnX, btnY, text, 18, "left", "#2A8958", handleClick, screens.game);
 }
 
 function drawTruthTable(x, y, gate){

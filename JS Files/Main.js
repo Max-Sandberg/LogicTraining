@@ -6,14 +6,14 @@ var allowedGates;
 var enableGateChanges;
 var draggedGate = 0;
 var selectedGate = null;
-var drawDraggedIntervalId, updateSelectedIntervalId, drawIntervalId, updateIntervalId, gateChangeIntervalId, menuHoverIntervalId;
+var drawDraggedInterval, updateSelectedInterval, drawInterval, updateInterval, gateChangeInterval, menuHoverInterval;
+var gateButtonIntervals = [];
 var mousex, mousey;
 var frameNo = 0;
-var moves = 0;
 var pause = false;
 var scrollSpeed;
 var level, levelIdx;
-var currentScreen, screens = Object.freeze({"menu":0, "game":1});
+var currentScreen, screens = Object.freeze({"menu":0, "game":1, "levelEnd":2});
 
 function startGame(){
 	createCanvases();
@@ -43,17 +43,14 @@ function startLevel(lvlIdx) {
 	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 	drawMenuBar();
 	prepareCircuits();
-	findLevelPar();
-	moves = 0;
-	drawMoves();
 	ctx1.lineWidth = 2;
 	ctx1.strokeStyle = "#000000";
 	ctx1.strokeRect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-1);
 	pause = false;
-	drawIntervalId = setInterval(drawGameArea, 1000/60, ctx1);
-	updateIntervalId = setInterval(updateGameArea, 200);
+	drawInterval = setInterval(drawGameArea, 1000/60, ctx1);
+	updateInterval = setInterval(updateGameArea, 200);
 	if (enableGateChanges && !level.introduceGateChanges){
-		gateChangeIntervalId = setInterval(changeLockedGates, 20000);
+		gateChangeInterval = setInterval(changeLockedGates, 20000);
 	}
 
 	// Assign hotkeys.
@@ -71,9 +68,9 @@ function startLevel(lvlIdx) {
 				if (allowedGates.indexOf(gate) != -1){
 					// If that gate is allowed to be used, set it as the dragged gate and start the necessary intervals.
 					draggedGate = gate;
-					if (drawDraggedIntervalId == undefined && updateSelectedIntervalId == undefined){
-						drawDraggedIntervalId = setInterval(drawDraggedGate, 1000/60);
-						updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
+					if (drawDraggedInterval == undefined && updateSelectedInterval == undefined){
+						drawDraggedInterval = setInterval(drawDraggedGate, 1000/60);
+						updateSelectedInterval = setInterval(updateSelectedGate, 50);
 					}
 				}
 			}
@@ -183,4 +180,73 @@ function handleResize(){
 		// Redraw menu.
 		drawMenu()
 	}
+}
+
+// A generic function for creating a button. Takes two functions, one to draw the button, and one to call when the button is clicked.
+function createButton(drawButton, drawArgs, checkHover, handleClick, intendedScreen){
+	// Draw the button.
+	drawButton(drawArgs);
+
+	// Function to check if the button is in the correct state, to be called on an interval.
+	var highlight = false,
+		buttonInterval,
+		mouseHover,
+		oldMouseDown;
+	function updateButton(){
+		// If we return to the main menu, stop updating this button.
+		if (currentScreen != intendedScreen){
+			clearInterval(buttonInterval);
+		}
+
+		mouseHover = checkHover();
+		if (!highlight && mouseHover){
+			// If the mouse is over the button and it isn't highlighted, highlight it.
+			highlight = true;
+			drawButton(drawArgs, true);
+			oldMouseDown = cvs2.onmousedown;
+			cvs2.onmousedown = handleClick;
+		}
+		else if (highlight && !mouseHover){
+			// If the mouse isn't over the button and it's still highlighted, unhighlight it.
+			highlight = false;
+			drawButton(drawArgs, false);
+			cvs2.onmousedown = oldMouseDown;
+		}
+	}
+
+	// Start the updateLevelButton function on an interval.
+	buttonInterval = setInterval(updateButton, 1000/60);
+	return buttonInterval;
+}
+
+// An extension of the createButton function, specifically for buttons that are plain text.
+function createTextButton(btnX, btnY, text, fontSize, align, backgroundColor, handleClick, intendedScreen){
+	// Measures the height and width the text will be, and where the x position is based on the alignment chosen.
+	ctx1.save();
+	ctx1.font = fontSize + "pt Impact";
+	var width = ctx1.measureText(text).width,
+		height = Math.round(1.05*fontSize),
+		btnX = (align == "center") ? btnX-(width/2) : btnX;
+	ctx1.restore();
+
+	// Function to draw the button.
+	function drawButton(args, highlight){
+		// Fills over what was here before with the specified background colour.
+		ctx1.save();
+		ctx1.fillStyle = backgroundColor;
+		ctx1.fillRect(btnX, btnY-1, width+2, height+2);
+
+		// Writes the text in the specified size and alignment.
+		ctx1.font = fontSize + "pt Impact";
+		ctx1.textAlign = align;
+		ctx1.fillStyle = (highlight) ? "rgba(0, 0, 0, 1)" : "rgba(0, 0, 0, 0.6)";
+		ctx1.fillText(text, btnX, btnY+height);
+		ctx1.restore();
+	}
+
+	function checkHover(){
+		return (mousex > btnX && mousex < btnX+width && mousey > btnY && mousey < btnY+height);
+	}
+
+	return createButton(drawButton, undefined, checkHover, handleClick, intendedScreen);
 }

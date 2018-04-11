@@ -6,14 +6,14 @@ var allowedGates;
 var enableGateChanges;
 var draggedGate = 0;
 var selectedGate = null;
-var drawDraggedIntervalId, updateSelectedIntervalId, drawIntervalId, updateIntervalId, gateChangeIntervalId, menuHoverIntervalId;
+var drawDraggedInterval, updateSelectedInterval, drawInterval, updateInterval, gateChangeInterval, menuHoverInterval;
+var gateButtonIntervals = [];
 var mousex, mousey;
 var frameNo = 0;
-var moves = 0;
 var pause = false;
 var scrollSpeed;
 var level, levelIdx;
-var currentScreen, screens = Object.freeze({"menu":0, "game":1});
+var currentScreen, screens = Object.freeze({"menu":0, "game":1, "levelEnd":2});
 
 function startGame(){
 	createCanvases();
@@ -43,17 +43,14 @@ function startLevel(lvlIdx) {
 	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 	drawMenuBar();
 	prepareCircuits();
-	findLevelPar();
-	moves = 0;
-	drawMoves();
 	ctx1.lineWidth = 2;
 	ctx1.strokeStyle = "#000000";
 	ctx1.strokeRect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-1);
 	pause = false;
-	drawIntervalId = setInterval(drawGameArea, 1000/60, ctx1);
-	updateIntervalId = setInterval(updateGameArea, 200);
+	drawInterval = setInterval(drawGameArea, 1000/60, ctx1);
+	updateInterval = setInterval(updateGameArea, 200);
 	if (enableGateChanges && !level.introduceGateChanges){
-		gateChangeIntervalId = setInterval(changeLockedGates, 20000);
+		gateChangeInterval = setInterval(changeLockedGates, 20000);
 	}
 
 	// Assign hotkeys.
@@ -71,9 +68,9 @@ function startLevel(lvlIdx) {
 				if (allowedGates.indexOf(gate) != -1){
 					// If that gate is allowed to be used, set it as the dragged gate and start the necessary intervals.
 					draggedGate = gate;
-					if (drawDraggedIntervalId == undefined && updateSelectedIntervalId == undefined){
-						drawDraggedIntervalId = setInterval(drawDraggedGate, 1000/60);
-						updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
+					if (drawDraggedInterval == undefined && updateSelectedInterval == undefined){
+						drawDraggedInterval = setInterval(drawDraggedGate, 1000/60);
+						updateSelectedInterval = setInterval(updateSelectedGate, 50);
 					}
 				}
 			}
@@ -184,6 +181,75 @@ function handleResize(){
 		drawMenu()
 	}
 }
+
+// A generic function for creating a button. Takes two functions, one to draw the button, and one to call when the button is clicked.
+function createButton(drawButton, drawArgs, checkHover, handleClick, intendedScreen){
+	// Draw the button.
+	drawButton(drawArgs);
+
+	// Function to check if the button is in the correct state, to be called on an interval.
+	var highlight = false,
+		buttonInterval,
+		mouseHover,
+		oldMouseDown;
+	function updateButton(){
+		// If we return to the main menu, stop updating this button.
+		if (currentScreen != intendedScreen){
+			clearInterval(buttonInterval);
+		}
+
+		mouseHover = checkHover();
+		if (!highlight && mouseHover){
+			// If the mouse is over the button and it isn't highlighted, highlight it.
+			highlight = true;
+			drawButton(drawArgs, true);
+			oldMouseDown = cvs2.onmousedown;
+			cvs2.onmousedown = handleClick;
+		}
+		else if (highlight && !mouseHover){
+			// If the mouse isn't over the button and it's still highlighted, unhighlight it.
+			highlight = false;
+			drawButton(drawArgs, false);
+			cvs2.onmousedown = oldMouseDown;
+		}
+	}
+
+	// Start the updateLevelButton function on an interval.
+	buttonInterval = setInterval(updateButton, 1000/60);
+	return buttonInterval;
+}
+
+// An extension of the createButton function, specifically for buttons that are plain text.
+function createTextButton(btnX, btnY, text, fontSize, align, backgroundColor, handleClick, intendedScreen){
+	// Measures the height and width the text will be, and where the x position is based on the alignment chosen.
+	ctx1.save();
+	ctx1.font = fontSize + "pt Impact";
+	var width = ctx1.measureText(text).width,
+		height = Math.round(1.05*fontSize),
+		btnX = (align == "center") ? btnX-(width/2) : btnX;
+	ctx1.restore();
+
+	// Function to draw the button.
+	function drawButton(args, highlight){
+		// Fills over what was here before with the specified background colour.
+		ctx1.save();
+		ctx1.fillStyle = backgroundColor;
+		ctx1.fillRect(btnX, btnY-1, width+2, height+2);
+
+		// Writes the text in the specified size and alignment.
+		ctx1.font = fontSize + "pt Impact";
+		ctx1.textAlign = align;
+		ctx1.fillStyle = (highlight) ? "rgba(0, 0, 0, 1)" : "rgba(0, 0, 0, 0.6)";
+		ctx1.fillText(text, btnX, btnY+height);
+		ctx1.restore();
+	}
+
+	function checkHover(){
+		return (mousex > btnX && mousex < btnX+width && mousey > btnY && mousey < btnY+height);
+	}
+
+	return createButton(drawButton, undefined, checkHover, handleClick, intendedScreen);
+}
 var levelButtonIntervals = [];
 
 // Draws the whole menu screen.
@@ -208,7 +274,7 @@ function drawMenu(){
 		var levelRows = Math.ceil(levels.length / 6),
 			levelsHeight = (levelRows*6*SC) + ((levelRows-1)*3*SC),
 			titleHeight = 8*SC,
-			titleY = (cvs1.height/2)-((levelsHeight+titleHeight)/2)+(4*SC),
+			titleY = Math.round((cvs1.height/2)-((levelsHeight+titleHeight)/2)+(4*SC)),
 			levelsY = titleY + (4*SC);
 
 		// Draw title
@@ -232,23 +298,45 @@ function createAllLevelButtons(starty){
 		var levelCount = Math.min(6, levels.length-(i*6)),
 			startx = Math.round((cvs1.width/2) - (((levelCount*6*SC) + ((levelCount-1)*3*SC))/2));
 		for (var j = 0; j < levelCount; j++){
-			createLevelButton(startx+(j*9*SC), starty+(i*9*SC), (i*6)+j);
+			var levelx = startx+(j*9*SC),
+				levely = starty+(i*9*SC),
+				levelIdx = (i*6)+j;
+			if (levels[(i*6)+j].unlocked){
+				createLevelButton(levelx, levely, levelIdx);
+			} else {
+				drawLevelButton([levelx, levely, levelIdx], false)
+			}
 		}
 	}
 }
 
-function drawLevelButton(x, y, levelIdx, selected){
+function drawLevelButton(args, highlight){
+	var x = args[0],
+		y = args[1],
+		levelIdx = args[2];
 	// Draw over whatever is already here.
 	ctx1.save();
 	ctx1.fillStyle = "#184E32";
 	ctx1.fillRect(x-4, y-4, (6*SC)+8, (6*SC)+8);
 
-	// Draw the box, with a thicker border and lighter colour if selected.
-	ctx1.lineWidth = (selected) ? 3 : 1;
-	ctx1.fillStyle = (selected) ? "#7D9C8D" : "#5D8370";
+	// Draw the box, with a thicker border and lighter colour if highlighted.
 	ctx1.strokeStyle = "#000000";
-	ctx1.fillRect(x+0.5, y+0.5, 6*SC, 6*SC);
-	ctx1.strokeRect(x+0.5, y+0.5, 6*SC, 6*SC);
+	if (highlight){
+		ctx1.fillStyle = "#7D9C8D";
+		ctx1.lineWidth = 2;
+		ctx1.fillRect(x, y, 6*SC, 6*SC);
+		ctx1.strokeRect(x-1, y-1, (6*SC)+2, (6*SC)+2);
+	} else {
+		ctx1.fillStyle = "#5D8370";
+		ctx1.lineWidth = 1;
+		ctx1.fillRect(x, y, 6*SC, 6*SC);
+		ctx1.strokeRect(x-0.5, y-0.5, (6*SC)+1, (6*SC)+1);
+	}
+	// ctx1.lineWidth = (highlight) ? 3 : 1;
+	// ctx1.fillStyle = (highlight) ? "#7D9C8D" : "#5D8370";
+	// ctx1.strokeStyle = "#000000";
+	// ctx1.fillRect(x+0.5, y+0.5, 6*SC, 6*SC);
+	// ctx1.strokeRect(x+0.5, y+0.5, 6*SC, 6*SC);
 
 	// Draw the TUTORIAL or LEVEL text.
 	var level = levels[levelIdx],
@@ -301,16 +389,13 @@ function drawLevelButton(x, y, levelIdx, selected){
 
 // Creates a level button, drawing it and creating an interval to handle mouse hovering and clicking.
 function createLevelButton(x, y, levelIdx){
-	// Draw the button.
-	drawLevelButton(x, y, levelIdx, false);
-
 	// Function to check if the mouse is hovering over this button.
-	function checkMouseHover(){
+	function checkHover(){
 		return (mousex > x && mousex < x+(6*SC) && mousey > y && mousey < y+(6*SC));
 	}
 
 	// Function to be called if this button is clicked.
-	function handleLevelClick(){
+	function handleClick(){
 		cvs2.mousedown = undefined;
 		clearLevelButtonIntervals();
 		if (levels[levelIdx].tutorial){
@@ -320,126 +405,41 @@ function createLevelButton(x, y, levelIdx){
 		}
 	}
 
-	// Function to check if the button is in the correct state, to be called on an interval.
-	var highlight = false,
-		updateButtonInterval, mouseHover;
-	function updateLevelButton(){
-		mouseHover = checkMouseHover();
-		if (!highlight && mouseHover){
-			// If the mouse is over the button and it isn't highlighted, highlight it.
-			highlight = true;
-			drawLevelButton(x, y, levelIdx, true);
-			cvs2.onmousedown = handleLevelClick;
-		}
-		else if (highlight && !mouseHover){
-			// If the mouse isn't over the button and it's still highlighted, unhighlight it.
-			highlight = false;
-			drawLevelButton(x, y, levelIdx, false);
-			cvs2.onmousedown = undefined;
-		}
-	}
+	var buttonInterval = createButton(drawLevelButton, [x, y, levelIdx], checkHover, handleClick, screens.menu);
+	levelButtonIntervals.push(buttonInterval);
 
-	// If the level is unlocked, start the updateLevelButton function on an interval.
-	if (levels[levelIdx].unlocked){
-		updateButtonInterval = setInterval(updateLevelButton, 1000/60);
-		levelButtonIntervals.push(updateButtonInterval);
-	}
+	// // Function to check if the button is in the correct state, to be called on an interval.
+	// var highlight = false,
+	// 	updateButtonInterval, mouseHover;
+	// function updateLevelButton(){
+	// 	mouseHover = checkMouseHover();
+	// 	if (!highlight && mouseHover){
+	// 		// If the mouse is over the button and it isn't highlighted, highlight it.
+	// 		highlight = true;
+	// 		drawLevelButton(x, y, levelIdx, true);
+	// 		cvs2.onmousedown = handleLevelClick;
+	// 	}
+	// 	else if (highlight && !mouseHover){
+	// 		// If the mouse isn't over the button and it's still highlighted, unhighlight it.
+	// 		highlight = false;
+	// 		drawLevelButton(x, y, levelIdx, false);
+	// 		cvs2.onmousedown = undefined;
+	// 	}
+	// }
+	//
+	// // If the level is unlocked, start the updateLevelButton function on an interval.
+	// if (levels[levelIdx].unlocked){
+	// 	updateButtonInterval = setInterval(updateLevelButton, 1000/60);
+	// 	levelButtonIntervals.push(updateButtonInterval);
+	// }
 }
 
+// Clears the intervals controlling all the level buttons in the main menu.
 function clearLevelButtonIntervals(){
 	while (levelButtonIntervals.length != 0){
 		clearInterval(levelButtonIntervals.pop());
 	}
 }
-//
-// 	var width = (levels.length*6*SC) + ((levels.length-1)*3*SC);
-// 		startx = Math.round((cvs1.width/2) - (width/2)),
-// 		x, selected;
-//
-// 	for (var i = 0; i < levels.length; i++){
-// 		selected = (levels[i].unlocked && selectedLevel == i);
-//
-// 		// Draw rectangle around the level.
-// 		x = startx + (i*9*SC);
-// 		ctx1.fillStyle = (selected) ? "#7D9C8D" : "#5D8370";
-// 		ctx1.lineWidth = (selected) ? 3 : 1;
-// 		ctx1.strokeStyle = "#000000";
-// 		ctx1.fillRect(x+0.5, y+0.5, 6*SC, 6*SC);
-// 		ctx1.strokeRect(x+0.5, y+0.5, 6*SC, 6*SC);
-// 		ctx1.lineWidth = 1;
-//
-// 		if (i == 0){
-// 			// Draw the tutorial button
-// 			ctx1.font = SC + "pt Impact";
-// 			ctx1.textAlign = "center";
-// 			ctx1.fillStyle = "#000000";
-// 			ctx1.fillText("TUTORIAL", x+(3*SC), y+(3*SC)+(0.4*SC));
-// 			ctx1.textAlign = "left";
-// 		} else {
-// 			// Write the "LEVEL" text.
-// 			ctx1.textAlign = "center";
-// 			ctx1.font = (0.8*SC) + "pt Impact";
-// 			ctx1.fillStyle = "#000000";
-// 			ctx1.fillText("LEVEL", x+(3*SC), y+(1.5*SC));
-//
-// 			// Draw the level number.
-// 			ctx1.font = (2*SC) + "pt Impact";
-// 			ctx1.fillStyle = "#000000";
-// 			ctx1.fillText(i, x+(3*SC), y+(4.2*SC));
-//
-// 			// Draw the stars, filling in the ones which have been earned.
-// 			ctx1.font = (0.8*SC) + "pt FontAwesome";
-// 			for (var j = 0; j < 3; j++){
-// 				if (j < levels[i].starsEarned){
-// 					ctx1.fillStyle = "#ffff00";
-// 					ctx1.fillText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
-// 				}
-// 				ctx1.strokeStyle = "#000000";
-// 				ctx1.strokeText("\uF005", x+(1.6*SC)+(j*1.4*SC), y+(5.5*SC));
-// 			}
-//
-// 			if (!levels[i].unlocked){
-// 				// Draw transparent grey box.
-// 				ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-// 				ctx1.fillRect(x, y, 6*SC, 6*SC);
-//
-// 				// Draw lock icon.
-// 				ctx1.font = 1.5*SC + "px FontAwesome";
-// 				ctx1.fillStyle = "#262626";
-// 				ctx1.fillText("\uf023", x+8, y+(1.5*SC)+2);
-// 				ctx1.font = 1.5*SC + "px FontAwesome";
-// 				ctx1.fillStyle = "#f2f2f2";
-// 				ctx1.fillText("\uf023", x+6, y+(1.5*SC));
-// 			}
-// 		}
-// 	}
-// }
-//
-// function handleMenuMouseDown(){
-// 	// If the level is unlocked, start the level the user clicked on.
-// 	if (selectedLevel == 0){
-// 		startTutorial();
-// 	} else if (selectedLevel != -1 && levels[selectedLevel].unlocked){
-// 		startLevel(selectedLevel);
-// 	}
-// }
-//
-// // Find which level icon the mouse is hovering over, if any.
-// function getSelectedLevel(){
-// 	if ((mousey > (cvs1.height/2)-(2*SC)) && (mousey < (cvs1.height/2)+(4*SC))){
-// 		// In y range of levels
-// 			var width = (levels.length*6*SC) + ((levels.length-1)*3*SC),
-// 			startx = Math.round((cvs1.width/2)-(width/2));
-// 		for (var i = 0; i < levels.length; i++){
-// 			if ((mousex > startx+(i*9*SC)) && (mousex < startx+(i*9*SC)+(6*SC))){
-// 				// In x range of a level
-// 				return i;
-// 			}
-// 		}
-// 	}
-//
-// 	return -1;
-// }
 // Updates the game area. This function is called on an interval.
 function updateGameArea() {
 	// Start/stop animations if the circuit is on/off the screen.
@@ -569,20 +569,6 @@ function changeLockedGates(){
 		}
 	}
 }
-
-function findLevelPar(){
-	level.par = 0;
-
-	for (var i = 0; i < circuits.length; i++){
-		for (var j = 0; j < circuits[i].gateSections.length; j++){
-			for (var k = 0; k < circuits[i].gateSections[j].length; k++){
-				if (!circuits[i].gateSections[j][k].fixed){
-					level.par++;
-				}
-			}
-		}
-	}
-}
 // Draws the menu bar at the top of the screen.
 function drawMenuBar(){
 	// Clear the menu area.
@@ -592,128 +578,128 @@ function drawMenuBar(){
 	ctx1.beginPath();
 	ctx1.lineWidth = 2;
 	ctx1.strokeStyle = "#000000";
-	ctx1.fillStyle="#2a8958";
+	ctx1.fillStyle="#2A8958";
 	ctx1.rect(1, 1, cvs1.width-2, (SC*6)-1);
 	ctx1.fill();
 	ctx1.stroke();
 	ctx1.closePath();
 
-	// Draw box for each gate.
-	var x = Math.round((cvs1.width / 2) - (14.5*SC));
-	var y = SC;
-	ctx1.beginPath();
-	ctx1.lineWidth = 2;
-	ctx1.fillStyle = "#d8f3e6";
-	ctx1.rect(x, y, 4*SC, 4*SC);
-	ctx1.rect(x+(5*SC), y, 4*SC, 4*SC);
-	ctx1.rect(x+(10*SC), y, 4*SC, 4*SC);
-	ctx1.rect(x+(15*SC), y, 4*SC, 4*SC);
-	ctx1.rect(x+(20*SC), y, 4*SC, 4*SC);
-	ctx1.rect(x+(25*SC), y, 4*SC, 4*SC);
-	ctx1.fill();
-	ctx1.stroke();
-	ctx1.closePath();
-
-	// Draw all the gates.
-	drawAND(x, y, 0, 0, 0, ctx1);
-	drawNAND(x+(5*SC), y, 0, 0, 0, ctx1);
-	drawOR(x+(10*SC), y, 0, 0, 0, ctx1);
-	drawNOR(x+(15*SC), y, 0, 0, 0, ctx1);
-	drawXOR(x+(20*SC), y, 0, 0, 0, ctx1);
-	drawXNOR(x+(25*SC), y, 0, 0, 0, ctx1);
-
-	// Draw the hotkey numbers.
-	ctx1.textAlign = "left";
-	ctx1.font = "8pt Arial";
-	ctx1.fillStyle = "#000000";
-	for (var i = 0; i < 6; i++){
-		ctx1.fillText(i+1, x+(i*5*SC)+(4*SC)-10, y+(4*SC)-4);
+	// Clear any existing gate button intervals.
+	while (gateButtonIntervals.length > 0){
+		clearInterval(gateButtonIntervals.pop());
 	}
 
-	// Draw a partially transparent grey box and a lock symbol on any locked gates.
-	ctx1.save();
-	ctx1.textAlign = "center";
-	for (var i = 1; i < 7; i++){
-		if (allowedGates.indexOf(i) == -1){
+	// Create buttons for all the gates.
+	var startx = Math.round((cvs1.width / 2) - (14.5*SC));
+	for (var i = 0; i < 6; i++){
+		createGateButton(startx + (i*5*SC), SC, i+1);
+	}
+
+	// Function to stop the game and return to the menu.
+	function handleMenuButtonClick(){
+		clearIntervals();
+		resetGameState();
+		drawMenu();
+	}
+
+	// Creates the menu button.
+	clearInterval(menuHoverInterval);
+	menuHoverInterval = createTextButton(0.5*SC, 0.5*SC, "MENU", SC+2, "left", "#2A8958", handleMenuButtonClick, screens.game);
+}
+
+function createGateButton(x, y, gate){
+	var unlocked = (allowedGates.indexOf(gate) != -1);
+
+	// Function to draw a gate button.
+	function drawGateButton(args, highlight){
+		// var x = Math.floor(args[0])+0.5,
+		// 	y = Math.floor(args[1])+0.5,
+		// 	gate = args[2];
+		var x = args[0],
+			y = args[1],
+			gate = args[2];
+
+		// Draw over whatever was already here.
+		ctx1.save();
+		ctx1.fillStyle="#2A8958";
+		ctx1.fillRect(x-2, y-2, (4*SC)+4, (4*SC)+4);
+
+		// Draw the box, with a thicker border and lighter colour if selected.
+		ctx1.strokeStyle = "#000000";
+		if (highlight && unlocked){
+			ctx1.fillStyle = "#E0F5EB";
+			ctx1.lineWidth = 3;
+			ctx1.fillRect(x-0.5, y-0.5, (4*SC)+1, (4*SC)+1);
+			ctx1.strokeRect(x-0.5, y-0.5, (4*SC)+1, (4*SC)+1);
+		} else {
+			ctx1.fillStyle = "#CDE7DA";
+			ctx1.lineWidth = 2;
+			ctx1.fillRect(x, y, 4*SC, 4*SC);
+			ctx1.strokeRect(x, y, 4*SC, 4*SC);
+		}
+
+
+		// Draw the gate.
+		switch (gate){
+			case gates.and:
+				drawAND(x, y, 0, 0, 0, ctx1);
+				break;
+			case gates.nand:
+				drawNAND(x, y, 0, 0, 0, ctx1);
+				break;
+			case gates.or:
+				drawOR(x, y, 0, 0, 0, ctx1);
+				break;
+			case gates.nor:
+				drawNOR(x, y, 0, 0, 0, ctx1);
+				break;
+			case gates.xor:
+				drawXOR(x, y, 0, 0, 0, ctx1);
+				break;
+			case gates.xnor:
+				drawXNOR(x, y, 0, 0, 0, ctx1);
+				break;
+		}
+
+		// Draw the hotkey number.
+		ctx1.textAlign = "left";
+		ctx1.font = "8pt Arial";
+		ctx1.fillStyle = "#000000";
+		ctx1.fillText(gate, x+(4*SC)-10, y+(4*SC)-4);
+
+		if (!unlocked){
 			// Draw transparent grey box.
-			var startx = x+((i-1)*5*SC);
 			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-			ctx1.fillRect(startx, y, 4*SC, 4*SC);
+			ctx1.fillRect(x, y, 4*SC, 4*SC);
 
 			// Draw lock icon.
+			ctx1.textAlign = "center";
 			ctx1.font = 2*SC + "px FontAwesome";
 			ctx1.fillStyle = "#000000";
-			ctx1.fillText("\uf023", startx+(2*SC)+3, y+(2.7*SC)+3);
+			ctx1.fillText("\uf023", x+(2*SC)+3, y+(2.7*SC)+3);
 			ctx1.font = 2*SC + "px FontAwesome";
 			ctx1.fillStyle = "#ffffff";
-			ctx1.fillText("\uf023", startx+(2*SC), y+(2.7*SC));
+			ctx1.fillText("\uf023", x+(2*SC), y+(2.7*SC));
 		}
-	}
-	ctx1.restore();
-
-	// Function to draw the menu button.
-	function drawMenuButton(colour){
-		ctx1.save();
-		// Draw over whatever is already here.
-		ctx1.font = (SC+2) + "pt Impact";
-		menuButtonWidth = ctx1.measureText("MENU").width;
-		ctx1.fillStyle = "#2A8958";
-		ctx1.fillRect((0.5*SC)-3, (0.5*SC)-4, menuButtonWidth+6, SC+8);
-		// Draw the MENU text in the given colour.
-		ctx1.textAlign = "left";
-		ctx1.fillStyle = colour;
-		ctx1.fillText("MENU", 0.5*SC, (1.5*SC)+2);
 		ctx1.restore();
 	}
-	var menuButtonWidth;
-	drawMenuButton("rgba(0, 0, 0, 0.5)");
 
-	// If there isn't already an interval checking if the mouse is hovering over the menu, create one.
-	if (menuHoverIntervalId == undefined){
-		var highlightMenu = false,
-			btnStartX = 0.5*SC,
-			btnEndX = (0.5*SC)+menuButtonWidth,
-			btnStartY = (0.5*SC)-2,
-			btnEndY = 1.5*SC+2;
-
-		// Function to check if the mouse is hovering over the menu button.
-		function checkMenuHover(){
-			return (mousex > btnStartX && mousex < btnEndX && mousey > btnStartY && mousey < btnEndY);
-		}
-		var onBtn = checkMenuHover();
-
-		// Function to check the menu button is in the correct state, to be called on an interval.
-		function updateMenuButton(){
-			// Clear this interval if we go back to the menu.
-			if (currentScreen == screens.menu){
-				clearInterval(menuHoverIntervalId);
-				menuHoverIntervalId = undefined;
-			} else {
-				mouseOverBtn = checkMenuHover();
-				if (!highlightMenu && mouseOverBtn){
-					// If the mouse is over the button and it isn't highlighted, highlight it.
-					highlightMenu = true;
-					drawMenuButton("rgba(0, 0, 0, 1)");
-					cvs2.onmousedown = handleMenuButtonClick;
-				}
-				else if (highlightMenu && !mouseOverBtn){
-					// If the mouse isn't over the button and it's still highlighted, unhighlight it.
-					highlightMenu = false;
-					drawMenuButton("rgba(0, 0, 0, 0.5)");
-					cvs2.onmousedown = handleMouseDown;
-				}
-			}
-		}
-
-		// Function to stop the game and return to the menu.
-		function handleMenuButtonClick(){
-			clearIntervals();
-			resetGameState();
-			drawMenu();
-		}
-
-		menuHoverIntervalId = setInterval(updateMenuButton, 80);
+	// Function to check if the mouse is hovering over the button.
+	function checkHover(){
+		return (draggedGate == 0 && (mousex > x && mousex < x+(4*SC) && mousey > y && mousey < y+(4*SC)));
 	}
+
+	// Function to call when the button is clicked.
+	function handleClick(){
+		if (unlocked){
+			// Sets draggedGate to the selected gate, and puts drawDraggedGate on an interval, so that it can be redrawn to snap to nearby gates even if the mouse doesn't move.
+			draggedGate = gate;
+			drawDraggedInterval = setInterval(drawDraggedGate, 1000/60);
+			updateSelectedInterval = setInterval(updateSelectedGate, 50);
+		}
+	}
+
+	gateButtonIntervals.push(createButton(drawGateButton, [x, y, gate], checkHover, handleClick, screens.game));
 }
 
 // Draws and moves all the circuits.
@@ -727,9 +713,9 @@ function drawGameArea(ctx){
 		if (!pause){
 			// Normal circuits move 1 pixel, star circuits move two pixels.
 			if (circuits[i].fast && circuits[i].startx < cvs1.width){
-				circuits[i].startx -= 5* 1.5 * scrollSpeed;
+				circuits[i].startx -= 20* 1.5 * scrollSpeed;
 			} else {
-				circuits[i].startx -= 5* scrollSpeed;
+				circuits[i].startx -= 20* scrollSpeed;
 			}
 		}
 		drawCircuit(circuits[i], ctx);
@@ -785,31 +771,6 @@ function drawBolt(bolt, xOffset, yOffset, ctx){
 	}
 	ctx.stroke();
 	ctx.closePath();
-}
-
-function drawMoves(){
-	ctx1.strokeStyle = "#000000";
-	ctx1.fillStyle = "#2a8958";
-	ctx1.lineWidth = 2;
-	ctx1.beginPath();
-	ctx1.moveTo((cvs1.width/2)-80, cvs1.height-2);
-	ctx1.lineTo((cvs1.width/2)-50, cvs1.height-60);
-	ctx1.lineTo((cvs1.width/2)+50, cvs1.height-60);
-	ctx1.lineTo((cvs1.width/2)+80, cvs1.height-2);
-	ctx1.fill();
-	ctx1.stroke();
-	ctx1.closePath();
-
-	ctx1.textAlign = "center";
-	ctx1.font = "18pt Impact";
-	ctx1.fillStyle = "#000000";
-	ctx1.fillText("MOVES: " + moves, cvs1.width/2, cvs1.height-30);
-	ctx1.fillStyle = (moves > level.par) ? "#B4301F" : "#C4EDD8";
-	ctx1.font = "12pt Tahoma";
-	ctx1.fontWeight = "bold"
-	ctx1.fillText("(PAR: " + level.par + ")", cvs1.width/2, cvs1.height-10);
-	ctx1.fontWeight = "normal"
-	ctx1.textAlign = "left";
 }
 
 // Clears the game area of all drawings
@@ -1430,9 +1391,12 @@ function drawWire(x1, y1, x2, y2, live, ctx){
 
 // Draws an input signal.
 function drawSignal(x, y, sig, ctx){
+	ctx.save();
+	ctx.textAlign = "left";
 	ctx.font = "26px Arial";
 	ctx.fillStyle = "#000000";
 	ctx.fillText(sig, x, y);
+	ctx.restore();
 }
 
 // Draws a lightning bolt for half a second at a random point along the wire.
@@ -1817,35 +1781,39 @@ function drawBulb(x, y, live, ctx){
 //#endregion
 // Checks if the user clicked on a gate in the menu bar, and if so, set draggedGate to that gate.
 function handleMouseDown(){
-	updateSelectedGate();
-
+	// If player is already holding a gate without holding the mouse down, i.e. they used a hotkey, place that gate.
 	if (draggedGate != 0){
-		// Player is already holding a gate without holding the mouse down, i.e. they used a hotkey.
+		updateSelectedGate();
 		handleMouseUp();
-	} else {
-		// See if the mouse position is in the boundaries of one of the gates in the menu bar.
-		if ((mousey > SC) && (mousey < (5*SC))){
-			var startX = (cvs1.width/2) - (14.5*SC);
-			for (var i = 1; i < 7; i++){
-				if ((allowedGates.indexOf(i) != -1) && (mousex > startX+((i-1)*5*SC)) && (mousex < startX+((i-1)*5*SC)+(4*SC))){
-					// Sets draggedGate to the selected gate, and puts drawDraggedGate on an interval, so that it can be redrawn to snap to nearby gates even if the mouse doesn't move.
-					draggedGate = i;
-					drawDraggedIntervalId = setInterval(drawDraggedGate, 1000/60);
-					updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
-				}
-			}
-		// } else {
-			// var gate = getSelectedGate(mousex, mousey, 0);
-			// if (gate != null){
-			// 	// If the user clicked and dragged a non-fixed gate in the circuit, remove that gate from the circuit.
-			// 	draggedGate = gate.type;
-			// 	gate.type = 0;
-			// 	updateCircuitValues(gate.idx);
-			// 	drawDraggedIntervalId = setInterval(drawDraggedGate, 1000/60);
-			// 	updateSelectedIntervalId = setInterval(updateSelectedGate, 50);
-			// }
-		}
 	}
+
+	// if (draggedGate != 0){
+	// 	// Player is already holding a gate without holding the mouse down, i.e. they used a hotkey.
+	// 	handleMouseUp();
+	// } else {
+	// 	// See if the mouse position is in the boundaries of one of the gates in the menu bar.
+	// 	if ((mousey > SC) && (mousey < (5*SC))){
+	// 		var startX = (cvs1.width/2) - (14.5*SC);
+	// 		for (var i = 1; i < 7; i++){
+	// 			if ((allowedGates.indexOf(i) != -1) && (mousex > startX+((i-1)*5*SC)) && (mousex < startX+((i-1)*5*SC)+(4*SC))){
+	// 				// Sets draggedGate to the selected gate, and puts drawDraggedGate on an interval, so that it can be redrawn to snap to nearby gates even if the mouse doesn't move.
+	// 				draggedGate = i;
+	// 				drawDraggedInterval = setInterval(drawDraggedGate, 1000/60);
+	// 				updateSelectedInterval = setInterval(updateSelectedGate, 50);
+	// 			}
+	// 		}
+	// 	// } else {
+	// 		// var gate = getSelectedGate(mousex, mousey, 0);
+	// 		// if (gate != null){
+	// 		// 	// If the user clicked and dragged a non-fixed gate in the circuit, remove that gate from the circuit.
+	// 		// 	draggedGate = gate.type;
+	// 		// 	gate.type = 0;
+	// 		// 	updateCircuitValues(gate.idx);
+	// 		// 	drawDraggedInterval = setInterval(drawDraggedGate, 1000/60);
+	// 		// 	updateSelectedInterval = setInterval(updateSelectedGate, 50);
+	// 		// }
+	// 	}
+	// }
 }
 
 // Checks if the user is currently dragging a gate, and if they released the mouse over a non-fixed gate in a circuit. If so, update that gate's type and update the circuit's values.
@@ -1855,10 +1823,10 @@ function handleMouseUp(){
 			chosenGate = draggedGate;
 
 		// Clear all the gate dragging intervals, and clear whatever dragged gate is being drawn.
-		clearInterval(updateSelectedIntervalId);
-		clearInterval(drawDraggedIntervalId);
-		updateSelectedIntervalId = undefined;
-		drawDraggedIntervalId = undefined;
+		clearInterval(updateSelectedInterval);
+		clearInterval(drawDraggedInterval);
+		updateSelectedInterval = undefined;
+		drawDraggedInterval = undefined;
 		draggedGate = 0;
 		ctx2.clearRect(0, 0, cvs2.width, cvs2.height);
 
@@ -1889,6 +1857,7 @@ var won;
 // Checks if the player won or lost, and how many stars they earned, then displays the relevant end dialogue.
 function endLevel(){
 	// Redraw the game, just to make sure the last circuit has been updated, then clear all intervals.
+	currentScreen = screens.levelEnd;
 	drawGameArea(ctx1);
 	clearIntervals();
 
@@ -1951,7 +1920,7 @@ function showEndScreen(circuitsSolved, starsEarned){
 		}
 	}
 
-	var width = won ? 400 : 328;
+	var width = won ? 400 : 350;
 		height = (starsEarned == 0) ? 240 :
 			 	 (starsEarned < 3) ? 304 : 280;
 		x = (cvs1.width/2) - (width/2);
@@ -1987,8 +1956,6 @@ function showEndScreen(circuitsSolved, starsEarned){
 		ctx1.save();
 		if (frame == 25 || frame == 50 || frame == 75){
 			if (starsEarned > frame/25){
-				// ctx2.fillStyle = "#184e32";
-				// ctx2.fillRect()
 				starX += 0.2*width;
 			} else {
 				clearInterval(id);
@@ -2008,7 +1975,7 @@ function showEndScreen(circuitsSolved, starsEarned){
 }
 
 function drawEndMessage(x, y, circuitsSolved, starsEarned, ctx){
-	var width = won ? 400 : 328;
+	var width = won ? 400 : 350;
 		height = (starsEarned == 0) ? 240 :
 				 (starsEarned < 3) ? 304 : 280;
 
@@ -2033,19 +2000,19 @@ function drawEndMessage(x, y, circuitsSolved, starsEarned, ctx){
 
 	// Write how many circuits they got right, and how many they need to get right to get the next star.
 	ctx.font = "14pt Arial";
-	text = (starsEarned == 0) ? "Nice try." :
-		   (starsEarned == 1) ? "Not bad!" :
-		   (starsEarned == 2) ? "Good job!" : text + "Great work!";
-	text = text + " You solved " + circuitsSolved + "/" + circuits.length + " circuits.";
+	text = "You solved " + circuitsSolved + "/" + circuits.length + " circuits.";
+	text = (starsEarned == 0) ? text + " Keep trying!" :
+		   (starsEarned == 1) ? text + " Not bad!" :
+		   (starsEarned == 2) ? text + " Good job!" : text + " Great work!";
 	ctx.fillText(text, x+(width/2), y+112);
 	if (circuitsSolved < circuits.length - 4){
-		text = "Get " + (circuits.length-4-circuitsSolved) + " more to win the level!";
+		text = "You need " + (circuits.length-4-circuitsSolved) + " more to win the level.";
 	}
 	else if (circuitsSolved < circuits.length - 2){
-		text = "Get " + (circuits.length-2-circuitsSolved) + " more for the next star!";
+		text = "You need " + (circuits.length-2-circuitsSolved) + " more for the next star.";
 	}
 	else if (circuitsSolved < circuits.length){
-		text = "Get " + (circuits.length-circuitsSolved) + " more for the next star!";
+		text = "You need " + (circuits.length-circuitsSolved) + " more for the next star.";
 	}
 	if (starsEarned != 3 && !level.tutorial){
 		ctx.fillText(text, x+(width/2), y+134);
@@ -2080,23 +2047,29 @@ function drawEndMessage(x, y, circuitsSolved, starsEarned, ctx){
 	// Draw the buttons.
 	if (ctx == ctx2){
 		// If we are using ctx2, this means the box is still in the sliding animation, so just draw the button.
-		drawEndScreenButton("RETRY", retryx, y+yOffset, false, ctx);
-		drawEndScreenButton("MENU", menux, y+yOffset, false, ctx);
+		drawEndScreenButton(["RETRY", retryx, y+yOffset, ctx], false);
+		drawEndScreenButton(["MENU", menux, y+yOffset, ctx], false);
 		if (won && levelIdx != levels.length-1){
-			drawEndScreenButton("NEXT LEVEL", nextx, y+yOffset, false, ctx);
+			drawEndScreenButton(["NEXT LEVEL", nextx, y+yOffset, ctx], false);
 		}
 	} else if (ctx == ctx1){
-		// If we are using ctx1 the animation has finished, and we want to be able to interact with the buttons, so we create them instead of just drawing.
-		createEndScreenButton("RETRY", retryx, y+yOffset, false, ctx);
-		createEndScreenButton("MENU", menux, y+yOffset, false, ctx);
+		// If we are using ctx1, the animation has finished and we want to be able to interact with the buttons. So we create them instead of just drawing.
+		createEndScreenButton("RETRY", retryx, y+yOffset);
+		createEndScreenButton("MENU", menux, y+yOffset);
 		if (won && levelIdx != levels.length-1){
-			createEndScreenButton("NEXT LEVEL", nextx, y+yOffset, false, ctx);
+			createEndScreenButton("NEXT LEVEL", nextx, y+yOffset);
 		}
 	}
 	ctx.restore();
 }
 
-function drawEndScreenButton(text, x, y, selected, ctx){
+function drawEndScreenButton(args, selected){
+	// Get the values out of the args.
+	var text = args[0],
+		x = args[1],
+		y = args[2],
+		ctx = args[3];
+
 	// Calculate the width of this button.
 	ctx.save();
 	ctx.font = "20pt Impact";
@@ -2118,21 +2091,22 @@ function drawEndScreenButton(text, x, y, selected, ctx){
 }
 
 function createEndScreenButton(text, x, y){
-	// Draw the button, and calculate its width.
-	drawEndScreenButton(text, x, y, false, ctx1);
+	// Calculate the button width.
 	ctx1.font = "20pt Impact";
 	var btnWidth = Math.round(ctx1.measureText(text).width) + 20;
 
 	// Function to check if the mouse is hovering over this button.
-	function checkMouseHover(){
+	function checkHover(){
 		return (mousex > x && mousex < x+btnWidth && mousey > y && mousey < y+40);
 	}
 
 	// Function to be called if this button is clicked.
-	function handleButtonClick(){
+	function handleClick(){
 		// Reset the game state in preparation for the next level.
 		resetGameState();
 		cvs2.mousedown = undefined;
+
+		// Do what the button says.
 		if (text == "RETRY"){
 			if (level.tutorial){
 				startTutorial();
@@ -2146,49 +2120,27 @@ function createEndScreenButton(text, x, y){
 		}
 	}
 
-	// Function to check if the button is in the correct state, to be called on an interval.
-	var highlight = false,
-		updateButtonInterval, mouseHover;
-	function updateEndScreenButton(){
-		// Clear this interval if we leave the end screen (won gets reset to undefined).
-		if (won == undefined){
-			clearInterval(updateButtonInterval);
-			updateButtonInterval = undefined;
-		} else {
-			mouseHover = checkMouseHover();
-			if (!highlight && mouseHover){
-				// If the mouse is over the button and it isn't highlighted, highlight it.
-				highlight = true;
-				drawEndScreenButton(text, x, y, true, ctx1);
-				cvs2.onmousedown = handleButtonClick;
-			}
-			else if (highlight && !mouseHover){
-				// If the mouse isn't over the button and it's still highlighted, unhighlight it.
-				highlight = false;
-				drawEndScreenButton(text, x, y, false, ctx1);
-				cvs2.onmousedown = undefined;
-			}
-		}
-	}
-
-	// Start the updateEndScreenButton function on an interval.
-	updateButtonInterval = setInterval(updateEndScreenButton, 1000/60);
+	// Create the button.
+	buttonInterval = createButton(drawEndScreenButton, [text, x, y, ctx1], checkHover, handleClick, screens.levelEnd);
 }
 
 function clearIntervals(){
 	// Cancel all the intervals and handlers
-	clearInterval(updateSelectedIntervalId);
-	clearInterval(drawDraggedIntervalId);
-	clearInterval(drawIntervalId);
-	clearInterval(updateIntervalId);
-	clearInterval(gateChangeIntervalId);
-	clearInterval(menuHoverIntervalId);
-	updateSelectedIntervalId = undefined;
-	drawDraggedIntervalId = undefined;
-	drawIntervalId = undefined;
-	updateIntervalId = undefined;
-	gateChangeIntervalId = undefined;
-	menuHoverIntervalId = undefined;
+	while (gateButtonIntervals.length > 0){
+		clearInterval(gateButtonIntervals.pop());
+	}
+	clearInterval(updateSelectedInterval);
+	clearInterval(drawDraggedInterval);
+	clearInterval(drawInterval);
+	clearInterval(updateInterval);
+	clearInterval(gateChangeInterval);
+	clearInterval(menuHoverInterval);
+	updateSelectedInterval = undefined;
+	drawDraggedInterval = undefined;
+	drawInterval = undefined;
+	updateInterval = undefined;
+	gateChangeInterval = undefined;
+	menuHoverInterval = undefined;
 	cvs2.onmousedown = undefined;
 	cvs2.onmouseup = undefined;
 	document.onkeypress = undefined;
@@ -2205,7 +2157,8 @@ function resetGameState(){
 	ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
 	ctx1.textAlign = "left";
 }
-var tutDialogues = [
+var currentTutDialogue,
+	tutDialogues = [
 	{
 		idx : 0,
 		topText : "Welcome to Logic Training! This tutorial will teach you what logic gates are, and how to play the game.",
@@ -2219,7 +2172,8 @@ var tutDialogues = [
 			drawWire(x+(6*SC), y+(2*SC), x+(8*SC), y+(2*SC), -1, ctx1);
 		},
 		getDiagramWidth : function () { return (8*SC); },
-		getDiagramHeight : function () { return (4*SC); }
+		getDiagramHeight : function () { return (4*SC); },
+		btnText : "CONTINUE"
 	},
 	{
 		idx : 1,
@@ -2235,7 +2189,8 @@ var tutDialogues = [
 			drawWire(x+(6*SC), y+(2*SC), x+(8*SC), y+(2*SC), 1, ctx1);
 		},
 		getDiagramWidth : function () { return (8*SC); },
-		getDiagramHeight : function () { return (4*SC); }
+		getDiagramHeight : function () { return (4*SC); },
+		btnText : "CONTINUE"
 	},
 	{
 		idx : 2,
@@ -2253,7 +2208,8 @@ var tutDialogues = [
 			drawBulb(x+(10*SC), y, 1, ctx1);
 		},
 		getDiagramWidth : function () { return (14*SC); },
-		getDiagramHeight : function () { return (4*SC); }
+		getDiagramHeight : function () { return (4*SC); },
+		btnText : "I'M READY"
 	},
 	{
 		idx : 3,
@@ -2261,7 +2217,8 @@ var tutDialogues = [
 	},
 	{
 		idx : 4,
-		text : "Nice one! When you drag a gate into a circuit, that gate becomes fixed and can't be changed again. This means you only get one attempt per circuit, so think hard before you put a gate in!"
+		text : "Nice one! When you drag a gate into a circuit, that gate becomes fixed and can't be changed again. This means you only get one attempt per circuit, so think hard before you put a gate in!",
+		btnText : "CONTINUE"
 	},
 	{
 		idx : 5,
@@ -2285,11 +2242,13 @@ var tutDialogues = [
 			drawBulb(x+(18*SC), y, -1, ctx1);
 		},
 		getDiagramWidth : function () { return (22*SC); },
-		getDiagramHeight : function () { return (4*SC); }
+		getDiagramHeight : function () { return (4*SC); },
+		btnText : "CONTINUE"
 	},
 	{
 		idx : 6,
-		text : "That's all there is to it. You're now ready for level 1, where you'll learn about the AND and NAND gates!"
+		text : "That's all there is to it. You're now ready for level 1, where you'll learn about the AND and NAND gates!",
+		btnText : "END TUTORIAL"
 	}
 ]
 
@@ -2299,6 +2258,7 @@ function startTutorial(){
 	displayTutorialDialogue(0);
 }
 
+// Function which writes text to the canvas, wrapping at the desired width. If noPrint is specified, it instead just returns the height of the block of text this function would produce.
 function wrapText(ctx, text, x, y, maxWidth, lineHeight, noPrint) {
 	var words = text.split(" "),
 		line = "",
@@ -2322,6 +2282,7 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight, noPrint) {
 	return lineCount * lineHeight;
 }
 
+// Function to display the tutorial dialogues.
 function displayTutorialDialogue(dlgIdx){
 	var dlg = tutDialogues[dlgIdx];
 
@@ -2329,22 +2290,25 @@ function displayTutorialDialogue(dlgIdx){
 	var topTextHeight, botTextHeight, textHeight, boxHeight,
 		boxWidth = (dlg.getDiagramWidth == undefined) ? 600 : Math.max(dlg.getDiagramWidth() + 80, 600);
 	ctx1.font = "14pt Arial";
-	if (dlg.text == undefined){
+	if (dlg.drawDiagram != undefined){
+		// If the dialogue box features a diagram and two text boxes, we need to include the height of all of these in the height of the box.
 		topTextHeight = wrapText(ctx1, dlg.topText, 0, 0, (0.95*boxWidth), 24, true);
 		botTextHeight = wrapText(ctx1, dlg.botText, 0, 0, (0.95*boxWidth), 24, true);
 		boxHeight = 15 + topTextHeight + 35 + dlg.getDiagramHeight() + 25 + botTextHeight + 68;
 	} else {
+		// If the dialogue box doesn't have a diagram, we only need to measure the one text box.
 		textHeight = wrapText(ctx1, dlg.text, 0, 0, (0.95*boxWidth), 24, true);
 		boxHeight = 15 + textHeight + 58;
 	}
 
+	// Calculate the start position of the dialogue box.
 	var startx = Math.round((cvs1.width/2) - (boxWidth/2)),
 		starty = Math.round((cvs1.height/2) - (boxHeight/2));
 
 	// Draw the rectangle.
 	ctx1.beginPath();
 	ctx1.lineWidth = 1;
-	ctx1.fillStyle = "#2a8958";
+	ctx1.fillStyle = "#2A8958";
 	ctx1.rect(startx+0.5, starty+0.5, boxWidth, boxHeight);
 	ctx1.fill();
 	ctx1.stroke();
@@ -2372,65 +2336,37 @@ function displayTutorialDialogue(dlgIdx){
 		dlg.drawDiagram(dgrmX, dgrmY);
 	}
 
-	// Draw the continue button.
-	var highlight = false,
-		btnX = startx+boxWidth-104,
-		btnY = starty+boxHeight-34;
+	// Function to call if the button is clicked.
+	var buttonInterval;
+	function handleClick(){
+		// Clear this dialogue box and the button interval.
+		ctx1.clearRect(startx-3, starty-3, boxWidth+6, boxHeight+6);
+		clearInterval(buttonInterval);
+		cvs2.onmousedown = handleMouseDown;
+
+		if (dlgIdx+1 == 3){
+			// If the next dialogue is the 4th one, start the test circuit instead.
+			startTestCircuit();
+		} else if (dlgIdx+1 < tutDialogues.length){
+			// If there is another dialogue, display that.
+			displayTutorialDialogue(dlgIdx+1);
+		} else {
+			// If this is the last dialogue, end the tutorial.
+			clearIntervals();
+			resetGameState();
+			levels[1].unlocked = true;
+			drawMenu();
+		}
+	}
+
+	// Calculate the button width and position.
 	ctx1.font = "18pt Impact";
-	ctx1.textAlign = "left";
-	ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-	ctx1.fillText("CONTINUE", btnX, btnY+20);
+	var btnWidth = ctx1.measureText(dlg.btnText).width,
+		btnX = startx + boxWidth - btnWidth - 10,
+		btnY = starty + boxHeight - 30;
 
-	// The interval to control highlighting the continue button when the mouse hovers over it.
-	var btnHoverIntervalId = setInterval(function(){
-		// Clear this interval if we go back to the menu.
-		if (currentScreen == screens.menu){
-			clearInterval(btnHoverIntervalId);
-			btnHoverIntervalId = undefined;
-		}
-
-		// If the mouse is over the button, and it isn't already highlighted.
-		if ((mousex > btnX-4 && mousex < btnX+98  && mousey > btnY-2 && mousey < btnY+24) && !highlight){
-			highlight = true;
-			ctx1.fillStyle="#2a8958";
-			ctx1.fillRect(btnX, btnY-2, 94, 24);
-			ctx1.fillStyle = "rgba(0, 0, 0, 1)";
-			ctx1.font = "18pt Impact";
-			ctx1.fillText("CONTINUE", btnX, btnY+20);
-			// If the mouse is hovering over the button, change the mousedown handler to go to the next message.
-			cvs2.onmousedown = function(){
-				ctx1.clearRect(startx-3, starty-3, boxWidth+6, boxHeight+6);
-				clearInterval(btnHoverIntervalId);
-				btnHoverIntervalId = undefined;
-				if (dlgIdx+1 < tutDialogues.length){
-					cvs2.onmousedown = handleMouseDown;
-					if (dlgIdx+1 != 3){
-						displayTutorialDialogue(dlgIdx+1);
-					} else {
-						startTestCircuit();
-					}
-				} else {
-					// End the tutorial
-					clearIntervals();
-					resetGameState();
-					levels[1].unlocked = true;
-					drawMenu();
-				}
-			}
-		}
-		// If the mouse isn't over the button, but it is still highlighted.
-		else if (!(mousex > btnX-4 && mousex < btnX+98  && mousey > btnY-2 && mousey < btnY+24) && highlight){
-			highlight = false;
-			ctx1.fillStyle="#2a8958";
-			ctx1.fillRect(btnX, btnY-2, 94, 24);
-			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-			ctx1.font = "18pt Impact";
-			ctx1.fillText("CONTINUE", btnX, btnY+20);
-			cvs2.onmousedown = handleMouseDown;
-		}
-	}, 50);
-
-	ctx1.textAlign = "left";
+	// Create the button.
+	buttonInterval = createTextButton(btnX, btnY, dlg.btnText, 18, "left", "#2A8958", handleClick, screens.game);
 }
 
 // Scroll a single test circuit across the screen, and show prompts for the player.
@@ -2446,7 +2382,7 @@ function startTestCircuit(){
 	// Draw the dialogue box.
 	ctx1.beginPath();
 	ctx1.lineWidth = 1;
-	ctx1.fillStyle = "#2a8958";
+	ctx1.fillStyle = "#2A8958";
 	ctx1.rect(startx+0.5, starty+0.5, boxWidth, 34);
 	ctx1.fill();
 	ctx1.stroke();
@@ -2508,7 +2444,7 @@ function introduceGates(gate){
 		starty = Math.round((cvs1.height/2)-(height/2));
 
 	// Draw the rectangle.
-	ctx1.fillStyle = "#2a8958";
+	ctx1.fillStyle = "#2A8958";
 	ctx1.lineWidth = 2;
 	ctx1.fillRect(startx, starty, width, height);
 	ctx1.strokeRect(startx, starty, width, height);
@@ -2549,59 +2485,34 @@ function introduceGates(gate){
 	ctx1.textAlign = "center";
 	wrapText(ctx1, gateExplanations[gate], cvs1.width/2, starty+height-textHeight-36, 0.9*width, 26)
 
-	// Draw the continue button.
-	var highlight = false,
-		btnX = startx+width-106,
-		btnY = starty+height-34;
-	ctx1.font = "18pt Impact";
-	ctx1.textAlign = "left";
-	ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-	ctx1.fillText("CONTINUE", btnX, btnY+20);
+	// Function to call when the button is clicked.
+	var buttonInterval;
+	function handleClick(){
+		// Clear the dialogue box and this interval.
+		ctx1.clearRect(startx-3, starty-3, width+6, height+6);
+		clearInterval(buttonInterval);
 
-	// The interval to control highlighting the continue button when the mouse hovers over it.
-	var btnHoverIntervalId = setInterval(function(){
-		// Clear this interval if we go back to the menu.
-		if (currentScreen == screens.menu){
-			clearInterval(btnHoverIntervalId);
-			btnHoverIntervalId = undefined;
-		}
-
-		// If the mouse is over the button, and it isn't already highlighted.
-		if ((mousex > btnX-4 && mousex < btnX+98  && mousey > btnY-2 && mousey < btnY+24) && !highlight){
-			highlight = true;
-			ctx1.fillStyle="#2a8958";
-			ctx1.fillRect(btnX, btnY-2, 94, 24);
-			ctx1.fillStyle = "rgba(0, 0, 0, 1)";
-			ctx1.font = "18pt Impact";
-			ctx1.fillText("CONTINUE", btnX, btnY+20);
-			// If the mouse is hovering over the button, change the mousedown handler to go to the next message.
-			cvs2.onmousedown = function(){
-				ctx1.clearRect(startx-3, starty-3, width+6, height+6);
-				clearInterval(btnHoverIntervalId);
-				btnHoverIntervalId = undefined;
-				// Display the next gate introduction, or start the game
-				if (gate % 2 == 1 && gate != 7){
-					introduceGates(gate+1);
-				} else {
-					cvs2.onmousedown = handleMouseDown;
-					pause = false;
-					if (gate == 7){
-						gateChangeIntervalId = setInterval(changeLockedGates, 20000);
-					}
-				}
+		// Display the next gate introduction, or start the game.
+		if (gate % 2 == 1 && !level.introduceGateChanges){
+			introduceGates(gate+1);
+		} else {
+			cvs2.onmousedown = handleMouseDown;
+			pause = false;
+			if (level.introduceGateChanges){
+				gateChangeInterval = setInterval(changeLockedGates, 20000);
 			}
 		}
-		// If the mouse isn't over the button, but it is still highlighted.
-		else if (!(mousex > btnX-4 && mousex < btnX+98  && mousey > btnY-2 && mousey < btnY+24) && highlight){
-			highlight = false;
-			ctx1.fillStyle="#2a8958";
-			ctx1.fillRect(btnX, btnY-2, 94, 24);
-			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-			ctx1.font = "18pt Impact";
-			ctx1.fillText("CONTINUE", btnX, btnY+20);
-			cvs2.onmousedown = handleMouseDown;
-		}
-	}, 50);
+	}
+
+	// Calculate the button width and position.
+	ctx1.font = "18pt Impact";
+	var text = (gate % 2 == 0 || level.introduceGateChanges) ? "START LEVEL" : "CONTINUE",
+		btnWidth = ctx1.measureText(text).width,
+		btnX = startx + width - btnWidth - 10,
+		btnY = starty + height - 30;
+
+	// Create the button.
+	buttonInterval = createTextButton(btnX, btnY, text, 18, "left", "#2A8958", handleClick, screens.game);
 }
 
 function drawTruthTable(x, y, gate){

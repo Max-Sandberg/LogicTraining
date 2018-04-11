@@ -127,17 +127,3 @@ function changeLockedGates(){
 		}
 	}
 }
-
-function findLevelPar(){
-	level.par = 0;
-
-	for (var i = 0; i < circuits.length; i++){
-		for (var j = 0; j < circuits[i].gateSections.length; j++){
-			for (var k = 0; k < circuits[i].gateSections[j].length; k++){
-				if (!circuits[i].gateSections[j][k].fixed){
-					level.par++;
-				}
-			}
-		}
-	}
-}

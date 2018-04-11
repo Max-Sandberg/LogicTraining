@@ -87,9 +87,12 @@ function drawWire(x1, y1, x2, y2, live, ctx){
 
 // Draws an input signal.
 function drawSignal(x, y, sig, ctx){
+	ctx.save();
+	ctx.textAlign = "left";
 	ctx.font = "26px Arial";
 	ctx.fillStyle = "#000000";
 	ctx.fillText(sig, x, y);
+	ctx.restore();
 }
 
 // Draws a lightning bolt for half a second at a random point along the wire.

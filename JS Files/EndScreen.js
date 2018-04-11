@@ -3,6 +3,7 @@ var won;
 // Checks if the player won or lost, and how many stars they earned, then displays the relevant end dialogue.
 function endLevel(){
 	// Redraw the game, just to make sure the last circuit has been updated, then clear all intervals.
+	currentScreen = screens.levelEnd;
 	drawGameArea(ctx1);
 	clearIntervals();
 
@@ -65,7 +66,7 @@ function showEndScreen(circuitsSolved, starsEarned){
 		}
 	}
 
-	var width = won ? 400 : 328;
+	var width = won ? 400 : 350;
 		height = (starsEarned == 0) ? 240 :
 			 	 (starsEarned < 3) ? 304 : 280;
 		x = (cvs1.width/2) - (width/2);
@@ -101,8 +102,6 @@ function showEndScreen(circuitsSolved, starsEarned){
 		ctx1.save();
 		if (frame == 25 || frame == 50 || frame == 75){
 			if (starsEarned > frame/25){
-				// ctx2.fillStyle = "#184e32";
-				// ctx2.fillRect()
 				starX += 0.2*width;
 			} else {
 				clearInterval(id);
@@ -122,7 +121,7 @@ function showEndScreen(circuitsSolved, starsEarned){
 }
 
 function drawEndMessage(x, y, circuitsSolved, starsEarned, ctx){
-	var width = won ? 400 : 328;
+	var width = won ? 400 : 350;
 		height = (starsEarned == 0) ? 240 :
 				 (starsEarned < 3) ? 304 : 280;
 
@@ -147,19 +146,19 @@ function drawEndMessage(x, y, circuitsSolved, starsEarned, ctx){
 
 	// Write how many circuits they got right, and how many they need to get right to get the next star.
 	ctx.font = "14pt Arial";
-	text = (starsEarned == 0) ? "Nice try." :
-		   (starsEarned == 1) ? "Not bad!" :
-		   (starsEarned == 2) ? "Good job!" : text + "Great work!";
-	text = text + " You solved " + circuitsSolved + "/" + circuits.length + " circuits.";
+	text = "You solved " + circuitsSolved + "/" + circuits.length + " circuits.";
+	text = (starsEarned == 0) ? text + " Keep trying!" :
+		   (starsEarned == 1) ? text + " Not bad!" :
+		   (starsEarned == 2) ? text + " Good job!" : text + " Great work!";
 	ctx.fillText(text, x+(width/2), y+112);
 	if (circuitsSolved < circuits.length - 4){
-		text = "Get " + (circuits.length-4-circuitsSolved) + " more to win the level!";
+		text = "You need " + (circuits.length-4-circuitsSolved) + " more to win the level.";
 	}
 	else if (circuitsSolved < circuits.length - 2){
-		text = "Get " + (circuits.length-2-circuitsSolved) + " more for the next star!";
+		text = "You need " + (circuits.length-2-circuitsSolved) + " more for the next star.";
 	}
 	else if (circuitsSolved < circuits.length){
-		text = "Get " + (circuits.length-circuitsSolved) + " more for the next star!";
+		text = "You need " + (circuits.length-circuitsSolved) + " more for the next star.";
 	}
 	if (starsEarned != 3 && !level.tutorial){
 		ctx.fillText(text, x+(width/2), y+134);
@@ -194,23 +193,29 @@ function drawEndMessage(x, y, circuitsSolved, starsEarned, ctx){
 	// Draw the buttons.
 	if (ctx == ctx2){
 		// If we are using ctx2, this means the box is still in the sliding animation, so just draw the button.
-		drawEndScreenButton("RETRY", retryx, y+yOffset, false, ctx);
-		drawEndScreenButton("MENU", menux, y+yOffset, false, ctx);
+		drawEndScreenButton(["RETRY", retryx, y+yOffset, ctx], false);
+		drawEndScreenButton(["MENU", menux, y+yOffset, ctx], false);
 		if (won && levelIdx != levels.length-1){
-			drawEndScreenButton("NEXT LEVEL", nextx, y+yOffset, false, ctx);
+			drawEndScreenButton(["NEXT LEVEL", nextx, y+yOffset, ctx], false);
 		}
 	} else if (ctx == ctx1){
-		// If we are using ctx1 the animation has finished, and we want to be able to interact with the buttons, so we create them instead of just drawing.
-		createEndScreenButton("RETRY", retryx, y+yOffset, false, ctx);
-		createEndScreenButton("MENU", menux, y+yOffset, false, ctx);
+		// If we are using ctx1, the animation has finished and we want to be able to interact with the buttons. So we create them instead of just drawing.
+		createEndScreenButton("RETRY", retryx, y+yOffset);
+		createEndScreenButton("MENU", menux, y+yOffset);
 		if (won && levelIdx != levels.length-1){
-			createEndScreenButton("NEXT LEVEL", nextx, y+yOffset, false, ctx);
+			createEndScreenButton("NEXT LEVEL", nextx, y+yOffset);
 		}
 	}
 	ctx.restore();
 }
 
-function drawEndScreenButton(text, x, y, selected, ctx){
+function drawEndScreenButton(args, selected){
+	// Get the values out of the args.
+	var text = args[0],
+		x = args[1],
+		y = args[2],
+		ctx = args[3];
+
 	// Calculate the width of this button.
 	ctx.save();
 	ctx.font = "20pt Impact";
@@ -232,21 +237,22 @@ function drawEndScreenButton(text, x, y, selected, ctx){
 }
 
 function createEndScreenButton(text, x, y){
-	// Draw the button, and calculate its width.
-	drawEndScreenButton(text, x, y, false, ctx1);
+	// Calculate the button width.
 	ctx1.font = "20pt Impact";
 	var btnWidth = Math.round(ctx1.measureText(text).width) + 20;
 
 	// Function to check if the mouse is hovering over this button.
-	function checkMouseHover(){
+	function checkHover(){
 		return (mousex > x && mousex < x+btnWidth && mousey > y && mousey < y+40);
 	}
 
 	// Function to be called if this button is clicked.
-	function handleButtonClick(){
+	function handleClick(){
 		// Reset the game state in preparation for the next level.
 		resetGameState();
 		cvs2.mousedown = undefined;
+
+		// Do what the button says.
 		if (text == "RETRY"){
 			if (level.tutorial){
 				startTutorial();
@@ -260,49 +266,27 @@ function createEndScreenButton(text, x, y){
 		}
 	}
 
-	// Function to check if the button is in the correct state, to be called on an interval.
-	var highlight = false,
-		updateButtonInterval, mouseHover;
-	function updateEndScreenButton(){
-		// Clear this interval if we leave the end screen (won gets reset to undefined).
-		if (won == undefined){
-			clearInterval(updateButtonInterval);
-			updateButtonInterval = undefined;
-		} else {
-			mouseHover = checkMouseHover();
-			if (!highlight && mouseHover){
-				// If the mouse is over the button and it isn't highlighted, highlight it.
-				highlight = true;
-				drawEndScreenButton(text, x, y, true, ctx1);
-				cvs2.onmousedown = handleButtonClick;
-			}
-			else if (highlight && !mouseHover){
-				// If the mouse isn't over the button and it's still highlighted, unhighlight it.
-				highlight = false;
-				drawEndScreenButton(text, x, y, false, ctx1);
-				cvs2.onmousedown = undefined;
-			}
-		}
-	}
-
-	// Start the updateEndScreenButton function on an interval.
-	updateButtonInterval = setInterval(updateEndScreenButton, 1000/60);
+	// Create the button.
+	buttonInterval = createButton(drawEndScreenButton, [text, x, y, ctx1], checkHover, handleClick, screens.levelEnd);
 }
 
 function clearIntervals(){
 	// Cancel all the intervals and handlers
-	clearInterval(updateSelectedIntervalId);
-	clearInterval(drawDraggedIntervalId);
-	clearInterval(drawIntervalId);
-	clearInterval(updateIntervalId);
-	clearInterval(gateChangeIntervalId);
-	clearInterval(menuHoverIntervalId);
-	updateSelectedIntervalId = undefined;
-	drawDraggedIntervalId = undefined;
-	drawIntervalId = undefined;
-	updateIntervalId = undefined;
-	gateChangeIntervalId = undefined;
-	menuHoverIntervalId = undefined;
+	while (gateButtonIntervals.length > 0){
+		clearInterval(gateButtonIntervals.pop());
+	}
+	clearInterval(updateSelectedInterval);
+	clearInterval(drawDraggedInterval);
+	clearInterval(drawInterval);
+	clearInterval(updateInterval);
+	clearInterval(gateChangeInterval);
+	clearInterval(menuHoverInterval);
+	updateSelectedInterval = undefined;
+	drawDraggedInterval = undefined;
+	drawInterval = undefined;
+	updateInterval = undefined;
+	gateChangeInterval = undefined;
+	menuHoverInterval = undefined;
 	cvs2.onmousedown = undefined;
 	cvs2.onmouseup = undefined;
 	document.onkeypress = undefined;
