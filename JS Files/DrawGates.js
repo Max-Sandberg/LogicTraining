@@ -256,7 +256,7 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 
 function drawBulb(x, y, live, ctx){
 	ctx.lineWidth = 2;
-	ctx.fillStyle = (live == 1) ? "#ffff00" : "#ffffff";
+	ctx.fillStyle = (live == 1) ? "#FFFF00" : "#F2F2F2";
 
 	ctx.beginPath();
 	ctx.moveTo(x+(1.5*SC), y+(2.9*SC));
@@ -269,7 +269,7 @@ function drawBulb(x, y, live, ctx){
 
 	ctx.beginPath();
 	ctx.lineWidth = 4;
-	ctx.fillStyle = "#cccccc";
+	ctx.fillStyle = "#CCCCCC";
 	ctx.rect(x+(1.4*SC)+1, y+(2.9*SC)+1, (1.2*SC)-2, (0.5*SC)-2);
 	ctx.stroke();
 	ctx.fill();
@@ -280,7 +280,7 @@ function drawBulb(x, y, live, ctx){
 	if (live == 1){
 		ctx.beginPath();
 		ctx.lineWidth = 4;
-		ctx.strokeStyle = "#ffff00";
+		ctx.strokeStyle = "#FFFF00";
 
 		// Right side lines
 		ctx.moveTo(x+(3.1*SC), y+(1*SC));

@@ -153,7 +153,7 @@ function createLevelButton(x, y, levelIdx){
 		}
 	}
 
-	var buttonInterval = createButton(drawLevelButton, [x, y, levelIdx], checkHover, handleClick, screens.menu);
+	var buttonInterval = createButton(drawLevelButton, [x, y, levelIdx], checkHover, handleClick, [screens.menu]);
 	levelButtonIntervals.push(buttonInterval);
 }
 

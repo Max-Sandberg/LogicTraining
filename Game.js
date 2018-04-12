@@ -13,9 +13,10 @@ var frameNo = 0;
 var pause = false;
 var scrollSpeed;
 var level, levelIdx;
-var currentScreen, screens = Object.freeze({"menu":0, "game":1, "levelEnd":2});
+var currentScreen, screens = Object.freeze({"menu":0, "game":1, "gateIntro":2, "levelEnd":3});
 
 function startGame(){
+	//unlockLevels();
 	createCanvases();
 	document.body.onresize = handleResize;
 	loadFontAwesome(drawMenu, 200);
@@ -34,19 +35,24 @@ function startLevel(lvlIdx) {
 	cvs2.onmouseup = handleMouseUp;
 	cvs2.onmousemove = handleMouseMove;
 
+	// Initialise some variables.
 	levelIdx = lvlIdx;
 	level = levels[levelIdx];
 	circuits = level.circuits;
 	enableGateChanges = level.enableGateChanges;
 	allowedGates = level.allowedGates;
 
+	// Draw the menu bar and a rectangle around the game area.
 	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 	drawMenuBar();
-	prepareCircuits();
 	ctx1.lineWidth = 2;
 	ctx1.strokeStyle = "#000000";
 	ctx1.strokeRect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-1);
+
+	// Prepare the circuits and start the draw and update and gatechange intervals.
 	pause = false;
+	chooseCircuits();
+	prepareCircuits();
 	drawInterval = setInterval(drawGameArea, 1000/60, ctx1);
 	updateInterval = setInterval(updateGameArea, 200);
 	if (enableGateChanges && !level.introduceGateChanges){
@@ -54,16 +60,13 @@ function startLevel(lvlIdx) {
 	}
 
 	// Assign hotkeys.
-	document.onkeypress = function (e) {
-		// e = e || window.event;
-		// // Find which key was pressed. Use either which or keyCode, depending on browser support.
-		// var key = event.which || event.keyCode;
-		if (e.key == " "){
-			// If key was space, pause the game - comment as appropriate.
+	document.onkeypress = function(event) {
+		// If space was pressed, pause the game - comment as appropriate.
+		if (event.key == " "){
 			// pause = !pause;
 		} else {
 			// If the key was a number, find which gate that number corresponds to.
-			var gate = parseInt(e.key);
+			var gate = parseInt(event.key);
 			if (gate > 0 && gate < 7){
 				if (allowedGates.indexOf(gate) != -1){
 					// If that gate is allowed to be used, set it as the dragged gate and start the necessary intervals.
@@ -175,7 +178,7 @@ function handleResize(){
 		// Calculate the scale to use for the UI based on the window size.
 		SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
 		SC = Math.min(SC, 22);
-		scrollSpeed = cvs1.width / 880;
+		scrollSpeed = Math.round(100*(cvs1.width/860))/100;
 
 		// Redraw menu.
 		drawMenu()
@@ -183,7 +186,7 @@ function handleResize(){
 }
 
 // A generic function for creating a button. Takes two functions, one to draw the button, and one to call when the button is clicked.
-function createButton(drawButton, drawArgs, checkHover, handleClick, intendedScreen){
+function createButton(drawButton, drawArgs, checkHover, handleClick, intendedScreens){
 	// Draw the button.
 	drawButton(drawArgs);
 
@@ -194,7 +197,7 @@ function createButton(drawButton, drawArgs, checkHover, handleClick, intendedScr
 		oldMouseDown;
 	function updateButton(){
 		// If we return to the main menu, stop updating this button.
-		if (currentScreen != intendedScreen){
+		if (intendedScreens.indexOf(currentScreen) == -1){
 			clearInterval(buttonInterval);
 		}
 
@@ -220,7 +223,7 @@ function createButton(drawButton, drawArgs, checkHover, handleClick, intendedScr
 }
 
 // An extension of the createButton function, specifically for buttons that are plain text.
-function createTextButton(btnX, btnY, text, fontSize, align, backgroundColor, handleClick, intendedScreen){
+function createTextButton(btnX, btnY, text, fontSize, align, backgroundColor, handleClick, intendedScreens){
 	// Measures the height and width the text will be, and where the x position is based on the alignment chosen.
 	ctx1.save();
 	ctx1.font = fontSize + "pt Impact";
@@ -248,7 +251,14 @@ function createTextButton(btnX, btnY, text, fontSize, align, backgroundColor, ha
 		return (mousex > btnX && mousex < btnX+width && mousey > btnY && mousey < btnY+height);
 	}
 
-	return createButton(drawButton, undefined, checkHover, handleClick, intendedScreen);
+	return createButton(drawButton, undefined, checkHover, handleClick, intendedScreens);
+}
+
+// Function for use with development and testing to unlock all the levels.
+function unlockLevels(){
+	for (var i = 0; i < levels.length; i++){
+		levels[i].unlocked = true;
+	}
 }
 var levelButtonIntervals = [];
 
@@ -405,7 +415,7 @@ function createLevelButton(x, y, levelIdx){
 		}
 	}
 
-	var buttonInterval = createButton(drawLevelButton, [x, y, levelIdx], checkHover, handleClick, screens.menu);
+	var buttonInterval = createButton(drawLevelButton, [x, y, levelIdx], checkHover, handleClick, [screens.menu]);
 	levelButtonIntervals.push(buttonInterval);
 }
 
@@ -579,7 +589,7 @@ function drawMenuBar(){
 
 	// Creates the menu button.
 	clearInterval(menuHoverInterval);
-	menuHoverInterval = createTextButton(0.5*SC, 0.5*SC, "MENU", SC+2, "left", "#2A8958", handleMenuButtonClick, screens.game);
+	menuHoverInterval = createTextButton(0.5*SC, 0.5*SC, "MENU", SC+2, "left", "#2A8958", handleMenuButtonClick, [screens.gateIntro, screens.game]);
 }
 
 function createGateButton(x, y, gate){
@@ -665,7 +675,7 @@ function createGateButton(x, y, gate){
 		}
 	}
 
-	gateButtonIntervals.push(createButton(drawGateButton, [x, y, gate], checkHover, handleClick, screens.game));
+	gateButtonIntervals.push(createButton(drawGateButton, [x, y, gate], checkHover, handleClick, [screens.game, screens.gateIntro]));
 }
 
 // Draws and moves all the circuits.
@@ -687,14 +697,14 @@ function drawGameArea(ctx){
 		drawCircuit(circuits[i], ctx);
 	}
 
-	// Draw box around game area.
-	ctx1.lineWidth = 1;
+	// Draw lines over the left and right edges of the game area.
+	ctx1.lineWidth = 2;
 	ctx1.strokeStyle = "#000000";
 	ctx1.beginPath();
 	ctx1.moveTo(1, (SC*6)+1);
 	ctx1.lineTo(1, cvs1.height-1);
 	ctx1.moveTo(cvs1.width-1, (SC*6)+1);
-	ctx1.lineTo(cvs1.width-1, cvs1.height-1);
+	ctx1.lineTo(cvs1.width-1, cvs1.height);
 	ctx1.stroke();
 	ctx1.closePath();
 }
@@ -744,9 +754,16 @@ function clearGameArea(){
 	for (var i = 0; i < circuits.length; i++){
 		var startx = Math.max(circuits[i].startx, 1),
 			endx = Math.min(circuits[i].endx, cvs1.width-1),
-			starty = circuits[i].starty;
+			starty = circuits[i].starty,
+			width = circuits[i].width,
+			height = circuits[i].height;
 		if (startx < cvs1.width && endx > 1){
-			ctx1.clearRect(startx, starty+(3*SC), endx-startx, (16*SC));
+			ctx1.clearRect(
+				startx,
+				starty+(10*SC)-(height/2)-2,
+				Math.min(width+2, cvs1.width-1-startx),
+				height+4
+			);
 		}
 	}
 }
@@ -927,8 +944,6 @@ function setWireInterval(wire, circuit){
 }
 // Prepares a circuit for drawing, by finding the positions of it's gates and wires.
 function prepareCircuits(){
-	chooseCircuits();
-
 	for (var i = 0; i < circuits.length; i++){
 		findGatePositions(i);
 	}
@@ -986,6 +1001,14 @@ function findCircuitPosition(idx){
 					 circuits[idx-1].endx + horzGap;
 	circuit.endx = circuit.startx + circuit.width;
 
+	// Calculate the circuit height.
+	var height = 0;
+	for (var i = 0; i < circuit.gateSections.length; i++){
+		height = Math.max(height, circuit.gateSections[i].length);
+	}
+	height = (height*4*SC) + ((height-1)*4*SC);
+	circuit.height = height;
+
 	var isFast = (circuit.fast),
 		oneBeforeFast = false,
 		twoBeforeFast = false,
@@ -1035,7 +1058,7 @@ function findGatePositions(circuitIdx){
 	for (var i = 0; i < cols.length; i++){
 		for (var j = 0; j < cols[i].length; j++){
 			var gate = cols[i][j];
-			gate.xOffset = (4*SC) + (i*8*SC);
+			gate.xOffset = (3*SC) + (i*8*SC);
 			gate.yOffset = (cols[i].length == 3) ? (j*8*SC) :
 						   (cols[i].length == 2) ? (j*8*SC) + (4*SC) :
 						   (cols[i].length == 1) ? (8*SC) : 0;
@@ -1057,7 +1080,7 @@ function findGatePositions(circuitIdx){
 			gate.idx = [circuitIdx, i, j];
 		}
 	}
-	circuit.width = cols.length * 8 * SC;
+	circuit.width = (cols.length * 8 * SC) - SC;
 }
 
 // Finds the x and y positions of every wire in the circuit, and organises them into groups based on which gate output they originate from.
@@ -1250,15 +1273,15 @@ function findWirePositions(circuit){
 				signal = {},
 				wire = {};
 
-			signal.x = (2*SC)-6;
+			signal.x = SC-6;
 			signal.y = inputY+10;
 			signal.val = gate.inputs[j].val;
 			firstSection[0].signals.push(signal);
 
 			wire.y1 = inputY;
-			wire.x1 = (2*SC)+12;
+			wire.x1 = SC+12;
 			wire.y2 = inputY;
-			wire.x2 = 4*SC;
+			wire.x2 = 3*SC;
 			wire.live = gate.inputs[j].val;
 			firstSection[0].wires.push(wire);
 		}
@@ -1696,7 +1719,7 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 
 function drawBulb(x, y, live, ctx){
 	ctx.lineWidth = 2;
-	ctx.fillStyle = (live == 1) ? "#ffff00" : "#ffffff";
+	ctx.fillStyle = (live == 1) ? "#FFFF00" : "#F2F2F2";
 
 	ctx.beginPath();
 	ctx.moveTo(x+(1.5*SC), y+(2.9*SC));
@@ -1709,7 +1732,7 @@ function drawBulb(x, y, live, ctx){
 
 	ctx.beginPath();
 	ctx.lineWidth = 4;
-	ctx.fillStyle = "#cccccc";
+	ctx.fillStyle = "#CCCCCC";
 	ctx.rect(x+(1.4*SC)+1, y+(2.9*SC)+1, (1.2*SC)-2, (0.5*SC)-2);
 	ctx.stroke();
 	ctx.fill();
@@ -1720,7 +1743,7 @@ function drawBulb(x, y, live, ctx){
 	if (live == 1){
 		ctx.beginPath();
 		ctx.lineWidth = 4;
-		ctx.strokeStyle = "#ffff00";
+		ctx.strokeStyle = "#FFFF00";
 
 		// Right side lines
 		ctx.moveTo(x+(3.1*SC), y+(1*SC));
@@ -1805,7 +1828,7 @@ function handleMouseUp(){
 		}
 
 		// Check if all the circuits are now complete, and end the game if so.
-		if (checkAllCircuitsComplete()){
+		if (currentScreen != screens.gateIntro && checkAllCircuitsComplete()){
 			endLevel();
 		}
 	}
@@ -2085,7 +2108,7 @@ function createEndScreenButton(text, x, y){
 	}
 
 	// Create the button.
-	buttonInterval = createButton(drawEndScreenButton, [text, x, y, ctx1], checkHover, handleClick, screens.levelEnd);
+	buttonInterval = createButton(drawEndScreenButton, [text, x, y, ctx1], checkHover, handleClick, [screens.levelEnd]);
 }
 
 function clearIntervals(){
@@ -2330,7 +2353,7 @@ function displayTutorialDialogue(dlgIdx){
 		btnY = starty + boxHeight - 30;
 
 	// Create the button.
-	buttonInterval = createTextButton(btnX, btnY, dlg.btnText, 18, "left", "#2A8958", handleClick, screens.game);
+	buttonInterval = createTextButton(btnX, btnY, dlg.btnText, 18, "left", "#2A8958", handleClick, [screens.game]);
 }
 
 // Scroll a single test circuit across the screen, and show prompts for the player.
@@ -2388,6 +2411,8 @@ function handleTestCircuit(){
 
 // Displays dialogues to introduce and explain any of the 3 gate pairs.
 function introduceGates(gate){
+	currentScreen = screens.gateIntro;
+
 	// The explanations of the different gates.
 	var gateExplanations = [,
 		"The AND gate only outputs 1 if both of the inputs are 1. If any of the inputs are 0, the output is 0.",
@@ -2399,11 +2424,15 @@ function introduceGates(gate){
 		"Congrats on getting to the final level! You'll need to think fast, as the gates you are allowed to use will change as you play. This one is tough, good luck!"
 	];
 
+	// Clear the update interval. We're messing with the circuits variable later, and we don't want the game to think we've won or lost because of it.
+	clearInterval(updateInterval);
+	updateInterval = undefined;
+
 	// Calculate box size and position.
 	ctx1.font = "14pt Arial";
-	var width = (gate != 7) ? 500 : 550,
+	var width = (gate != 7) ? 380 + (18*SC) : 550,
 		textHeight = wrapText(ctx1, gateExplanations[gate], 500, 500, 0.9*width, 26, true),
-		height = (gate != 7) ? 346+textHeight : 146+textHeight,
+		height = (gate != 7) ? 210+textHeight+(18*SC) : 146+textHeight,
 		startx = Math.round((cvs1.width/2)-(width/2)),
 		starty = Math.round((cvs1.height/2)-(height/2));
 
@@ -2424,23 +2453,40 @@ function introduceGates(gate){
 	ctx1.fillText(text, (cvs1.width/2), starty+62);
 
 	if (gate != 7){
+		// Store the heights and widths of the icon, table, and examples.
+		var iconWidth = 4*SC,
+			iconHeight = 4*SC,
+			tableWidth = 160,
+			tableHeight = 146,
+			examplesWidth = 18*SC,
+			examplesHeight = 18*SC;
+
+		// Calculate the positions of the icon, table, and examples.
+		var tableX = Math.round(startx + ((width-tableWidth-examplesWidth)/3)),
+			examplesX = Math.round(tableX + tableWidth + ((width-tableWidth-examplesWidth)/3)),
+			iconX = Math.round(tableX + ((tableWidth-iconWidth)/2)),
+			examplesY = Math.round(starty + 100),
+			iconY = Math.round(examplesY + ((examplesHeight+22-iconHeight-tableHeight-40)/3)),
+			tableY = Math.round(iconY + iconHeight + 22 + ((examplesHeight+22-iconHeight-tableHeight-40)/3));
+
 		// Draw the gate icon.
-		var iconx = Math.round(startx + 100) + 0.5,
-			icony = Math.round(starty + 130) + 0.5;
 		ctx1.lineWidth = 1;
-		ctx1.clearRect(iconx, icony, 4*SC, 4*SC);
-		ctx1.strokeRect(iconx, icony, 4*SC, 4*SC);
-		drawGate(iconx, icony, gate, [{val:0}, {val:0}], 0, -1, ctx1);
+		ctx1.clearRect(iconX, iconY, 4*SC, 4*SC);
+		ctx1.strokeRect(iconX-0.5, iconY-0.5, (4*SC)+1, (4*SC)+1);
+		drawGate(iconX, iconY, gate, [{val:0}, {val:0}], 0, -1, ctx1);
 		ctx1.font = "12pt Arial";
 		ctx1.fillStyle = "#000000";
-		ctx1.fillText("Icon", iconx+(2*SC), icony+(4*SC)+22);
+		ctx1.fillText("Icon", iconX+(iconWidth/2), iconY+iconHeight+22);
 
 		// Draw the truth table
-		var tablex =  Math.round(startx + width - 260)+0.5,
-			tabley = Math.round(starty + 130 + (2*SC) - 73)+0.5;
-		drawTruthTable(tablex, tabley, gate);
+		drawTruthTable(tableX, tableY, gate);
 		ctx1.font = "12pt Arial";
-		ctx1.fillText("Truth Table", tablex+80, tabley+168);
+		ctx1.fillText("Truth Table", tableX+(tableWidth/2), tableY+tableHeight+22);
+
+		// Draw the example circuits.
+		drawExampleCircuits(gate, examplesX, examplesY);
+		ctx1.font = "12pt Arial";
+		ctx1.fillText("Examples", examplesX+(examplesWidth/2), examplesY+examplesHeight+22);
 	}
 
 	// Write the explanation of how the gate works.
@@ -2460,7 +2506,14 @@ function introduceGates(gate){
 		if (gate % 2 == 1 && !level.introduceGateChanges){
 			introduceGates(gate+1);
 		} else {
+			// We changed this levels circuits when drawing the examples, so we need to reset them.
+			chooseCircuits();
+			prepareCircuits();
+
+			// Start the game.
+			currentScreen = screens.game;
 			cvs2.onmousedown = handleMouseDown;
+			updateInterval = setInterval(updateGameArea, 200);
 			pause = false;
 			if (level.introduceGateChanges){
 				gateChangeInterval = setInterval(changeLockedGates, 20000);
@@ -2476,21 +2529,21 @@ function introduceGates(gate){
 		btnY = starty + height - 30;
 
 	// Create the button.
-	buttonInterval = createTextButton(btnX, btnY, text, 18, "left", "#2A8958", handleClick, screens.game);
+	buttonInterval = createTextButton(btnX, btnY, text, 18, "left", "#2A8958", handleClick, [screens.gateIntro]);
 }
 
 function drawTruthTable(x, y, gate){
 	// Clear a rectangle.
 	ctx1.lineWidth = 1;
 	ctx1.clearRect(x, y, 160, 146);
-	ctx1.strokeRect(x, y, 160, 146);
+	ctx1.strokeRect(x-0.5, y-0.5, 161, 147);
 
 	// Draw the separating lines.
 	ctx1.beginPath();
-	ctx1.moveTo(x, y+30);
-	ctx1.lineTo(x+160, y+30);
-	ctx1.moveTo(x+80, y);
-	ctx1.lineTo(x+80, y+146);
+	ctx1.moveTo(x, y+30.5);
+	ctx1.lineTo(x+160, y+30.5);
+	ctx1.moveTo(x+80.5, y);
+	ctx1.lineTo(x+80.5, y+146);
 	ctx1.stroke();
 	ctx1.closePath();
 
@@ -2515,6 +2568,46 @@ function drawTruthTable(x, y, gate){
 	ctx1.fillText(output2, x+120, y+81);
 	ctx1.fillText(output2, x+120, y+108);
 	ctx1.fillText(output3, x+120, y+135);
+}
+
+// Draw 3 example circuits with the given gate.
+function drawExampleCircuits(gateType, x, y){
+	// Clear the rectangle where the circuits will be drawn.
+	ctx1.clearRect(x, y, 18*SC, 18*SC);
+	ctx1.lineWidth = 1;
+	ctx1.strokeStyle = "#000000";
+	ctx1.strokeRect(x-0.5, y-0.5, (18*SC)+1, (18*SC)+1);
+
+	// We need some circuit objects to draw, so we copy them from the difficulty 1 pool.
+	circuits = [
+		JSON.parse(JSON.stringify(circuitPools[0].all[0])),
+		JSON.parse(JSON.stringify(circuitPools[0].all[3])),
+		JSON.parse(JSON.stringify(circuitPools[0].all[4])),
+	]
+
+	// Do all the calculations on how to draw these circuits.
+	prepareCircuits();
+
+	// Move the circuits into the correct position.
+	circuits[0].startx = x+SC;
+	circuits[0].starty = y-(7*SC);
+	circuits[1].startx = x+SC;
+	circuits[1].starty = y-SC;
+	circuits[2].startx = x+SC;
+	circuits[2].starty = y+(5*SC);
+
+	// Put the correct gates into the circuits and update them.
+	for (var i = 0; i < 3; i++){
+		var gate = circuits[i].gateSections[0][0];
+		gate.type = gateType;
+		gate.fixed = true;
+		updateCircuitValues(gate.idx);
+	}
+
+	// Draw the circuits.
+	drawCircuit(circuits[0], ctx1);
+	drawCircuit(circuits[1], ctx1);
+	drawCircuit(circuits[2], ctx1);
 }
 // This contains all of the potential circuits that can appear in the game. They are grouped by difficulty, then subdivided further based on which gates they contain. Each level specifies which pool of circuits to pick from for each difficulty.
 var circuitPools = [

@@ -13,9 +13,10 @@ var frameNo = 0;
 var pause = false;
 var scrollSpeed;
 var level, levelIdx;
-var currentScreen, screens = Object.freeze({"menu":0, "game":1, "levelEnd":2});
+var currentScreen, screens = Object.freeze({"menu":0, "game":1, "gateIntro":2, "levelEnd":3});
 
 function startGame(){
+	//unlockLevels();
 	createCanvases();
 	document.body.onresize = handleResize;
 	loadFontAwesome(drawMenu, 200);
@@ -34,19 +35,24 @@ function startLevel(lvlIdx) {
 	cvs2.onmouseup = handleMouseUp;
 	cvs2.onmousemove = handleMouseMove;
 
+	// Initialise some variables.
 	levelIdx = lvlIdx;
 	level = levels[levelIdx];
 	circuits = level.circuits;
 	enableGateChanges = level.enableGateChanges;
 	allowedGates = level.allowedGates;
 
+	// Draw the menu bar and a rectangle around the game area.
 	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
 	drawMenuBar();
-	prepareCircuits();
 	ctx1.lineWidth = 2;
 	ctx1.strokeStyle = "#000000";
 	ctx1.strokeRect(1, (SC*6), cvs1.width-2, cvs1.height-(SC*6)-1);
+
+	// Prepare the circuits and start the draw and update and gatechange intervals.
 	pause = false;
+	chooseCircuits();
+	prepareCircuits();
 	drawInterval = setInterval(drawGameArea, 1000/60, ctx1);
 	updateInterval = setInterval(updateGameArea, 200);
 	if (enableGateChanges && !level.introduceGateChanges){
@@ -54,16 +60,13 @@ function startLevel(lvlIdx) {
 	}
 
 	// Assign hotkeys.
-	document.onkeypress = function (e) {
-		// e = e || window.event;
-		// // Find which key was pressed. Use either which or keyCode, depending on browser support.
-		// var key = event.which || event.keyCode;
-		if (e.key == " "){
-			// If key was space, pause the game - comment as appropriate.
+	document.onkeypress = function(event) {
+		// If space was pressed, pause the game - comment as appropriate.
+		if (event.key == " "){
 			// pause = !pause;
 		} else {
 			// If the key was a number, find which gate that number corresponds to.
-			var gate = parseInt(e.key);
+			var gate = parseInt(event.key);
 			if (gate > 0 && gate < 7){
 				if (allowedGates.indexOf(gate) != -1){
 					// If that gate is allowed to be used, set it as the dragged gate and start the necessary intervals.
@@ -175,7 +178,7 @@ function handleResize(){
 		// Calculate the scale to use for the UI based on the window size.
 		SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
 		SC = Math.min(SC, 22);
-		scrollSpeed = cvs1.width / 880;
+		scrollSpeed = Math.round(100*(cvs1.width/860))/100;
 
 		// Redraw menu.
 		drawMenu()
@@ -183,7 +186,7 @@ function handleResize(){
 }
 
 // A generic function for creating a button. Takes two functions, one to draw the button, and one to call when the button is clicked.
-function createButton(drawButton, drawArgs, checkHover, handleClick, intendedScreen){
+function createButton(drawButton, drawArgs, checkHover, handleClick, intendedScreens){
 	// Draw the button.
 	drawButton(drawArgs);
 
@@ -194,7 +197,7 @@ function createButton(drawButton, drawArgs, checkHover, handleClick, intendedScr
 		oldMouseDown;
 	function updateButton(){
 		// If we return to the main menu, stop updating this button.
-		if (currentScreen != intendedScreen){
+		if (intendedScreens.indexOf(currentScreen) == -1){
 			clearInterval(buttonInterval);
 		}
 
@@ -220,7 +223,7 @@ function createButton(drawButton, drawArgs, checkHover, handleClick, intendedScr
 }
 
 // An extension of the createButton function, specifically for buttons that are plain text.
-function createTextButton(btnX, btnY, text, fontSize, align, backgroundColor, handleClick, intendedScreen){
+function createTextButton(btnX, btnY, text, fontSize, align, backgroundColor, handleClick, intendedScreens){
 	// Measures the height and width the text will be, and where the x position is based on the alignment chosen.
 	ctx1.save();
 	ctx1.font = fontSize + "pt Impact";
@@ -248,5 +251,12 @@ function createTextButton(btnX, btnY, text, fontSize, align, backgroundColor, ha
 		return (mousex > btnX && mousex < btnX+width && mousey > btnY && mousey < btnY+height);
 	}
 
-	return createButton(drawButton, undefined, checkHover, handleClick, intendedScreen);
+	return createButton(drawButton, undefined, checkHover, handleClick, intendedScreens);
+}
+
+// Function for use with development and testing to unlock all the levels.
+function unlockLevels(){
+	for (var i = 0; i < levels.length; i++){
+		levels[i].unlocked = true;
+	}
 }

@@ -58,7 +58,7 @@ function handleMouseUp(){
 		}
 
 		// Check if all the circuits are now complete, and end the game if so.
-		if (checkAllCircuitsComplete()){
+		if (currentScreen != screens.gateIntro && checkAllCircuitsComplete()){
 			endLevel();
 		}
 	}

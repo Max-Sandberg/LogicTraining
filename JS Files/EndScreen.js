@@ -267,7 +267,7 @@ function createEndScreenButton(text, x, y){
 	}
 
 	// Create the button.
-	buttonInterval = createButton(drawEndScreenButton, [text, x, y, ctx1], checkHover, handleClick, screens.levelEnd);
+	buttonInterval = createButton(drawEndScreenButton, [text, x, y, ctx1], checkHover, handleClick, [screens.levelEnd]);
 }
 
 function clearIntervals(){

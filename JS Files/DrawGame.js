@@ -33,7 +33,7 @@ function drawMenuBar(){
 
 	// Creates the menu button.
 	clearInterval(menuHoverInterval);
-	menuHoverInterval = createTextButton(0.5*SC, 0.5*SC, "MENU", SC+2, "left", "#2A8958", handleMenuButtonClick, screens.game);
+	menuHoverInterval = createTextButton(0.5*SC, 0.5*SC, "MENU", SC+2, "left", "#2A8958", handleMenuButtonClick, [screens.gateIntro, screens.game]);
 }
 
 function createGateButton(x, y, gate){
@@ -119,7 +119,7 @@ function createGateButton(x, y, gate){
 		}
 	}
 
-	gateButtonIntervals.push(createButton(drawGateButton, [x, y, gate], checkHover, handleClick, screens.game));
+	gateButtonIntervals.push(createButton(drawGateButton, [x, y, gate], checkHover, handleClick, [screens.game, screens.gateIntro]));
 }
 
 // Draws and moves all the circuits.
@@ -141,14 +141,14 @@ function drawGameArea(ctx){
 		drawCircuit(circuits[i], ctx);
 	}
 
-	// Draw box around game area.
-	ctx1.lineWidth = 1;
+	// Draw lines over the left and right edges of the game area.
+	ctx1.lineWidth = 2;
 	ctx1.strokeStyle = "#000000";
 	ctx1.beginPath();
 	ctx1.moveTo(1, (SC*6)+1);
 	ctx1.lineTo(1, cvs1.height-1);
 	ctx1.moveTo(cvs1.width-1, (SC*6)+1);
-	ctx1.lineTo(cvs1.width-1, cvs1.height-1);
+	ctx1.lineTo(cvs1.width-1, cvs1.height);
 	ctx1.stroke();
 	ctx1.closePath();
 }
@@ -198,9 +198,16 @@ function clearGameArea(){
 	for (var i = 0; i < circuits.length; i++){
 		var startx = Math.max(circuits[i].startx, 1),
 			endx = Math.min(circuits[i].endx, cvs1.width-1),
-			starty = circuits[i].starty;
+			starty = circuits[i].starty,
+			width = circuits[i].width,
+			height = circuits[i].height;
 		if (startx < cvs1.width && endx > 1){
-			ctx1.clearRect(startx, starty+(3*SC), endx-startx, (16*SC));
+			ctx1.clearRect(
+				startx,
+				starty+(10*SC)-(height/2)-2,
+				Math.min(width+2, cvs1.width-1-startx),
+				height+4
+			);
 		}
 	}
 }

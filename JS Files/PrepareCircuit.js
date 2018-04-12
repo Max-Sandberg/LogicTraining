@@ -1,7 +1,5 @@
 // Prepares a circuit for drawing, by finding the positions of it's gates and wires.
 function prepareCircuits(){
-	chooseCircuits();
-
 	for (var i = 0; i < circuits.length; i++){
 		findGatePositions(i);
 	}
@@ -59,6 +57,14 @@ function findCircuitPosition(idx){
 					 circuits[idx-1].endx + horzGap;
 	circuit.endx = circuit.startx + circuit.width;
 
+	// Calculate the circuit height.
+	var height = 0;
+	for (var i = 0; i < circuit.gateSections.length; i++){
+		height = Math.max(height, circuit.gateSections[i].length);
+	}
+	height = (height*4*SC) + ((height-1)*4*SC);
+	circuit.height = height;
+
 	var isFast = (circuit.fast),
 		oneBeforeFast = false,
 		twoBeforeFast = false,
@@ -108,7 +114,7 @@ function findGatePositions(circuitIdx){
 	for (var i = 0; i < cols.length; i++){
 		for (var j = 0; j < cols[i].length; j++){
 			var gate = cols[i][j];
-			gate.xOffset = (4*SC) + (i*8*SC);
+			gate.xOffset = (3*SC) + (i*8*SC);
 			gate.yOffset = (cols[i].length == 3) ? (j*8*SC) :
 						   (cols[i].length == 2) ? (j*8*SC) + (4*SC) :
 						   (cols[i].length == 1) ? (8*SC) : 0;
@@ -130,7 +136,7 @@ function findGatePositions(circuitIdx){
 			gate.idx = [circuitIdx, i, j];
 		}
 	}
-	circuit.width = cols.length * 8 * SC;
+	circuit.width = (cols.length * 8 * SC) - SC;
 }
 
 // Finds the x and y positions of every wire in the circuit, and organises them into groups based on which gate output they originate from.
@@ -323,15 +329,15 @@ function findWirePositions(circuit){
 				signal = {},
 				wire = {};
 
-			signal.x = (2*SC)-6;
+			signal.x = SC-6;
 			signal.y = inputY+10;
 			signal.val = gate.inputs[j].val;
 			firstSection[0].signals.push(signal);
 
 			wire.y1 = inputY;
-			wire.x1 = (2*SC)+12;
+			wire.x1 = SC+12;
 			wire.y2 = inputY;
-			wire.x2 = 4*SC;
+			wire.x2 = 3*SC;
 			wire.live = gate.inputs[j].val;
 			firstSection[0].wires.push(wire);
 		}
