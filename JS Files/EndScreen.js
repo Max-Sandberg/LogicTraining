@@ -3,7 +3,6 @@ var won;
 // Checks if the player won or lost, and how many stars they earned, then displays the relevant end dialogue.
 function endLevel(){
 	// Redraw the game, just to make sure the last circuit has been updated, then clear all intervals.
-	currentScreen = screens.levelEnd;
 	drawGameArea(ctx1);
 	clearIntervals();
 
@@ -23,6 +22,7 @@ function endLevel(){
 		handleTestCircuit();
 	} else {
 		// Calculate how many stars the player earned.
+		currentScreen = screens.levelEnd;
 		var starsEarned = (level.tutorial) ? 0 :
 						  (circuitsSolved == circuits.length) ? 3 :
 						  (circuitsSolved >= circuits.length - 2) ? 2 :
@@ -128,7 +128,7 @@ function drawEndMessage(x, y, circuitsSolved, starsEarned, ctx){
 	// Draw the box.
 	ctx.save();
 	ctx.lineWidth = 2;
-	ctx.fillStyle = "#184e32";
+	ctx.fillStyle = "#184E32";
 	ctx.beginPath();
 	ctx.rect(Math.round(x), Math.round(y), width, height);
 	ctx.fill();

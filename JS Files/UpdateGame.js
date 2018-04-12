@@ -76,7 +76,7 @@ function changeLockedGates(){
 		frame++;
 		if (won == undefined){
 			// Fill over whatever is already there.
-			ctx1.fillStyle = "#2a8958";
+			ctx1.fillStyle = "#2A8958";
 			ctx1.fillRect(xOffset-(4*SC), yOffset, (8*SC), (4*SC));
 
 			if (frame != 150){
@@ -107,7 +107,7 @@ function changeLockedGates(){
 		frame++;
 		if (won == undefined){
 			// Fill over whatever is already there.
-			ctx1.fillStyle = "#2a8958";
+			ctx1.fillStyle = "#2A8958";
 			ctx1.fillRect(xOffset-(10*SC), yOffset, (20*SC), (4*SC));
 
 			if (frame != 75){

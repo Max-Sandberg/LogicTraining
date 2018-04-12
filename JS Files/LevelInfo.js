@@ -3656,7 +3656,7 @@ var levels = [
 
 	//#region Level 1 - AND/NAND, Easy
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [1, 2],
 		newGates : true,
@@ -3671,7 +3671,7 @@ var levels = [
 
 	//#region Level 2 - AND/NAND, Medium
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [1, 2],
 		circuitDifficulties : [2, 2, 2, 3, 2, 3, 2, 3, 2, 4],
@@ -3685,7 +3685,7 @@ var levels = [
 
 	//#region Level 3 - OR/NOR, Easy
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [3,4],
 		newGates : true,
@@ -3700,7 +3700,7 @@ var levels = [
 
 	//#region Level 4 - OR/NOR, Medium
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [3,4],
 		circuitDifficulties : [2, 2, 2, 3, 2, 3, 2, 3, 2, 4],
@@ -3714,7 +3714,7 @@ var levels = [
 
 	//#region Level 5 - XOR/XNOR, Easy
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [5,6],
 		newGates : true,
@@ -3729,7 +3729,7 @@ var levels = [
 
 	//#region Level 6 - XOR/XNOR, Medium
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [5,6],
 		circuitDifficulties : [2, 2, 2, 3, 2, 3, 2, 3, 2, 4],
@@ -3743,7 +3743,7 @@ var levels = [
 
 	//#region Level 7 - AND/NAND, Hard
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [1,2],
 		circuitDifficulties : [3, 3, 3, 4, 2, 3, 3, 4, 2, 5],
@@ -3758,7 +3758,7 @@ var levels = [
 
 	//#region Level 8 - OR/NOR, Hard
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [3,4],
 		circuitDifficulties : [3, 3, 3, 4, 2, 3, 3, 4, 2, 5],
@@ -3773,7 +3773,7 @@ var levels = [
 
 	//#region Level 9 - XOR/XNOR, Hard
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [5,6],
 		circuitDifficulties : [3, 3, 3, 4, 2, 3, 3, 4, 2, 5],
@@ -3788,7 +3788,7 @@ var levels = [
 
 	//#region Level 10 - Gate changes, Hard
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [1,2,3,4,5,6],
 		introduceGateChanges : true,

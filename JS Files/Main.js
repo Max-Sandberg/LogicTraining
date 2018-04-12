@@ -60,7 +60,7 @@ function startLevel(lvlIdx) {
 		// var key = event.which || event.keyCode;
 		if (e.key == " "){
 			// If key was space, pause the game - comment as appropriate.
-			pause = !pause;
+			// pause = !pause;
 		} else {
 			// If the key was a number, find which gate that number corresponds to.
 			var gate = parseInt(e.key);
@@ -175,7 +175,7 @@ function handleResize(){
 		// Calculate the scale to use for the UI based on the window size.
 		SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
 		SC = Math.min(SC, 22);
-		scrollSpeed = cvs1.width / 1000;
+		scrollSpeed = cvs1.width / 880;
 
 		// Redraw menu.
 		drawMenu()

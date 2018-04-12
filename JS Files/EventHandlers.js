@@ -51,11 +51,9 @@ function handleMouseUp(){
 
 		// If there is a gate at this position, update it with the selected gate.
 		if (gate != null){
-			moves++;
 			gate.type = chosenGate;
 			gate.invis = false;
 			gate.fixed = true;
-			drawMoves();
 			updateCircuitValues(gate.idx);
 		}
 

@@ -118,7 +118,7 @@ function drawLevelButton(args, highlight){
 			// If the level is locked, draw a transparent grey box over it.
 			ctx1.save();
 			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-			ctx1.fillRect(x+1, y+1, (6*SC)-1, (6*SC)-1);
+			ctx1.fillRect(x, y, 6*SC, 6*SC);
 
 			// Draw lock icon.
 			ctx1.textAlign = "left";
@@ -155,31 +155,6 @@ function createLevelButton(x, y, levelIdx){
 
 	var buttonInterval = createButton(drawLevelButton, [x, y, levelIdx], checkHover, handleClick, screens.menu);
 	levelButtonIntervals.push(buttonInterval);
-
-	// // Function to check if the button is in the correct state, to be called on an interval.
-	// var highlight = false,
-	// 	updateButtonInterval, mouseHover;
-	// function updateLevelButton(){
-	// 	mouseHover = checkMouseHover();
-	// 	if (!highlight && mouseHover){
-	// 		// If the mouse is over the button and it isn't highlighted, highlight it.
-	// 		highlight = true;
-	// 		drawLevelButton(x, y, levelIdx, true);
-	// 		cvs2.onmousedown = handleLevelClick;
-	// 	}
-	// 	else if (highlight && !mouseHover){
-	// 		// If the mouse isn't over the button and it's still highlighted, unhighlight it.
-	// 		highlight = false;
-	// 		drawLevelButton(x, y, levelIdx, false);
-	// 		cvs2.onmousedown = undefined;
-	// 	}
-	// }
-	//
-	// // If the level is unlocked, start the updateLevelButton function on an interval.
-	// if (levels[levelIdx].unlocked){
-	// 	updateButtonInterval = setInterval(updateLevelButton, 1000/60);
-	// 	levelButtonIntervals.push(updateButtonInterval);
-	// }
 }
 
 // Clears the intervals controlling all the level buttons in the main menu.

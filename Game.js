@@ -60,7 +60,7 @@ function startLevel(lvlIdx) {
 		// var key = event.which || event.keyCode;
 		if (e.key == " "){
 			// If key was space, pause the game - comment as appropriate.
-			pause = !pause;
+			// pause = !pause;
 		} else {
 			// If the key was a number, find which gate that number corresponds to.
 			var gate = parseInt(e.key);
@@ -175,7 +175,7 @@ function handleResize(){
 		// Calculate the scale to use for the UI based on the window size.
 		SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
 		SC = Math.min(SC, 22);
-		scrollSpeed = cvs1.width / 1000;
+		scrollSpeed = cvs1.width / 880;
 
 		// Redraw menu.
 		drawMenu()
@@ -370,7 +370,7 @@ function drawLevelButton(args, highlight){
 			// If the level is locked, draw a transparent grey box over it.
 			ctx1.save();
 			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
-			ctx1.fillRect(x+1, y+1, (6*SC)-1, (6*SC)-1);
+			ctx1.fillRect(x, y, 6*SC, 6*SC);
 
 			// Draw lock icon.
 			ctx1.textAlign = "left";
@@ -407,31 +407,6 @@ function createLevelButton(x, y, levelIdx){
 
 	var buttonInterval = createButton(drawLevelButton, [x, y, levelIdx], checkHover, handleClick, screens.menu);
 	levelButtonIntervals.push(buttonInterval);
-
-	// // Function to check if the button is in the correct state, to be called on an interval.
-	// var highlight = false,
-	// 	updateButtonInterval, mouseHover;
-	// function updateLevelButton(){
-	// 	mouseHover = checkMouseHover();
-	// 	if (!highlight && mouseHover){
-	// 		// If the mouse is over the button and it isn't highlighted, highlight it.
-	// 		highlight = true;
-	// 		drawLevelButton(x, y, levelIdx, true);
-	// 		cvs2.onmousedown = handleLevelClick;
-	// 	}
-	// 	else if (highlight && !mouseHover){
-	// 		// If the mouse isn't over the button and it's still highlighted, unhighlight it.
-	// 		highlight = false;
-	// 		drawLevelButton(x, y, levelIdx, false);
-	// 		cvs2.onmousedown = undefined;
-	// 	}
-	// }
-	//
-	// // If the level is unlocked, start the updateLevelButton function on an interval.
-	// if (levels[levelIdx].unlocked){
-	// 	updateButtonInterval = setInterval(updateLevelButton, 1000/60);
-	// 	levelButtonIntervals.push(updateButtonInterval);
-	// }
 }
 
 // Clears the intervals controlling all the level buttons in the main menu.
@@ -518,7 +493,7 @@ function changeLockedGates(){
 		frame++;
 		if (won == undefined){
 			// Fill over whatever is already there.
-			ctx1.fillStyle = "#2a8958";
+			ctx1.fillStyle = "#2A8958";
 			ctx1.fillRect(xOffset-(4*SC), yOffset, (8*SC), (4*SC));
 
 			if (frame != 150){
@@ -549,7 +524,7 @@ function changeLockedGates(){
 		frame++;
 		if (won == undefined){
 			// Fill over whatever is already there.
-			ctx1.fillStyle = "#2a8958";
+			ctx1.fillStyle = "#2A8958";
 			ctx1.fillRect(xOffset-(10*SC), yOffset, (20*SC), (4*SC));
 
 			if (frame != 75){
@@ -624,20 +599,11 @@ function createGateButton(x, y, gate){
 		ctx1.fillStyle="#2A8958";
 		ctx1.fillRect(x-2, y-2, (4*SC)+4, (4*SC)+4);
 
-		// Draw the box, with a thicker border and lighter colour if selected.
 		ctx1.strokeStyle = "#000000";
-		if (highlight && unlocked){
-			ctx1.fillStyle = "#E0F5EB";
-			ctx1.lineWidth = 3;
-			ctx1.fillRect(x-0.5, y-0.5, (4*SC)+1, (4*SC)+1);
-			ctx1.strokeRect(x-0.5, y-0.5, (4*SC)+1, (4*SC)+1);
-		} else {
-			ctx1.fillStyle = "#CDE7DA";
-			ctx1.lineWidth = 2;
-			ctx1.fillRect(x, y, 4*SC, 4*SC);
-			ctx1.strokeRect(x, y, 4*SC, 4*SC);
-		}
-
+		ctx1.fillStyle = (highlight && unlocked) ? "#effaf5" : "#D8F3E6";
+		ctx1.lineWidth = 2;
+		ctx1.fillRect(x, y, 4*SC, 4*SC);
+		ctx1.strokeRect(x, y, 4*SC, 4*SC);
 
 		// Draw the gate.
 		switch (gate){
@@ -713,9 +679,9 @@ function drawGameArea(ctx){
 		if (!pause){
 			// Normal circuits move 1 pixel, star circuits move two pixels.
 			if (circuits[i].fast && circuits[i].startx < cvs1.width){
-				circuits[i].startx -= 20* 1.5 * scrollSpeed;
+				circuits[i].startx -= 1.5 * scrollSpeed;
 			} else {
-				circuits[i].startx -= 20* scrollSpeed;
+				circuits[i].startx -= scrollSpeed;
 			}
 		}
 		drawCircuit(circuits[i], ctx);
@@ -1832,11 +1798,9 @@ function handleMouseUp(){
 
 		// If there is a gate at this position, update it with the selected gate.
 		if (gate != null){
-			moves++;
 			gate.type = chosenGate;
 			gate.invis = false;
 			gate.fixed = true;
-			drawMoves();
 			updateCircuitValues(gate.idx);
 		}
 
@@ -1857,7 +1821,6 @@ var won;
 // Checks if the player won or lost, and how many stars they earned, then displays the relevant end dialogue.
 function endLevel(){
 	// Redraw the game, just to make sure the last circuit has been updated, then clear all intervals.
-	currentScreen = screens.levelEnd;
 	drawGameArea(ctx1);
 	clearIntervals();
 
@@ -1877,6 +1840,7 @@ function endLevel(){
 		handleTestCircuit();
 	} else {
 		// Calculate how many stars the player earned.
+		currentScreen = screens.levelEnd;
 		var starsEarned = (level.tutorial) ? 0 :
 						  (circuitsSolved == circuits.length) ? 3 :
 						  (circuitsSolved >= circuits.length - 2) ? 2 :
@@ -1982,7 +1946,7 @@ function drawEndMessage(x, y, circuitsSolved, starsEarned, ctx){
 	// Draw the box.
 	ctx.save();
 	ctx.lineWidth = 2;
-	ctx.fillStyle = "#184e32";
+	ctx.fillStyle = "#184E32";
 	ctx.beginPath();
 	ctx.rect(Math.round(x), Math.round(y), width, height);
 	ctx.fill();
@@ -2319,10 +2283,10 @@ function displayTutorialDialogue(dlgIdx){
 	ctx1.fillStyle = "#000000";
 	ctx1.textAlign = "left";
 	if (dlg.text == undefined){
-		wrapText(ctx1, dlg.topText, startx+(0.03*boxWidth), starty+39, 0.95*boxWidth, 24);
-		wrapText(ctx1, dlg.botText, startx+(0.03*boxWidth), starty+30+topTextHeight+35+dlg.getDiagramHeight()+25+24, 0.95*boxWidth, 24);
+		wrapText(ctx1, dlg.topText, startx+(0.04*boxWidth), starty+39, 0.95*boxWidth, 24);
+		wrapText(ctx1, dlg.botText, startx+(0.04*boxWidth), starty+30+topTextHeight+35+dlg.getDiagramHeight()+25+24, 0.95*boxWidth, 24);
 	} else {
-		wrapText(ctx1, dlg.text, startx+(0.03*boxWidth), starty+39, 0.95*boxWidth, 24);
+		wrapText(ctx1, dlg.text, startx+(0.04*boxWidth), starty+39, 0.95*boxWidth, 24);
 	}
 
 	// Draw the diagram if there is one.
@@ -6210,7 +6174,7 @@ var levels = [
 
 	//#region Level 1 - AND/NAND, Easy
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [1, 2],
 		newGates : true,
@@ -6225,7 +6189,7 @@ var levels = [
 
 	//#region Level 2 - AND/NAND, Medium
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [1, 2],
 		circuitDifficulties : [2, 2, 2, 3, 2, 3, 2, 3, 2, 4],
@@ -6239,7 +6203,7 @@ var levels = [
 
 	//#region Level 3 - OR/NOR, Easy
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [3,4],
 		newGates : true,
@@ -6254,7 +6218,7 @@ var levels = [
 
 	//#region Level 4 - OR/NOR, Medium
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [3,4],
 		circuitDifficulties : [2, 2, 2, 3, 2, 3, 2, 3, 2, 4],
@@ -6268,7 +6232,7 @@ var levels = [
 
 	//#region Level 5 - XOR/XNOR, Easy
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [5,6],
 		newGates : true,
@@ -6283,7 +6247,7 @@ var levels = [
 
 	//#region Level 6 - XOR/XNOR, Medium
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [5,6],
 		circuitDifficulties : [2, 2, 2, 3, 2, 3, 2, 3, 2, 4],
@@ -6297,7 +6261,7 @@ var levels = [
 
 	//#region Level 7 - AND/NAND, Hard
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [1,2],
 		circuitDifficulties : [3, 3, 3, 4, 2, 3, 3, 4, 2, 5],
@@ -6312,7 +6276,7 @@ var levels = [
 
 	//#region Level 8 - OR/NOR, Hard
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [3,4],
 		circuitDifficulties : [3, 3, 3, 4, 2, 3, 3, 4, 2, 5],
@@ -6327,7 +6291,7 @@ var levels = [
 
 	//#region Level 9 - XOR/XNOR, Hard
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [5,6],
 		circuitDifficulties : [3, 3, 3, 4, 2, 3, 3, 4, 2, 5],
@@ -6342,7 +6306,7 @@ var levels = [
 
 	//#region Level 10 - Gate changes, Hard
 	{
-		unlocked : true, //change me!
+		unlocked : false,
 		starsEarned : 0,
 		allowedGates : [1,2,3,4,5,6],
 		introduceGateChanges : true,

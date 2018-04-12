@@ -160,10 +160,10 @@ function displayTutorialDialogue(dlgIdx){
 	ctx1.fillStyle = "#000000";
 	ctx1.textAlign = "left";
 	if (dlg.text == undefined){
-		wrapText(ctx1, dlg.topText, startx+(0.03*boxWidth), starty+39, 0.95*boxWidth, 24);
-		wrapText(ctx1, dlg.botText, startx+(0.03*boxWidth), starty+30+topTextHeight+35+dlg.getDiagramHeight()+25+24, 0.95*boxWidth, 24);
+		wrapText(ctx1, dlg.topText, startx+(0.04*boxWidth), starty+39, 0.95*boxWidth, 24);
+		wrapText(ctx1, dlg.botText, startx+(0.04*boxWidth), starty+30+topTextHeight+35+dlg.getDiagramHeight()+25+24, 0.95*boxWidth, 24);
 	} else {
-		wrapText(ctx1, dlg.text, startx+(0.03*boxWidth), starty+39, 0.95*boxWidth, 24);
+		wrapText(ctx1, dlg.text, startx+(0.04*boxWidth), starty+39, 0.95*boxWidth, 24);
 	}
 
 	// Draw the diagram if there is one.

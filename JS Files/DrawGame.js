@@ -53,20 +53,11 @@ function createGateButton(x, y, gate){
 		ctx1.fillStyle="#2A8958";
 		ctx1.fillRect(x-2, y-2, (4*SC)+4, (4*SC)+4);
 
-		// Draw the box, with a thicker border and lighter colour if selected.
 		ctx1.strokeStyle = "#000000";
-		if (highlight && unlocked){
-			ctx1.fillStyle = "#E0F5EB";
-			ctx1.lineWidth = 3;
-			ctx1.fillRect(x-0.5, y-0.5, (4*SC)+1, (4*SC)+1);
-			ctx1.strokeRect(x-0.5, y-0.5, (4*SC)+1, (4*SC)+1);
-		} else {
-			ctx1.fillStyle = "#CDE7DA";
-			ctx1.lineWidth = 2;
-			ctx1.fillRect(x, y, 4*SC, 4*SC);
-			ctx1.strokeRect(x, y, 4*SC, 4*SC);
-		}
-
+		ctx1.fillStyle = (highlight && unlocked) ? "#effaf5" : "#D8F3E6";
+		ctx1.lineWidth = 2;
+		ctx1.fillRect(x, y, 4*SC, 4*SC);
+		ctx1.strokeRect(x, y, 4*SC, 4*SC);
 
 		// Draw the gate.
 		switch (gate){
@@ -142,9 +133,9 @@ function drawGameArea(ctx){
 		if (!pause){
 			// Normal circuits move 1 pixel, star circuits move two pixels.
 			if (circuits[i].fast && circuits[i].startx < cvs1.width){
-				circuits[i].startx -= 20* 1.5 * scrollSpeed;
+				circuits[i].startx -= 1.5 * scrollSpeed;
 			} else {
-				circuits[i].startx -= 20* scrollSpeed;
+				circuits[i].startx -= scrollSpeed;
 			}
 		}
 		drawCircuit(circuits[i], ctx);
