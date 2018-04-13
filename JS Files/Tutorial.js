@@ -35,8 +35,8 @@ var currentTutDialogue,
 	},
 	{
 		idx : 2,
-		topText : "Circuits have lightbulbs at the end of them. To turn the lightbulb on, the wire leading into it must be a 1.",
-		botText : "In each level, circuits will slide across the screen to the left. If a circuit slides off the screen and hasn't been solved yet, that counts as getting it wrong, so you'll have to think fast! Lets give it a go.",
+		topText : "Circuits have lightbulbs at the end of them. To turn the lightbulb on and solve the circuit, the wire leading into it must be a 1.",
+		botText : "In each level, circuits will slide across the screen from the right. You have to solve as many as you can! Lets give it a go.",
 		drawDiagram : function(x, y){
 			drawSignal(x, y+SC+9, 0, ctx1);
 			drawSignal(x, y+(3*SC)+9, 1, ctx1);
@@ -63,18 +63,18 @@ var currentTutDialogue,
 	},
 	{
 		idx : 5,
-		topText : "Circuits will often already have fixed gates in them, like this one. In the circuit below, the output of the first gate is the input for the fixed gate.",
-		botText : "To solve these circuits, you'll have to consider what inputs the fixed gate needs in order to get the output you want.",
+		topText : "Circuits will often have more than one gate in them, and some that are already fixed. In the circuit below, the output of the first gate is the input for the second gate, which is fixed.",
+		botText : "To solve these circuits, think about what output you want the fixed gate to have, and which inputs the fixed gate needs in order to get that output.",
 		drawDiagram : function(x, y){
 			drawSignal(x, y+SC+9, 0, ctx1);
 			drawWire(x+16, y+SC, x+(2*SC), y+SC, 0, ctx1);
 			drawSignal(x, y+(3*SC)+9, 1, ctx1);
 			drawWire(x+16, y+(3*SC), x+(2*SC), y+(3*SC), 1, ctx1);
 			drawDottedBox(x+(2*SC), y, ctx1);
-			drawWire(x+(6*SC), y+(2*SC), x+(7.2*SC), y+(2*SC), -1, ctx1);
-			drawWire(x+(7.2*SC), y+(2*SC), x+(7.2*SC), y+(1*SC), -1, ctx1);
-			drawWire(x+(7.2*SC), y+(1*SC), x+(10*SC), y+(1*SC), -1, ctx1);
-			drawSignal(x+(8*SC), y+(3*SC)+9, 1, ctx1);
+			drawWire(x+(6*SC), y+(2*SC), x+(8*SC), y+(2*SC), -1, ctx1);
+			drawWire(x+(8*SC), y+(2*SC), x+(8*SC), y+(1*SC), -1, ctx1);
+			drawWire(x+(8*SC), y+(1*SC), x+(10*SC), y+(1*SC), -1, ctx1);
+			drawSignal(x+(8*SC)-2, y+(3*SC)+9, 1, ctx1);
 			drawWire(x+(8*SC)+12, y+(3*SC), x+(10*SC), y+(3*SC), 1, ctx1);
 			drawFixedBox(x+(10*SC), y, ctx1);
 			drawAND(x+(10*SC), y, -1, 1, -1, ctx1);

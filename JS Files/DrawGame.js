@@ -89,7 +89,7 @@ function createGateButton(x, y, gate){
 
 		if (!unlocked){
 			// Draw transparent grey box.
-			ctx1.fillStyle = "rgba(0, 0, 0, 0.6)";
+			ctx1.fillStyle = "rgba(0, 0, 0, 0.7)";
 			ctx1.fillRect(x, y, 4*SC, 4*SC);
 
 			// Draw lock icon.
