@@ -98,6 +98,11 @@ function showEndScreen(circuitsSolved, starsEarned){
 		starY = (cvs1.height/2) + (height/2) - 102,
 		size;
 	function animateStars(){
+		// If the user clicks one of the buttons before the animation finishes, clear the interval.
+		if (currentScreen != game.endScreen){
+			clearInterval(id);
+		}
+
 		frame++;
 		ctx1.save();
 		if (frame == 25 || frame == 50 || frame == 75){

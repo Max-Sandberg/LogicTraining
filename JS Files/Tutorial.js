@@ -36,7 +36,7 @@ var currentTutDialogue,
 	{
 		idx : 2,
 		topText : "Circuits have lightbulbs at the end of them. To turn the lightbulb on and solve the circuit, the wire leading into it must be a 1.",
-		botText : "In each level, circuits will slide across the screen from the right. You have to solve as many as you can! Lets give it a go.",
+		botText : "In each level, circuits will slide across the screen from the right. You have to solve 6 to pass, 8 for two stars, and 10 for all three stars! Lets give it a go.",
 		drawDiagram : function(x, y){
 			drawSignal(x, y+SC+9, 0, ctx1);
 			drawSignal(x, y+(3*SC)+9, 1, ctx1);

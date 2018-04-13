@@ -14,9 +14,10 @@ var pause = false;
 var scrollSpeed;
 var level, levelIdx;
 var currentScreen, screens = Object.freeze({"menu":0, "game":1, "gateIntro":2, "levelEnd":3});
+var devMode;
 
 function startGame(){
-	//unlockLevels();
+	//enterDevMode();
 	createCanvases();
 	document.body.onresize = handleResize;
 	loadFontAwesome(drawMenu, 200);
@@ -61,21 +62,29 @@ function startLevel(lvlIdx) {
 
 	// Assign hotkeys.
 	document.onkeypress = function(event) {
-		// If space was pressed, pause the game - comment as appropriate.
-		if (event.key == " "){
-			// pause = !pause;
-		} else {
-			// If the key was a number, find which gate that number corresponds to.
-			var gate = parseInt(event.key);
-			if (gate > 0 && gate < 7){
-				if (allowedGates.indexOf(gate) != -1){
-					// If that gate is allowed to be used, set it as the dragged gate and start the necessary intervals.
-					draggedGate = gate;
-					if (drawDraggedInterval == undefined && updateSelectedInterval == undefined){
-						drawDraggedInterval = setInterval(drawDraggedGate, 1000/60);
-						updateSelectedInterval = setInterval(updateSelectedGate, 50);
-					}
+		// If the key was a number, find which gate that number corresponds to.
+		var gate = parseInt(event.key);
+		if (gate > 0 && gate < 7){
+			if (allowedGates.indexOf(gate) != -1){
+				// If that gate is allowed to be used, set it as the dragged gate and start the necessary intervals.
+				draggedGate = gate;
+				if (drawDraggedInterval == undefined && updateSelectedInterval == undefined){
+					drawDraggedInterval = setInterval(drawDraggedGate, 1000/60);
+					updateSelectedInterval = setInterval(updateSelectedGate, 50);
 				}
+			}
+		}
+
+		// If in dev mode, allow pausing and changing the scroll speed
+		if (devMode){
+			if (event.key == " "){
+				pause = !pause;
+			} else if (event.key == "-"){
+				scrollSpeed -= 0.2;
+			} else if (event.key == "="){
+				scrollSpeed += 0.2;
+			} else if (event.key == "0"){
+				scrollSpeed = Math.round(5*(cvs1.width/1100))/5;
 			}
 		}
 	};
@@ -162,7 +171,7 @@ function createCanvases(){
 	// Calculate the scale to use for the UI and the scroll speed based on the window size.
 	SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
 	SC = Math.min(SC, 22);
-	scrollSpeed = cvs1.width / 1200;
+	scrollSpeed = Math.round(5*(cvs1.width/1100))/5;
 }
 
 // Handles the window being resized.
@@ -175,10 +184,10 @@ function handleResize(){
 		cvs2.width = window.innerWidth;
 		cvs2.height = window.innerHeight;
 
-		// Calculate the scale to use for the UI based on the window size.
+		// Calculate the scale to use for the UI and the scroll speed based on the window size.
 		SC = Math.round(Math.min(cvs1.height/48, cvs1.width/96));
 		SC = Math.min(SC, 22);
-		scrollSpeed = Math.round(100*(cvs1.width/860))/100;
+		scrollSpeed = Math.round(5*(cvs1.width/1100))/5;
 
 		// Redraw menu.
 		drawMenu()
@@ -255,8 +264,12 @@ function createTextButton(btnX, btnY, text, fontSize, align, backgroundColor, ha
 }
 
 // Function for use with development and testing to unlock all the levels.
-function unlockLevels(){
+function enterDevMode(){
+	devMode = true;
 	for (var i = 0; i < levels.length; i++){
 		levels[i].unlocked = true;
+	}
+	if (currentScreen == screens.menu){
+		drawMenu();
 	}
 }
