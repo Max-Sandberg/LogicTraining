@@ -99,7 +99,7 @@ function showEndScreen(circuitsSolved, starsEarned){
 		size;
 	function animateStars(){
 		// If the user clicks one of the buttons before the animation finishes, clear the interval.
-		if (currentScreen != game.endScreen){
+		if (currentScreen != screens.levelEnd){
 			clearInterval(id);
 		}
 

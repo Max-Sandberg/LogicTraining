@@ -54,16 +54,14 @@ function updateSelectedGate(){
 	selectedGate = newGate;
 }
 
+// Function to change which gates are locked, i.e. perform a gate change. Available gates will always consist of a single gate/!gate pair (e.g. AND/NAND, OR/NOR, XOR/XNOR) so that there is always a possible gate for every desired gate output.
 function changeLockedGates(){
-	// Available gates will always consist of a single gate/!gate pair (e.g. AND/NAND, OR/NOR, XOR/XNOR) so that there is always a possible gate for every desired gate output, plus one other random gate.
-	var gate1, gate2, gate3 = -1;
+	var gate1 = -1, gate2;
 
-	// Choose a gate/!gate pair.
-	gate1 = (Math.floor(Math.random()*3) * 2) + 1; // 1, 3 or 5.
-	gate2 = gate1 + 1;
-	// Choose another random gate.
-	while ((gate3 == gate1) || (gate3 == gate2) || (gate3 == -1) || (gate3 == allowedGates[2])){
-		gate3 = Math.floor(Math.random()*6) + 1;
+	// Choose a random gate/!gate pair that isn't what we already have.
+	while (gate1 == -1 || gate1 == allowedGates[0]){
+		gate1 = (Math.floor(Math.random()*3) * 2) + 1; // 1, 3 or 5.
+		gate2 = gate1 + 1;
 	}
 
 	var frame = -1,
@@ -95,7 +93,7 @@ function changeLockedGates(){
 			// Update the allowed gates and redraw the menu bar, then display the "Gate change!" animation.
 			clearInterval(id);
 			if (won == undefined){
-				allowedGates = [gate1, gate2, gate3];
+				allowedGates = [gate1, gate2];
 				drawMenuBar();
 			}
 			frame = -1;

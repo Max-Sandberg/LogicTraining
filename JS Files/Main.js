@@ -17,7 +17,7 @@ var currentScreen, screens = Object.freeze({"menu":0, "game":1, "gateIntro":2, "
 var devMode;
 
 function startGame(){
-	//enterDevMode();
+	// enterDevMode();
 	createCanvases();
 	document.body.onresize = handleResize;
 	loadFontAwesome(drawMenu, 200);
@@ -41,7 +41,13 @@ function startLevel(lvlIdx) {
 	level = levels[levelIdx];
 	circuits = level.circuits;
 	enableGateChanges = level.enableGateChanges;
-	allowedGates = level.allowedGates;
+	if (enableGateChanges){
+		var gate1 = (Math.floor(Math.random()*3) * 2) + 1, // 1, 3 or 5.
+			gate2 = gate1 + 1;
+		allowedGates = [gate1, gate2];
+	} else {
+		allowedGates = level.allowedGates;
+	}
 
 	// Draw the menu bar and a rectangle around the game area.
 	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);

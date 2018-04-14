@@ -370,7 +370,7 @@ function introduceGates(gate){
 			updateInterval = setInterval(updateGameArea, 200);
 			pause = false;
 			if (level.introduceGateChanges){
-				gateChangeInterval = setInterval(changeLockedGates, 20000);
+				gateChangeInterval = setInterval(changeLockedGates, 18000);
 			}
 		}
 	}
