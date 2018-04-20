@@ -9,7 +9,6 @@ var selectedGate = null;
 var drawDraggedInterval, updateSelectedInterval, drawInterval, updateInterval, gateChangeInterval, menuHoverInterval;
 var gateButtonIntervals = [];
 var mousex, mousey;
-var frameNo = 0;
 var pause = false;
 var scrollSpeed;
 var level, levelIdx;
@@ -60,8 +59,8 @@ function startLevel(lvlIdx) {
 	pause = false;
 	chooseCircuits();
 	prepareCircuits();
-	drawInterval = setInterval(drawGameArea, 1000/60, ctx1);
-	updateInterval = setInterval(updateGameArea, 200);
+	updateInterval = setInterval(updateGame, 1000/60);
+
 	if (enableGateChanges && !level.introduceGateChanges){
 		gateChangeInterval = setInterval(changeLockedGates, 20000);
 	}
@@ -86,9 +85,9 @@ function startLevel(lvlIdx) {
 			if (event.key == " "){
 				pause = !pause;
 			} else if (event.key == "-"){
-				scrollSpeed -= 0.2;
+				scrollSpeed -= 1;
 			} else if (event.key == "="){
-				scrollSpeed += 0.2;
+				scrollSpeed += 1;
 			} else if (event.key == "0"){
 				scrollSpeed = Math.round(5*(cvs1.width/1100))/5;
 			}

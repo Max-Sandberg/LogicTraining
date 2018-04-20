@@ -2,45 +2,53 @@ var won;
 
 // Checks if the player won or lost, and how many stars they earned, then displays the relevant end dialogue.
 function endLevel(){
-	// Redraw the game, just to make sure the last circuit has been updated, then clear all intervals.
-	drawGameArea(ctx1);
-	clearIntervals();
-
-	// Counts how many circuits the player got correct.
-	var circuitsSolved = 0;
-	for (var i = 0; i < circuits.length; i++){
-		var gateSections = circuits[i].gateSections,
-			bulb = gateSections[gateSections.length-1][0];
-		if (bulb.outputVal == 1){
-			circuitsSolved++;
-		}
-	}
-
 	if (level.tutorial && circuitsSolved == 1){
 		// If this is the tutorial level, don't show the end screen, just continue the tutorial.
 		pause = true;
 		handleTestCircuit();
 	} else {
-		// Calculate how many stars the player earned.
+		// Wait for the game to draw one more frame, just to make sure the last circuit has been updated.
 		currentScreen = screens.levelEnd;
-		var starsEarned = (level.tutorial) ? 0 :
-						  (circuitsSolved == circuits.length) ? 3 :
-						  (circuitsSolved >= circuits.length - 2) ? 2 :
-				  		  (circuitsSolved >= circuits.length - 4) ? 1 : 0
-		won = (starsEarned > 0);
+		window.requestAnimationFrame(function(){
+			window.requestAnimationFrame(function(){
+				callback();
+			})
+		});
 
-		if (won){
-			// Unlock the next level if they won.
-			if (levelIdx < levels.length-1){
-				levels[levelIdx+1].unlocked = true;
+		function callback(){
+			// Clear all intervals.
+			clearIntervals();
+
+			// Counts how many circuits the player got correct.
+			var circuitsSolved = 0;
+			for (var i = 0; i < circuits.length; i++){
+				var gateSections = circuits[i].gateSections,
+					bulb = gateSections[gateSections.length-1][0];
+				if (bulb.outputVal == 1){
+					circuitsSolved++;
+				}
 			}
-			// If they earned more stars than they had previously earned for this level, update the stars gained.
-			if (level.starsEarned < starsEarned){
-				level.starsEarned = starsEarned;
+
+			// Calculate how many stars the player earned.
+			var starsEarned = (level.tutorial) ? 0 :
+							  (circuitsSolved == circuits.length) ? 3 :
+							  (circuitsSolved >= circuits.length - 2) ? 2 :
+							  (circuitsSolved >= circuits.length - 4) ? 1 : 0
+			won = (starsEarned > 0);
+
+			if (won){
+				// Unlock the next level if they won.
+				if (levelIdx < levels.length-1){
+					levels[levelIdx+1].unlocked = true;
+				}
+				// If they earned more stars than they had previously earned for this level, update the stars gained.
+				if (level.starsEarned < starsEarned){
+					level.starsEarned = starsEarned;
+				}
 			}
+
+			showEndScreen(circuitsSolved, starsEarned);
 		}
-
-		showEndScreen(circuitsSolved, starsEarned);
 	}
 }
 
@@ -57,9 +65,9 @@ function showEndScreen(circuitsSolved, starsEarned){
 			ctx2.fillRect(0, 0, cvs1.width, cvs1.height);
 		} else if (frame == 40){
 			ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
-			ctx1.fillStyle = "rgba(0, 0, 0, " + ((frame/40)*0.8) + ")";
+			ctx1.fillStyle = "rgba(0, 0, 0, 0.8)";
 			ctx1.fillRect(0, 0, cvs1.width, cvs1.height);
-		} else if (frame > 80){
+		} else if (frame == 80){
 			clearInterval(id);
 			frame = -1;
 			id = setInterval(slideEndMessage, 1000/60);
@@ -276,13 +284,20 @@ function createEndScreenButton(text, x, y){
 }
 
 function clearIntervals(){
+	// Clears all circuit animations queued for the next frame.
+	for (var i = 0; i < circuits.length; i++){
+		if (circuits[i].animationRef != undefined){
+			window.cancelAnimationFrame(circuits[i].animationRef);
+			circuits[i].animationRef = undefined;
+		}
+	}
+
 	// Cancel all the intervals and handlers
 	while (gateButtonIntervals.length > 0){
 		clearInterval(gateButtonIntervals.pop());
 	}
 	clearInterval(updateSelectedInterval);
 	clearInterval(drawDraggedInterval);
-	clearInterval(drawInterval);
 	clearInterval(updateInterval);
 	clearInterval(gateChangeInterval);
 	clearInterval(menuHoverInterval);
@@ -299,9 +314,7 @@ function clearIntervals(){
 
 function resetGameState(){
 	starsEarned = 0;
-	frameNo = 0;
 	draggedGate = 0;
-	moves = 0;
 	won = undefined;
 	selectedGate = null;
 	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);

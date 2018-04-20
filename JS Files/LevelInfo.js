@@ -3528,6 +3528,9 @@ var circuitPools = [
 						type : gates.blank,
 						fixed : false,
 						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}, {
 							gateIdx : [1, 1],
 							inputs : [0]
 						}]
@@ -3544,9 +3547,6 @@ var circuitPools = [
 						nextGates : [{
 							gateIdx : [1, 1],
 							inputs : [1]
-						}, {
-							gateIdx : [1, 0],
-							inputs : [1]
 						}]
 					}],
 					[{
@@ -3555,7 +3555,7 @@ var circuitPools = [
 							val : 1
 						}, {
 							type : "gate",
-							gate : [0, 1]
+							gate : [0, 0]
 						}],
 						type : gates.nor,
 						fixed : true,

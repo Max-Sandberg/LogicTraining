@@ -1,3 +1,58 @@
+// Function to start the animation of a circuit sliding across the screen.
+function startCircuitAnimation(circuit, ctx){
+	// Clear the area where the circuit was.
+	function clearCircuit(){
+		ctx1.clearRect(
+			circuit.startx,
+			circuit.starty+(10*SC)-(circuit.height/2)-2,
+			circuit.width+4+(2*scrollSpeed),
+			circuit.height+4
+		);
+	}
+
+	// Redraws the 2 pixel lines on the edge of the screen if they were cleared or drawn over.
+	function redrawBorder(circuit, ctx){
+		if (circuit.startx < 2 || circuit.startx+circuit.width+4+(2*scrollSpeed) > cvs1.width - 2){
+			ctx1.save();
+			ctx1.lineWidth = 2;
+			ctx1.strokeStyle = "#000000";
+			ctx1.beginPath();
+			if (circuit.startx < 4){
+				// Draw the left edge.
+				ctx1.moveTo(1, (SC*6)+1);
+				ctx1.lineTo(1, cvs1.height-1);
+			} else {
+				// Draw the right edge.
+				ctx1.moveTo(cvs1.width-1, (SC*6)+1);
+				ctx1.lineTo(cvs1.width-1, cvs1.height);
+			}
+			ctx1.stroke();
+			ctx1.closePath();
+			ctx1.restore();
+		}
+	}
+
+	// Draw the circuit.
+	function drawCircuit(){
+		if (circuit.endx > 0){
+			clearCircuit();
+			drawGates(circuit, ctx);
+			drawWires(circuit, ctx);
+			drawAnimations(circuit, ctx);
+			redrawBorder(circuit, ctx);
+			circuit.animationRef = window.requestAnimationFrame(drawCircuit);
+		} else {
+			stopWireAnimations(circuits[i]);
+			clearCircuit();
+			redrawBorder(circuit, ctx);
+			circuit.animationRef = undefined;
+		}
+	}
+
+	// Start the animation.
+	circuit.animationRef = window.requestAnimationFrame(drawCircuit);
+}
+
 // Draws the menu bar at the top of the screen.
 function drawMenuBar(){
 	// Clear the menu area.
@@ -122,37 +177,6 @@ function createGateButton(x, y, gate){
 	gateButtonIntervals.push(createButton(drawGateButton, [x, y, gate], checkHover, handleClick, [screens.game, screens.gateIntro]));
 }
 
-// Draws and moves all the circuits.
-function drawGameArea(ctx){
-	// Increase frameNo, and clear the game area.
-	if (!pause) { frameNo++; }
-	clearGameArea();
-
-	// Move and draw the circuits.
-	for (var i = 0; i < circuits.length; i++){
-		if (!pause){
-			// Normal circuits move 1 pixel, star circuits move two pixels.
-			if (circuits[i].fast && circuits[i].startx < cvs1.width){
-				circuits[i].startx -= 1.5 * scrollSpeed;
-			} else {
-				circuits[i].startx -= scrollSpeed;
-			}
-		}
-		drawCircuit(circuits[i], ctx);
-	}
-
-	// Draw lines over the left and right edges of the game area.
-	ctx1.lineWidth = 2;
-	ctx1.strokeStyle = "#000000";
-	ctx1.beginPath();
-	ctx1.moveTo(1, (SC*6)+1);
-	ctx1.lineTo(1, cvs1.height-1);
-	ctx1.moveTo(cvs1.width-1, (SC*6)+1);
-	ctx1.lineTo(cvs1.width-1, cvs1.height);
-	ctx1.stroke();
-	ctx1.closePath();
-}
-
 // Draws the whole circuit.
 function drawCircuit(circuit, ctx) {
 	if (circuit.startx < cvs1.width && circuit.endx > 0){
@@ -182,6 +206,7 @@ function drawAnimations(circuit, ctx){
 }
 
 function drawBolt(bolt, xOffset, yOffset, ctx){
+	ctx.save();
 	ctx.strokeStyle = "#00bfff";
 	ctx.lineWidth = 1;
 	ctx.beginPath();
@@ -191,6 +216,7 @@ function drawBolt(bolt, xOffset, yOffset, ctx){
 	}
 	ctx.stroke();
 	ctx.closePath();
+	ctx.restore();
 }
 
 // Clears the game area of all drawings

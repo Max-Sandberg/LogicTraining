@@ -9,7 +9,6 @@ var selectedGate = null;
 var drawDraggedInterval, updateSelectedInterval, drawInterval, updateInterval, gateChangeInterval, menuHoverInterval;
 var gateButtonIntervals = [];
 var mousex, mousey;
-var frameNo = 0;
 var pause = false;
 var scrollSpeed;
 var level, levelIdx;
@@ -60,8 +59,8 @@ function startLevel(lvlIdx) {
 	pause = false;
 	chooseCircuits();
 	prepareCircuits();
-	drawInterval = setInterval(drawGameArea, 1000/60, ctx1);
-	updateInterval = setInterval(updateGameArea, 200);
+	updateInterval = setInterval(updateGame, 1000/60);
+
 	if (enableGateChanges && !level.introduceGateChanges){
 		gateChangeInterval = setInterval(changeLockedGates, 20000);
 	}
@@ -86,9 +85,9 @@ function startLevel(lvlIdx) {
 			if (event.key == " "){
 				pause = !pause;
 			} else if (event.key == "-"){
-				scrollSpeed -= 0.2;
+				scrollSpeed -= 1;
 			} else if (event.key == "="){
-				scrollSpeed += 0.2;
+				scrollSpeed += 1;
 			} else if (event.key == "0"){
 				scrollSpeed = Math.round(5*(cvs1.width/1100))/5;
 			}
@@ -444,25 +443,28 @@ function clearLevelButtonIntervals(){
 		clearInterval(levelButtonIntervals.pop());
 	}
 }
-// Updates the game area. This function is called on an interval.
-function updateGameArea() {
-	// Start/stop animations if the circuit is on/off the screen.
+function updateGame(){
+	// Move all circuits.
 	for (var i = 0; i < circuits.length; i++){
-		if ((circuits[i].startx < cvs1.width) && (circuits[i].endx > 0)){
-			// If on-screen
-			if (circuits[i].animated == false){
-				startWireAnimations(circuits[i]);
+		if (!pause){
+			// Normal circuits move 1 pixel, star circuits move two pixels.
+			if (circuits[i].fast && circuits[i].startx < cvs1.width){
+				circuits[i].startx -= 1.5 * scrollSpeed;
+			} else {
+				circuits[i].startx -= scrollSpeed;
 			}
-		} else {
-			// If off-screen
-			if (circuits[i].animated == true){
-				stopWireAnimations(circuits[i]);
+
+			// Start animations if the circuit moves on the screen.
+			if ((circuits[i].startx < cvs1.width) && (circuits[i].animated == false)){
+				startCircuitAnimation(circuits[i], ctx1);
+				circuits[i].animated = true;
 			}
 		}
 	}
 
 	// When the last two circuits are on the screen, we need to start regularly checking if all the circuits are complete or scrolled off the screen, so we can end the game.
-	if ((level.tutorial || circuits[circuits.length-2].startx <= 0) && checkAllCircuitsComplete()){
+	if ((level.tutorial || circuits[circuits.length-2].startx <= 0)
+	 	&& checkAllCircuitsComplete() && currentScreen != screens.levelEnd){
 		endLevel();
 	}
 }
@@ -571,6 +573,61 @@ function changeLockedGates(){
 		}
 	}
 }
+// Function to start the animation of a circuit sliding across the screen.
+function startCircuitAnimation(circuit, ctx){
+	// Clear the area where the circuit was.
+	function clearCircuit(){
+		ctx1.clearRect(
+			circuit.startx,
+			circuit.starty+(10*SC)-(circuit.height/2)-2,
+			circuit.width+4+(2*scrollSpeed),
+			circuit.height+4
+		);
+	}
+
+	// Redraws the 2 pixel lines on the edge of the screen if they were cleared or drawn over.
+	function redrawBorder(circuit, ctx){
+		if (circuit.startx < 2 || circuit.startx+circuit.width+4+(2*scrollSpeed) > cvs1.width - 2){
+			ctx1.save();
+			ctx1.lineWidth = 2;
+			ctx1.strokeStyle = "#000000";
+			ctx1.beginPath();
+			if (circuit.startx < 4){
+				// Draw the left edge.
+				ctx1.moveTo(1, (SC*6)+1);
+				ctx1.lineTo(1, cvs1.height-1);
+			} else {
+				// Draw the right edge.
+				ctx1.moveTo(cvs1.width-1, (SC*6)+1);
+				ctx1.lineTo(cvs1.width-1, cvs1.height);
+			}
+			ctx1.stroke();
+			ctx1.closePath();
+			ctx1.restore();
+		}
+	}
+
+	// Draw the circuit.
+	function drawCircuit(){
+		if (circuit.endx > 0){
+			clearCircuit();
+			drawGates(circuit, ctx);
+			drawWires(circuit, ctx);
+			drawAnimations(circuit, ctx);
+			redrawBorder(circuit, ctx);
+			circuit.animationRef = window.requestAnimationFrame(drawCircuit);
+		} else {
+			stopWireAnimations(circuits[i]);
+			clearCircuit();
+			redrawBorder(circuit, ctx);
+			circuit.animationRef = undefined;
+		}
+	}
+
+	// Start the animation.
+	circuit.animationRef = window.requestAnimationFrame(drawCircuit);
+}
+
 // Draws the menu bar at the top of the screen.
 function drawMenuBar(){
 	// Clear the menu area.
@@ -695,37 +752,6 @@ function createGateButton(x, y, gate){
 	gateButtonIntervals.push(createButton(drawGateButton, [x, y, gate], checkHover, handleClick, [screens.game, screens.gateIntro]));
 }
 
-// Draws and moves all the circuits.
-function drawGameArea(ctx){
-	// Increase frameNo, and clear the game area.
-	if (!pause) { frameNo++; }
-	clearGameArea();
-
-	// Move and draw the circuits.
-	for (var i = 0; i < circuits.length; i++){
-		if (!pause){
-			// Normal circuits move 1 pixel, star circuits move two pixels.
-			if (circuits[i].fast && circuits[i].startx < cvs1.width){
-				circuits[i].startx -= 1.5 * scrollSpeed;
-			} else {
-				circuits[i].startx -= scrollSpeed;
-			}
-		}
-		drawCircuit(circuits[i], ctx);
-	}
-
-	// Draw lines over the left and right edges of the game area.
-	ctx1.lineWidth = 2;
-	ctx1.strokeStyle = "#000000";
-	ctx1.beginPath();
-	ctx1.moveTo(1, (SC*6)+1);
-	ctx1.lineTo(1, cvs1.height-1);
-	ctx1.moveTo(cvs1.width-1, (SC*6)+1);
-	ctx1.lineTo(cvs1.width-1, cvs1.height);
-	ctx1.stroke();
-	ctx1.closePath();
-}
-
 // Draws the whole circuit.
 function drawCircuit(circuit, ctx) {
 	if (circuit.startx < cvs1.width && circuit.endx > 0){
@@ -755,6 +781,7 @@ function drawAnimations(circuit, ctx){
 }
 
 function drawBolt(bolt, xOffset, yOffset, ctx){
+	ctx.save();
 	ctx.strokeStyle = "#00bfff";
 	ctx.lineWidth = 1;
 	ctx.beginPath();
@@ -764,6 +791,7 @@ function drawBolt(bolt, xOffset, yOffset, ctx){
 	}
 	ctx.stroke();
 	ctx.closePath();
+	ctx.restore();
 }
 
 // Clears the game area of all drawings
@@ -1372,6 +1400,7 @@ function drawWires(circuit, ctx){
 
 // Draws a single wire between two points.
 function drawWire(x1, y1, x2, y2, live, ctx){
+	ctx.save();
 	ctx.beginPath();
 	ctx.moveTo(x1, y1);
 	ctx.lineTo(x2, y2);
@@ -1393,6 +1422,7 @@ function drawWire(x1, y1, x2, y2, live, ctx){
 	ctx.strokeStyle="#000000";
 	ctx.lineWidth = 1;
 	ctx.closePath();
+	ctx.restore();
 }
 
 // Draws an input signal.
@@ -1600,7 +1630,8 @@ function drawAND(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	ctx.fillStyle = "#8080ff"; // blue
+	// ctx.fillStyle = "#8080ff"; // blue
+	ctx.fillStyle = "#ffffff";
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
@@ -1619,7 +1650,8 @@ function drawNAND(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	ctx.fillStyle = "#ffd280"; // orange
+	// ctx.fillStyle = "#ffd280"; // orange
+	ctx.fillStyle = "#ffffff";
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
@@ -1644,7 +1676,8 @@ function drawOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	ctx.fillStyle = "#80ff80"; // green
+	// ctx.fillStyle = "#80ff80"; // green
+	ctx.fillStyle = "#ffffff";
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
@@ -1662,7 +1695,8 @@ function drawNOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	ctx.fillStyle = "#ff8080"; // red
+	// ctx.fillStyle = "#ff8080"; // red
+	ctx.fillStyle = "#ffffff";
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
@@ -1686,7 +1720,8 @@ function drawXOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	ctx.fillStyle = "#ffff80"; // yellow
+	// ctx.fillStyle = "#ffff80"; // yellow
+	ctx.fillStyle = "#ffffff";
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
@@ -1710,7 +1745,8 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	ctx.fillStyle = "#ff80ff"; // purple
+	// ctx.fillStyle = "#ff80ff"; // purple
+	ctx.fillStyle = "#ffffff";
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
@@ -1792,34 +1828,6 @@ function handleMouseDown(){
 		updateSelectedGate();
 		handleMouseUp();
 	}
-
-	// if (draggedGate != 0){
-	// 	// Player is already holding a gate without holding the mouse down, i.e. they used a hotkey.
-	// 	handleMouseUp();
-	// } else {
-	// 	// See if the mouse position is in the boundaries of one of the gates in the menu bar.
-	// 	if ((mousey > SC) && (mousey < (5*SC))){
-	// 		var startX = (cvs1.width/2) - (14.5*SC);
-	// 		for (var i = 1; i < 7; i++){
-	// 			if ((allowedGates.indexOf(i) != -1) && (mousex > startX+((i-1)*5*SC)) && (mousex < startX+((i-1)*5*SC)+(4*SC))){
-	// 				// Sets draggedGate to the selected gate, and puts drawDraggedGate on an interval, so that it can be redrawn to snap to nearby gates even if the mouse doesn't move.
-	// 				draggedGate = i;
-	// 				drawDraggedInterval = setInterval(drawDraggedGate, 1000/60);
-	// 				updateSelectedInterval = setInterval(updateSelectedGate, 50);
-	// 			}
-	// 		}
-	// 	// } else {
-	// 		// var gate = getSelectedGate(mousex, mousey, 0);
-	// 		// if (gate != null){
-	// 		// 	// If the user clicked and dragged a non-fixed gate in the circuit, remove that gate from the circuit.
-	// 		// 	draggedGate = gate.type;
-	// 		// 	gate.type = 0;
-	// 		// 	updateCircuitValues(gate.idx);
-	// 		// 	drawDraggedInterval = setInterval(drawDraggedGate, 1000/60);
-	// 		// 	updateSelectedInterval = setInterval(updateSelectedGate, 50);
-	// 		// }
-	// 	}
-	// }
 }
 
 // Checks if the user is currently dragging a gate, and if they released the mouse over a non-fixed gate in a circuit. If so, update that gate's type and update the circuit's values.
@@ -1860,45 +1868,53 @@ var won;
 
 // Checks if the player won or lost, and how many stars they earned, then displays the relevant end dialogue.
 function endLevel(){
-	// Redraw the game, just to make sure the last circuit has been updated, then clear all intervals.
-	drawGameArea(ctx1);
-	clearIntervals();
-
-	// Counts how many circuits the player got correct.
-	var circuitsSolved = 0;
-	for (var i = 0; i < circuits.length; i++){
-		var gateSections = circuits[i].gateSections,
-			bulb = gateSections[gateSections.length-1][0];
-		if (bulb.outputVal == 1){
-			circuitsSolved++;
-		}
-	}
-
 	if (level.tutorial && circuitsSolved == 1){
 		// If this is the tutorial level, don't show the end screen, just continue the tutorial.
 		pause = true;
 		handleTestCircuit();
 	} else {
-		// Calculate how many stars the player earned.
+		// Wait for the game to draw one more frame, just to make sure the last circuit has been updated.
 		currentScreen = screens.levelEnd;
-		var starsEarned = (level.tutorial) ? 0 :
-						  (circuitsSolved == circuits.length) ? 3 :
-						  (circuitsSolved >= circuits.length - 2) ? 2 :
-				  		  (circuitsSolved >= circuits.length - 4) ? 1 : 0
-		won = (starsEarned > 0);
+		window.requestAnimationFrame(function(){
+			window.requestAnimationFrame(function(){
+				callback();
+			})
+		});
 
-		if (won){
-			// Unlock the next level if they won.
-			if (levelIdx < levels.length-1){
-				levels[levelIdx+1].unlocked = true;
+		function callback(){
+			// Clear all intervals.
+			clearIntervals();
+
+			// Counts how many circuits the player got correct.
+			var circuitsSolved = 0;
+			for (var i = 0; i < circuits.length; i++){
+				var gateSections = circuits[i].gateSections,
+					bulb = gateSections[gateSections.length-1][0];
+				if (bulb.outputVal == 1){
+					circuitsSolved++;
+				}
 			}
-			// If they earned more stars than they had previously earned for this level, update the stars gained.
-			if (level.starsEarned < starsEarned){
-				level.starsEarned = starsEarned;
+
+			// Calculate how many stars the player earned.
+			var starsEarned = (level.tutorial) ? 0 :
+							  (circuitsSolved == circuits.length) ? 3 :
+							  (circuitsSolved >= circuits.length - 2) ? 2 :
+							  (circuitsSolved >= circuits.length - 4) ? 1 : 0
+			won = (starsEarned > 0);
+
+			if (won){
+				// Unlock the next level if they won.
+				if (levelIdx < levels.length-1){
+					levels[levelIdx+1].unlocked = true;
+				}
+				// If they earned more stars than they had previously earned for this level, update the stars gained.
+				if (level.starsEarned < starsEarned){
+					level.starsEarned = starsEarned;
+				}
 			}
+
+			showEndScreen(circuitsSolved, starsEarned);
 		}
-
-		showEndScreen(circuitsSolved, starsEarned);
 	}
 }
 
@@ -1915,9 +1931,9 @@ function showEndScreen(circuitsSolved, starsEarned){
 			ctx2.fillRect(0, 0, cvs1.width, cvs1.height);
 		} else if (frame == 40){
 			ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
-			ctx1.fillStyle = "rgba(0, 0, 0, " + ((frame/40)*0.8) + ")";
+			ctx1.fillStyle = "rgba(0, 0, 0, 0.8)";
 			ctx1.fillRect(0, 0, cvs1.width, cvs1.height);
-		} else if (frame > 80){
+		} else if (frame == 80){
 			clearInterval(id);
 			frame = -1;
 			id = setInterval(slideEndMessage, 1000/60);
@@ -2134,13 +2150,20 @@ function createEndScreenButton(text, x, y){
 }
 
 function clearIntervals(){
+	// Clears all circuit animations queued for the next frame.
+	for (var i = 0; i < circuits.length; i++){
+		if (circuits[i].animationRef != undefined){
+			window.cancelAnimationFrame(circuits[i].animationRef);
+			circuits[i].animationRef = undefined;
+		}
+	}
+
 	// Cancel all the intervals and handlers
 	while (gateButtonIntervals.length > 0){
 		clearInterval(gateButtonIntervals.pop());
 	}
 	clearInterval(updateSelectedInterval);
 	clearInterval(drawDraggedInterval);
-	clearInterval(drawInterval);
 	clearInterval(updateInterval);
 	clearInterval(gateChangeInterval);
 	clearInterval(menuHoverInterval);
@@ -2157,9 +2180,7 @@ function clearIntervals(){
 
 function resetGameState(){
 	starsEarned = 0;
-	frameNo = 0;
 	draggedGate = 0;
-	moves = 0;
 	won = undefined;
 	selectedGate = null;
 	ctx1.clearRect(0, 0, cvs1.width, cvs1.height);
@@ -2535,7 +2556,7 @@ function introduceGates(gate){
 			// Start the game.
 			currentScreen = screens.game;
 			cvs2.onmousedown = handleMouseDown;
-			updateInterval = setInterval(updateGameArea, 200);
+			updateInterval = setInterval(updateGame, 1000/60);
 			pause = false;
 			if (level.introduceGateChanges){
 				gateChangeInterval = setInterval(changeLockedGates, 18000);
@@ -6161,6 +6182,9 @@ var circuitPools = [
 						type : gates.blank,
 						fixed : false,
 						nextGates : [{
+							gateIdx : [1, 0],
+							inputs : [1]
+						}, {
 							gateIdx : [1, 1],
 							inputs : [0]
 						}]
@@ -6177,9 +6201,6 @@ var circuitPools = [
 						nextGates : [{
 							gateIdx : [1, 1],
 							inputs : [1]
-						}, {
-							gateIdx : [1, 0],
-							inputs : [1]
 						}]
 					}],
 					[{
@@ -6188,7 +6209,7 @@ var circuitPools = [
 							val : 1
 						}, {
 							type : "gate",
-							gate : [0, 1]
+							gate : [0, 0]
 						}],
 						type : gates.nor,
 						fixed : true,

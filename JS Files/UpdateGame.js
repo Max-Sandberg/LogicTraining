@@ -1,22 +1,25 @@
-// Updates the game area. This function is called on an interval.
-function updateGameArea() {
-	// Start/stop animations if the circuit is on/off the screen.
+function updateGame(){
+	// Move all circuits.
 	for (var i = 0; i < circuits.length; i++){
-		if ((circuits[i].startx < cvs1.width) && (circuits[i].endx > 0)){
-			// If on-screen
-			if (circuits[i].animated == false){
-				startWireAnimations(circuits[i]);
+		if (!pause){
+			// Normal circuits move 1 pixel, star circuits move two pixels.
+			if (circuits[i].fast && circuits[i].startx < cvs1.width){
+				circuits[i].startx -= 1.5 * scrollSpeed;
+			} else {
+				circuits[i].startx -= scrollSpeed;
 			}
-		} else {
-			// If off-screen
-			if (circuits[i].animated == true){
-				stopWireAnimations(circuits[i]);
+
+			// Start animations if the circuit moves on the screen.
+			if ((circuits[i].startx < cvs1.width) && (circuits[i].animated == false)){
+				startCircuitAnimation(circuits[i], ctx1);
+				circuits[i].animated = true;
 			}
 		}
 	}
 
 	// When the last two circuits are on the screen, we need to start regularly checking if all the circuits are complete or scrolled off the screen, so we can end the game.
-	if ((level.tutorial || circuits[circuits.length-2].startx <= 0) && checkAllCircuitsComplete()){
+	if ((level.tutorial || circuits[circuits.length-2].startx <= 0)
+	 	&& checkAllCircuitsComplete() && currentScreen != screens.levelEnd){
 		endLevel();
 	}
 }

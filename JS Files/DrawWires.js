@@ -62,6 +62,7 @@ function drawWires(circuit, ctx){
 
 // Draws a single wire between two points.
 function drawWire(x1, y1, x2, y2, live, ctx){
+	ctx.save();
 	ctx.beginPath();
 	ctx.moveTo(x1, y1);
 	ctx.lineTo(x2, y2);
@@ -83,6 +84,7 @@ function drawWire(x1, y1, x2, y2, live, ctx){
 	ctx.strokeStyle="#000000";
 	ctx.lineWidth = 1;
 	ctx.closePath();
+	ctx.restore();
 }
 
 // Draws an input signal.

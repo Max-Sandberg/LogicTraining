@@ -367,7 +367,7 @@ function introduceGates(gate){
 			// Start the game.
 			currentScreen = screens.game;
 			cvs2.onmousedown = handleMouseDown;
-			updateInterval = setInterval(updateGameArea, 200);
+			updateInterval = setInterval(updateGame, 1000/60);
 			pause = false;
 			if (level.introduceGateChanges){
 				gateChangeInterval = setInterval(changeLockedGates, 18000);
