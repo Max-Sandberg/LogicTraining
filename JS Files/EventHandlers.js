@@ -26,7 +26,7 @@ function handleMouseUp(){
 			gate.type = chosenGate;
 			gate.invis = false;
 			gate.fixed = true;
-			updateCircuitValues(gate.idx);
+			updateCircuitVoltages(gate.idx);
 		}
 
 		// Check if all the circuits are now complete, and end the game if so.

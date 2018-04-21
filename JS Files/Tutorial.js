@@ -455,7 +455,7 @@ function drawExampleCircuits(gateType, x, y){
 		var gate = circuits[i].gateSections[0][0];
 		gate.type = gateType;
 		gate.fixed = true;
-		updateCircuitValues(gate.idx);
+		updateCircuitVoltages(gate.idx);
 	}
 
 	// Draw the circuits.

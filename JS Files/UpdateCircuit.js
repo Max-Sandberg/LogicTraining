@@ -1,5 +1,5 @@
 // Updates the values in a circuit after a particular gate has changed.
-function updateCircuitValues(gateIdx){
+function updateCircuitVoltages(gateIdx){
 	var gateSections = circuits[gateIdx[0]].gateSections,
 		section = gateSections[gateIdx[1]],
 		gate, oldOutput, newOutput, changed = false;
@@ -70,33 +70,24 @@ function updateGateOutput(gateIdx){
 	return gate.outputVal;
 }
 
-// Calculates what output you get with any combination of gates and inputs.
+// Calculates the output of a gate, given its type and inputs.
 function calculateGateOutput(gate, input1, input2){
-	var newOutput;
 	switch (gate.type){
 		case gates.and:
-			newOutput = (input1 && input2) ? 1 : 0;
-			break;
+			return (input1 && input2) ? 1 : 0;
 		case gates.nand:
-			newOutput = !(input1 && input2) ? 1 : 0;
-			break;
+			return !(input1 && input2) ? 1 : 0;
 		case gates.or:
-			newOutput = (input1 || input2) ? 1 : 0;
-			break;
+			return (input1 || input2) ? 1 : 0;
 		case gates.nor:
-			newOutput = !(input1 || input2) ? 1 : 0;
-			break;
+			return !(input1 || input2) ? 1 : 0;
 		case gates.xor:
-			newOutput = ((input1 || input2) && !(input1 && input2)) ? 1 : 0;
-			break;
+			return (input1 != input2) ? 1 : 0;
 		case gates.xnor:
-			newOutput = !((input1 || input2) && !(input1 && input2)) ? 1 : 0;
-			break;
+			return (input1 == input2) ? 1 : 0;
 		case gates.bulb:
-			newOutput = (input1 == 1) ? 1 : 0;
-			break;
+			return (input1 == 1) ? 1 : 0;
 	}
-	return newOutput;
 }
 
 // Takes an x and y coordinate and looks to see if that point is within the boundaries of one of the gates in the circuits. If it is, that gate index is returned.

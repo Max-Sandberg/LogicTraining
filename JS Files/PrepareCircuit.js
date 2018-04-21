@@ -7,7 +7,7 @@ function prepareCircuits(){
 	for (var i = 0; i < circuits.length; i++){
 		findCircuitPosition(i);
 		findWirePositions(circuits[i]);
-		updateCircuitValues([i, 0, 0]);
+		updateCircuitVoltages([i, 0, 0]);
 		stopWireAnimations(circuits[i]);
 	}
 }

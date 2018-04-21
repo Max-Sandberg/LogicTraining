@@ -813,7 +813,7 @@ function clearGameArea(){
 	}
 }
 // Updates the values in a circuit after a particular gate has changed.
-function updateCircuitValues(gateIdx){
+function updateCircuitVoltages(gateIdx){
 	var gateSections = circuits[gateIdx[0]].gateSections,
 		section = gateSections[gateIdx[1]],
 		gate, oldOutput, newOutput, changed = false;
@@ -884,33 +884,24 @@ function updateGateOutput(gateIdx){
 	return gate.outputVal;
 }
 
-// Calculates what output you get with any combination of gates and inputs.
+// Calculates the output of a gate, given its type and inputs.
 function calculateGateOutput(gate, input1, input2){
-	var newOutput;
 	switch (gate.type){
 		case gates.and:
-			newOutput = (input1 && input2) ? 1 : 0;
-			break;
+			return (input1 && input2) ? 1 : 0;
 		case gates.nand:
-			newOutput = !(input1 && input2) ? 1 : 0;
-			break;
+			return !(input1 && input2) ? 1 : 0;
 		case gates.or:
-			newOutput = (input1 || input2) ? 1 : 0;
-			break;
+			return (input1 || input2) ? 1 : 0;
 		case gates.nor:
-			newOutput = !(input1 || input2) ? 1 : 0;
-			break;
+			return !(input1 || input2) ? 1 : 0;
 		case gates.xor:
-			newOutput = ((input1 || input2) && !(input1 && input2)) ? 1 : 0;
-			break;
+			return (input1 != input2) ? 1 : 0;
 		case gates.xnor:
-			newOutput = !((input1 || input2) && !(input1 && input2)) ? 1 : 0;
-			break;
+			return (input1 == input2) ? 1 : 0;
 		case gates.bulb:
-			newOutput = (input1 == 1) ? 1 : 0;
-			break;
+			return (input1 == 1) ? 1 : 0;
 	}
-	return newOutput;
 }
 
 // Takes an x and y coordinate and looks to see if that point is within the boundaries of one of the gates in the circuits. If it is, that gate index is returned.
@@ -996,7 +987,7 @@ function prepareCircuits(){
 	for (var i = 0; i < circuits.length; i++){
 		findCircuitPosition(i);
 		findWirePositions(circuits[i]);
-		updateCircuitValues([i, 0, 0]);
+		updateCircuitVoltages([i, 0, 0]);
 		stopWireAnimations(circuits[i]);
 	}
 }
@@ -1630,8 +1621,7 @@ function drawAND(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	// ctx.fillStyle = "#8080ff"; // blue
-	ctx.fillStyle = "#ffffff";
+	ctx.fillStyle = "#8080ff"; // blue
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
@@ -1650,8 +1640,7 @@ function drawNAND(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	// ctx.fillStyle = "#ffd280"; // orange
-	ctx.fillStyle = "#ffffff";
+	ctx.fillStyle = "#ffd280"; // orange
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
@@ -1676,8 +1665,7 @@ function drawOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	// ctx.fillStyle = "#80ff80"; // green
-	ctx.fillStyle = "#ffffff";
+	ctx.fillStyle = "#80ff80"; // green
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
@@ -1695,8 +1683,7 @@ function drawNOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	// ctx.fillStyle = "#ff8080"; // red
-	ctx.fillStyle = "#ffffff";
+	ctx.fillStyle = "#ff8080"; // red
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
@@ -1720,8 +1707,7 @@ function drawXOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	// ctx.fillStyle = "#ffff80"; // yellow
-	ctx.fillStyle = "#ffffff";
+	ctx.fillStyle = "#ffff80"; // yellow
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
@@ -1745,8 +1731,7 @@ function drawXNOR(x, y, input1, input2, output, ctx){
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
 	ctx.lineWidth = 1.5;
-	// ctx.fillStyle = "#ff80ff"; // purple
-	ctx.fillStyle = "#ffffff";
+	ctx.fillStyle = "#ff80ff"; // purple
 
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
@@ -1849,7 +1834,7 @@ function handleMouseUp(){
 			gate.type = chosenGate;
 			gate.invis = false;
 			gate.fixed = true;
-			updateCircuitValues(gate.idx);
+			updateCircuitVoltages(gate.idx);
 		}
 
 		// Check if all the circuits are now complete, and end the game if so.
@@ -2644,7 +2629,7 @@ function drawExampleCircuits(gateType, x, y){
 		var gate = circuits[i].gateSections[0][0];
 		gate.type = gateType;
 		gate.fixed = true;
-		updateCircuitValues(gate.idx);
+		updateCircuitVoltages(gate.idx);
 	}
 
 	// Draw the circuits.
