@@ -115,13 +115,15 @@ function drawDraggedGate(){
 
 //#region - Functions to draw the specific gates.
 function drawAND(x, y, input1, input2, output, ctx){
+	// Draw the input wires and output wire.
 	drawWire(x, y+SC, x+(0.6*SC), y+SC, input1, ctx);
 	drawWire(x, y+(3*SC), x+(0.6*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
+	// Draw the gate icon.
+	ctx.save();
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#8080ff"; // blue
-
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
 	ctx.lineTo(x+(1.6*SC), y+(0.4*SC));
@@ -131,83 +133,121 @@ function drawAND(x, y, input1, input2, output, ctx){
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
+
+	// Write the name of the gate.
+	ctx.font = (0.8*SC) + "pt Impact";
+	ctx.textAlign = "center";
+	ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx.fillText("AND", x+(1.98*SC), y+(2.4*SC));
+	ctx.restore();
 }
 
 function drawNAND(x, y, input1, input2, output, ctx){
-	drawWire(x, y+SC, x+(0.6*SC), y+SC, input1, ctx);
-	drawWire(x, y+(3*SC), x+(0.6*SC), y+(3*SC), input2, ctx);
+	// Draw the input wires and output wire.
+	drawWire(x, y+SC, x+(0.5*SC), y+SC, input1, ctx);
+	drawWire(x, y+(3*SC), x+(0.5*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
+	// Draw the gate icon.
+	ctx.save();
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ffd280"; // orange
-
 	ctx.beginPath();
-	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
+	ctx.moveTo(x+(0.5*SC), y+(0.4*SC));
 	ctx.lineTo(x+(1.4*SC), y+(0.4*SC));
 	ctx.bezierCurveTo(x+(3.9*SC), y+(0.4*SC), x+(3.9*SC), y+(3.6*SC), x+(1.4*SC), y+(3.6*SC));
-	ctx.lineTo(x+(0.6*SC), y+(3.6*SC));
-	ctx.lineTo(x+(0.6*SC), y+(0.4*SC));
+	ctx.lineTo(x+(0.5*SC), y+(3.6*SC));
+	ctx.lineTo(x+(0.5*SC), y+(0.4*SC));
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
 
+	// Draw the circle at the end.
 	ctx.beginPath();
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
+
+	// Write the name of the gate.
+	ctx.font = (0.8*SC) + "pt Impact";
+	ctx.textAlign = "center";
+	ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx.fillText("NAND", x+(1.85*SC), y+(2.4*SC));
+	ctx.restore();
 }
 
 function drawOR(x, y, input1, input2, output, ctx){
+	// Draw the input wires and output wire.
 	drawWire(x, y+SC, x+(0.8*SC), y+SC, input1, ctx);
 	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
+	// Draw the gate icon.
+	ctx.save();
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#80ff80"; // green
-
 	ctx.beginPath();
-	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
+	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
 	ctx.quadraticCurveTo(x+(3*SC), y+(0.4*SC), x+(3.5*SC), y+(2*SC));
-	ctx.quadraticCurveTo(x+(3*SC), y+(3.6*SC), x+(0.4*SC), y+(3.6*SC));
-	ctx.bezierCurveTo(x+(1.2*SC), y+(3*SC), x+(1.2*SC), y+(1*SC), x+(0.4*SC), y+(0.4*SC));
+	ctx.quadraticCurveTo(x+(3*SC), y+(3.6*SC), x+(0.3*SC), y+(3.6*SC));
+	ctx.bezierCurveTo(x+(1.1*SC), y+(3*SC), x+(1.1*SC), y+(1*SC), x+(0.3*SC), y+(0.4*SC));
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
+
+	// Write the name of the gate.
+	ctx.font = (0.8*SC) + "pt Impact";
+	ctx.textAlign = "center";
+	ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx.fillText("OR", x+(2.02*SC), y+(2.4*SC));
+	ctx.restore();
 }
 
 function drawNOR(x, y, input1, input2, output, ctx){
-	drawWire(x, y+SC, x+(0.8*SC), y+SC, input1, ctx);
-	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC), input2, ctx);
+	// Draw the input wires and output wire.
+	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
+	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
+	// Draw the gate icon.
+	ctx.save();
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ff8080"; // red
-
 	ctx.beginPath();
-	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
+	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
 	ctx.quadraticCurveTo(x+(2.75*SC), y+(0.4*SC), x+(3.25*SC), y+(2*SC));
-	ctx.quadraticCurveTo(x+(2.75*SC), y+(3.6*SC), x+(0.4*SC), y+(3.6*SC));
-	ctx.bezierCurveTo(x+(1.2*SC), y+(3*SC), x+(1.2*SC), y+(1*SC), x+(0.4*SC), y+(0.4*SC));
+	ctx.quadraticCurveTo(x+(2.75*SC), y+(3.6*SC), x+(0.3*SC), y+(3.6*SC));
+	ctx.bezierCurveTo(x+(1.1*SC), y+(3*SC), x+(1.1*SC), y+(1*SC), x+(0.3*SC), y+(0.4*SC));
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
 
+	// Draw the circle at the end.
 	ctx.beginPath();
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
+
+	// Write the name of the gate.
+	ctx.font = (0.8*SC) + "pt Impact";
+	ctx.textAlign = "center";
+	ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx.fillText("NOR", x+(1.94*SC), y+(2.4*SC));
+	ctx.restore();
 }
 
 function drawXOR(x, y, input1, input2, output, ctx){
+	// Draw the input wires and output wire.
 	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
 	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
+	// Draw the gate icon.
+	ctx.save();
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ffff80"; // yellow
-
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
 	ctx.quadraticCurveTo(x+(3*SC), y+(0.4*SC), x+(3.5*SC), y+(2*SC));
@@ -217,41 +257,60 @@ function drawXOR(x, y, input1, input2, output, ctx){
 	ctx.stroke();
 	ctx.closePath();
 
+	// Draw the extra curved line at the start.
 	ctx.beginPath();
 	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
 	ctx.bezierCurveTo(x+(1.1*SC), y+(1*SC), x+(1.1*SC), y+(3*SC), x+(0.3*SC), y+(3.6*SC));
 	ctx.stroke();
 	ctx.closePath();
+
+	// Write the name of the gate.
+	ctx.font = (0.8*SC) + "pt Impact";
+	ctx.textAlign = "center";
+	ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx.fillText("XOR", x+(2.25*SC), y+(2.4*SC));
+	ctx.restore();
 }
 
 function drawXNOR(x, y, input1, input2, output, ctx){
-	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
-	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
+	// Draw the input wires and output wire.
+	drawWire(x, y+SC, x+(0.6*SC), y+SC, input1, ctx);
+	drawWire(x, y+(3*SC), x+(0.6*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
+	// Draw the gate icon.
+	ctx.save();
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ff80ff"; // purple
-
 	ctx.beginPath();
-	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
-	ctx.quadraticCurveTo(x+(2.75*SC), y+(0.4*SC), x+(3.25*SC), y+(2*SC));
-	ctx.quadraticCurveTo(x+(2.75*SC), y+(3.6*SC), x+(0.6*SC), y+(3.6*SC));
-	ctx.bezierCurveTo(x+(1.4*SC), y+(3*SC), x+(1.4*SC), y+(1*SC), x+(0.6*SC), y+(0.4*SC));
+	ctx.moveTo(x+(0.45*SC), y+(0.4*SC));
+	ctx.quadraticCurveTo(x+(2.65*SC), y+(0.4*SC), x+(3.25*SC), y+(2*SC));
+	ctx.quadraticCurveTo(x+(2.65*SC), y+(3.6*SC), x+(0.45*SC), y+(3.6*SC));
+	ctx.bezierCurveTo(x+(1.15*SC), y+(3*SC), x+(1.15*SC), y+(1*SC), x+(0.45*SC), y+(0.4*SC));
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
 
+	// Draw the extra curved line at the start.
 	ctx.beginPath();
-	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
-	ctx.bezierCurveTo(x+(1.1*SC), y+(1*SC), x+(1.1*SC), y+(3*SC), x+(0.3*SC), y+(3.6*SC));
+	ctx.moveTo(x+(0.2*SC), y+(0.4*SC));
+	ctx.bezierCurveTo(x+(0.9*SC), y+(1*SC), x+(0.9*SC), y+(3*SC), x+(0.2*SC), y+(3.6*SC));
 	ctx.stroke();
 	ctx.closePath();
 
+	// Draw the circle at the end.
 	ctx.beginPath();
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
+
+	// Write the name of the gate.
+	ctx.font = (0.65*SC) + "pt Impact";
+	ctx.textAlign = "center";
+	ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx.fillText("XNOR", x+(2.05*SC), y+(2.32*SC));
+	ctx.restore();
 }
 
 function drawBulb(x, y, live, ctx){

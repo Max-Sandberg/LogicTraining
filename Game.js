@@ -6,7 +6,7 @@ var allowedGates;
 var enableGateChanges;
 var draggedGate = 0;
 var selectedGate = null;
-var drawDraggedInterval, updateSelectedInterval, drawInterval, updateInterval, gateChangeInterval, menuHoverInterval;
+var drawDraggedInterval, updateSelectedInterval, drawInterval, updateInterval, gateChangeInterval, menuHoverInterval, restartHoverInterval;
 var gateButtonIntervals = [];
 var mousex, mousey;
 var pause = false;
@@ -16,7 +16,7 @@ var currentScreen, screens = Object.freeze({"menu":0, "game":1, "gateIntro":2, "
 var devMode;
 
 function startGame(){
-	// enterDevMode();
+	enterDevMode();
 	createCanvases();
 	document.body.onresize = handleResize;
 	loadFontAwesome(drawMenu, 200);
@@ -182,7 +182,7 @@ function createCanvases(){
 // Handles the window being resized.
 function handleResize(){
 	// Don't resize if we're mid-level. That breaks things. Just deal with the size problem, and resize when we get back to the menu.
-	if (currentScreen != screens.game){
+	if (currentScreen == screens.menu){
 		// Resize the canvases.
 		cvs1.width = window.innerWidth;
 		cvs1.height = window.innerHeight;
@@ -448,10 +448,10 @@ function updateGame(){
 	for (var i = 0; i < circuits.length; i++){
 		if (!pause){
 			// Normal circuits move 1 pixel, star circuits move two pixels.
-			if (circuits[i].fast && circuits[i].startx < cvs1.width){
-				circuits[i].startx -= 1.5 * scrollSpeed;
-			} else {
+			if (circuits[i].startx > cvs1.width){
 				circuits[i].startx -= scrollSpeed;
+			} else {
+				circuits[i].startx -= circuits[i].speedModifier * scrollSpeed;
 			}
 
 			// Start animations if the circuit moves on the screen.
@@ -664,6 +664,17 @@ function drawMenuBar(){
 	// Creates the menu button.
 	clearInterval(menuHoverInterval);
 	menuHoverInterval = createTextButton(0.5*SC, 0.5*SC, "MENU", SC+2, "left", "#2A8958", handleMenuButtonClick, [screens.gateIntro, screens.game]);
+
+	// Function to restart the current level.
+	function handleRestartButtonClick(){
+		clearIntervals();
+		resetGameState();
+		startLevel(levelIdx);
+	}
+
+	// Creates the restart button.
+	clearInterval(restartHoverInterval);
+	restartHoverInterval = createTextButton(0.5*SC, 2*SC, "RESTART", SC+2, "left", "#2A8958", handleRestartButtonClick, [screens.gateIntro, screens.game]);
 }
 
 function createGateButton(x, y, gate){
@@ -1015,12 +1026,16 @@ function chooseCircuits(){
 		// Randomly chooses a circuit from diffPool, removes it from the pool, and adds it to circuits.
 		idx = Math.floor(Math.random()*(diffPool.length));
 		circuits.push(diffPool.splice(idx,1)[0]);
+
+		// Circuits move at different speeds based on their difficulty, so calculate this now.
+		circuits[i].speedModifier = (27-diff)/25;
 	}
 
 	// Circuits 4 and 8 are always fast circuits, so change these now.
 	if (!level.tutorial){
 		for (var i = 3; i <= 7; i += 4){
 			circuits[i].fast = true;
+			circuits[i].speedModifier = circuits[i].speedModifier * 1.5;
 		}
 	}
 }
@@ -1616,13 +1631,15 @@ function drawDraggedGate(){
 
 //#region - Functions to draw the specific gates.
 function drawAND(x, y, input1, input2, output, ctx){
+	// Draw the input wires and output wire.
 	drawWire(x, y+SC, x+(0.6*SC), y+SC, input1, ctx);
 	drawWire(x, y+(3*SC), x+(0.6*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
+	// Draw the gate icon.
+	ctx.save();
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#8080ff"; // blue
-
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
 	ctx.lineTo(x+(1.6*SC), y+(0.4*SC));
@@ -1632,83 +1649,121 @@ function drawAND(x, y, input1, input2, output, ctx){
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
+
+	// Write the name of the gate.
+	ctx.font = (0.8*SC) + "pt Impact";
+	ctx.textAlign = "center";
+	ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx.fillText("AND", x+(1.98*SC), y+(2.4*SC));
+	ctx.restore();
 }
 
 function drawNAND(x, y, input1, input2, output, ctx){
-	drawWire(x, y+SC, x+(0.6*SC), y+SC, input1, ctx);
-	drawWire(x, y+(3*SC), x+(0.6*SC), y+(3*SC), input2, ctx);
+	// Draw the input wires and output wire.
+	drawWire(x, y+SC, x+(0.5*SC), y+SC, input1, ctx);
+	drawWire(x, y+(3*SC), x+(0.5*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
+	// Draw the gate icon.
+	ctx.save();
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ffd280"; // orange
-
 	ctx.beginPath();
-	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
+	ctx.moveTo(x+(0.5*SC), y+(0.4*SC));
 	ctx.lineTo(x+(1.4*SC), y+(0.4*SC));
 	ctx.bezierCurveTo(x+(3.9*SC), y+(0.4*SC), x+(3.9*SC), y+(3.6*SC), x+(1.4*SC), y+(3.6*SC));
-	ctx.lineTo(x+(0.6*SC), y+(3.6*SC));
-	ctx.lineTo(x+(0.6*SC), y+(0.4*SC));
+	ctx.lineTo(x+(0.5*SC), y+(3.6*SC));
+	ctx.lineTo(x+(0.5*SC), y+(0.4*SC));
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
 
+	// Draw the circle at the end.
 	ctx.beginPath();
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
+
+	// Write the name of the gate.
+	ctx.font = (0.8*SC) + "pt Impact";
+	ctx.textAlign = "center";
+	ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx.fillText("NAND", x+(1.85*SC), y+(2.4*SC));
+	ctx.restore();
 }
 
 function drawOR(x, y, input1, input2, output, ctx){
+	// Draw the input wires and output wire.
 	drawWire(x, y+SC, x+(0.8*SC), y+SC, input1, ctx);
 	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
+	// Draw the gate icon.
+	ctx.save();
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#80ff80"; // green
-
 	ctx.beginPath();
-	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
+	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
 	ctx.quadraticCurveTo(x+(3*SC), y+(0.4*SC), x+(3.5*SC), y+(2*SC));
-	ctx.quadraticCurveTo(x+(3*SC), y+(3.6*SC), x+(0.4*SC), y+(3.6*SC));
-	ctx.bezierCurveTo(x+(1.2*SC), y+(3*SC), x+(1.2*SC), y+(1*SC), x+(0.4*SC), y+(0.4*SC));
+	ctx.quadraticCurveTo(x+(3*SC), y+(3.6*SC), x+(0.3*SC), y+(3.6*SC));
+	ctx.bezierCurveTo(x+(1.1*SC), y+(3*SC), x+(1.1*SC), y+(1*SC), x+(0.3*SC), y+(0.4*SC));
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
+
+	// Write the name of the gate.
+	ctx.font = (0.8*SC) + "pt Impact";
+	ctx.textAlign = "center";
+	ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx.fillText("OR", x+(2.02*SC), y+(2.4*SC));
+	ctx.restore();
 }
 
 function drawNOR(x, y, input1, input2, output, ctx){
-	drawWire(x, y+SC, x+(0.8*SC), y+SC, input1, ctx);
-	drawWire(x, y+(3*SC), x+(0.8*SC), y+(3*SC), input2, ctx);
+	// Draw the input wires and output wire.
+	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
+	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
+	// Draw the gate icon.
+	ctx.save();
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ff8080"; // red
-
 	ctx.beginPath();
-	ctx.moveTo(x+(0.4*SC), y+(0.4*SC));
+	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
 	ctx.quadraticCurveTo(x+(2.75*SC), y+(0.4*SC), x+(3.25*SC), y+(2*SC));
-	ctx.quadraticCurveTo(x+(2.75*SC), y+(3.6*SC), x+(0.4*SC), y+(3.6*SC));
-	ctx.bezierCurveTo(x+(1.2*SC), y+(3*SC), x+(1.2*SC), y+(1*SC), x+(0.4*SC), y+(0.4*SC));
+	ctx.quadraticCurveTo(x+(2.75*SC), y+(3.6*SC), x+(0.3*SC), y+(3.6*SC));
+	ctx.bezierCurveTo(x+(1.1*SC), y+(3*SC), x+(1.1*SC), y+(1*SC), x+(0.3*SC), y+(0.4*SC));
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
 
+	// Draw the circle at the end.
 	ctx.beginPath();
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
+
+	// Write the name of the gate.
+	ctx.font = (0.8*SC) + "pt Impact";
+	ctx.textAlign = "center";
+	ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx.fillText("NOR", x+(1.94*SC), y+(2.4*SC));
+	ctx.restore();
 }
 
 function drawXOR(x, y, input1, input2, output, ctx){
+	// Draw the input wires and output wire.
 	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
 	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.5*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
+	// Draw the gate icon.
+	ctx.save();
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ffff80"; // yellow
-
 	ctx.beginPath();
 	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
 	ctx.quadraticCurveTo(x+(3*SC), y+(0.4*SC), x+(3.5*SC), y+(2*SC));
@@ -1718,41 +1773,60 @@ function drawXOR(x, y, input1, input2, output, ctx){
 	ctx.stroke();
 	ctx.closePath();
 
+	// Draw the extra curved line at the start.
 	ctx.beginPath();
 	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
 	ctx.bezierCurveTo(x+(1.1*SC), y+(1*SC), x+(1.1*SC), y+(3*SC), x+(0.3*SC), y+(3.6*SC));
 	ctx.stroke();
 	ctx.closePath();
+
+	// Write the name of the gate.
+	ctx.font = (0.8*SC) + "pt Impact";
+	ctx.textAlign = "center";
+	ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx.fillText("XOR", x+(2.25*SC), y+(2.4*SC));
+	ctx.restore();
 }
 
 function drawXNOR(x, y, input1, input2, output, ctx){
-	drawWire(x, y+SC, x+(0.7*SC), y+SC, input1, ctx);
-	drawWire(x, y+(3*SC), x+(0.7*SC), y+(3*SC), input2, ctx);
+	// Draw the input wires and output wire.
+	drawWire(x, y+SC, x+(0.6*SC), y+SC, input1, ctx);
+	drawWire(x, y+(3*SC), x+(0.6*SC), y+(3*SC), input2, ctx);
 	drawWire(x+(3.75*SC), y+(2*SC), x+(4*SC), y+(2*SC), output, ctx);
 
+	// Draw the gate icon.
+	ctx.save();
 	ctx.lineWidth = 1.5;
 	ctx.fillStyle = "#ff80ff"; // purple
-
 	ctx.beginPath();
-	ctx.moveTo(x+(0.6*SC), y+(0.4*SC));
-	ctx.quadraticCurveTo(x+(2.75*SC), y+(0.4*SC), x+(3.25*SC), y+(2*SC));
-	ctx.quadraticCurveTo(x+(2.75*SC), y+(3.6*SC), x+(0.6*SC), y+(3.6*SC));
-	ctx.bezierCurveTo(x+(1.4*SC), y+(3*SC), x+(1.4*SC), y+(1*SC), x+(0.6*SC), y+(0.4*SC));
+	ctx.moveTo(x+(0.45*SC), y+(0.4*SC));
+	ctx.quadraticCurveTo(x+(2.65*SC), y+(0.4*SC), x+(3.25*SC), y+(2*SC));
+	ctx.quadraticCurveTo(x+(2.65*SC), y+(3.6*SC), x+(0.45*SC), y+(3.6*SC));
+	ctx.bezierCurveTo(x+(1.15*SC), y+(3*SC), x+(1.15*SC), y+(1*SC), x+(0.45*SC), y+(0.4*SC));
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
 
+	// Draw the extra curved line at the start.
 	ctx.beginPath();
-	ctx.moveTo(x+(0.3*SC), y+(0.4*SC));
-	ctx.bezierCurveTo(x+(1.1*SC), y+(1*SC), x+(1.1*SC), y+(3*SC), x+(0.3*SC), y+(3.6*SC));
+	ctx.moveTo(x+(0.2*SC), y+(0.4*SC));
+	ctx.bezierCurveTo(x+(0.9*SC), y+(1*SC), x+(0.9*SC), y+(3*SC), x+(0.2*SC), y+(3.6*SC));
 	ctx.stroke();
 	ctx.closePath();
 
+	// Draw the circle at the end.
 	ctx.beginPath();
 	ctx.arc(x+(3.5*SC), y+(2*SC), 0.25*SC, 0, 2*Math.PI);
 	ctx.fill();
 	ctx.stroke();
 	ctx.closePath();
+
+	// Write the name of the gate.
+	ctx.font = (0.65*SC) + "pt Impact";
+	ctx.textAlign = "center";
+	ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+	ctx.fillText("XNOR", x+(2.05*SC), y+(2.32*SC));
+	ctx.restore();
 }
 
 function drawBulb(x, y, live, ctx){
@@ -2152,12 +2226,14 @@ function clearIntervals(){
 	clearInterval(updateInterval);
 	clearInterval(gateChangeInterval);
 	clearInterval(menuHoverInterval);
+	clearInterval(restartHoverInterval);
 	updateSelectedInterval = undefined;
 	drawDraggedInterval = undefined;
 	drawInterval = undefined;
 	updateInterval = undefined;
 	gateChangeInterval = undefined;
 	menuHoverInterval = undefined;
+	restartHoverInterval = undefined;
 	cvs2.onmousedown = undefined;
 	cvs2.onmouseup = undefined;
 	document.onkeypress = undefined;
@@ -6025,7 +6101,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1]
 						}],
-						type : gates.and,
+						type : gates.xor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -6040,7 +6116,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 1]
 						}],
-						type : gates.xor,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],

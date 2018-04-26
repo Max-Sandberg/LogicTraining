@@ -301,12 +301,14 @@ function clearIntervals(){
 	clearInterval(updateInterval);
 	clearInterval(gateChangeInterval);
 	clearInterval(menuHoverInterval);
+	clearInterval(restartHoverInterval);
 	updateSelectedInterval = undefined;
 	drawDraggedInterval = undefined;
 	drawInterval = undefined;
 	updateInterval = undefined;
 	gateChangeInterval = undefined;
 	menuHoverInterval = undefined;
+	restartHoverInterval = undefined;
 	cvs2.onmousedown = undefined;
 	cvs2.onmouseup = undefined;
 	document.onkeypress = undefined;

@@ -35,12 +35,16 @@ function chooseCircuits(){
 		// Randomly chooses a circuit from diffPool, removes it from the pool, and adds it to circuits.
 		idx = Math.floor(Math.random()*(diffPool.length));
 		circuits.push(diffPool.splice(idx,1)[0]);
+
+		// Circuits move at different speeds based on their difficulty, so calculate this now.
+		circuits[i].speedModifier = (27-diff)/25;
 	}
 
 	// Circuits 4 and 8 are always fast circuits, so change these now.
 	if (!level.tutorial){
 		for (var i = 3; i <= 7; i += 4){
 			circuits[i].fast = true;
+			circuits[i].speedModifier = circuits[i].speedModifier * 1.5;
 		}
 	}
 }

@@ -3,10 +3,10 @@ function updateGame(){
 	for (var i = 0; i < circuits.length; i++){
 		if (!pause){
 			// Normal circuits move 1 pixel, star circuits move two pixels.
-			if (circuits[i].fast && circuits[i].startx < cvs1.width){
-				circuits[i].startx -= 1.5 * scrollSpeed;
-			} else {
+			if (circuits[i].startx > cvs1.width){
 				circuits[i].startx -= scrollSpeed;
+			} else {
+				circuits[i].startx -= circuits[i].speedModifier * scrollSpeed;
 			}
 
 			// Start animations if the circuit moves on the screen.

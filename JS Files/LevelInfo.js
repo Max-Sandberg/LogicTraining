@@ -3386,7 +3386,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [0, 1]
 						}],
-						type : gates.and,
+						type : gates.xor,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [2, 0],
@@ -3401,7 +3401,7 @@ var circuitPools = [
 							type : "gate",
 							gate : [1, 1]
 						}],
-						type : gates.xor,
+						type : gates.and,
 						fixed : true,
 						nextGates : [{
 							gateIdx : [3, 0],

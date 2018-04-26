@@ -6,7 +6,7 @@ var allowedGates;
 var enableGateChanges;
 var draggedGate = 0;
 var selectedGate = null;
-var drawDraggedInterval, updateSelectedInterval, drawInterval, updateInterval, gateChangeInterval, menuHoverInterval;
+var drawDraggedInterval, updateSelectedInterval, drawInterval, updateInterval, gateChangeInterval, menuHoverInterval, restartHoverInterval;
 var gateButtonIntervals = [];
 var mousex, mousey;
 var pause = false;
@@ -16,7 +16,7 @@ var currentScreen, screens = Object.freeze({"menu":0, "game":1, "gateIntro":2, "
 var devMode;
 
 function startGame(){
-	// enterDevMode();
+	enterDevMode();
 	createCanvases();
 	document.body.onresize = handleResize;
 	loadFontAwesome(drawMenu, 200);
@@ -182,7 +182,7 @@ function createCanvases(){
 // Handles the window being resized.
 function handleResize(){
 	// Don't resize if we're mid-level. That breaks things. Just deal with the size problem, and resize when we get back to the menu.
-	if (currentScreen != screens.game){
+	if (currentScreen == screens.menu){
 		// Resize the canvases.
 		cvs1.width = window.innerWidth;
 		cvs1.height = window.innerHeight;

@@ -89,6 +89,17 @@ function drawMenuBar(){
 	// Creates the menu button.
 	clearInterval(menuHoverInterval);
 	menuHoverInterval = createTextButton(0.5*SC, 0.5*SC, "MENU", SC+2, "left", "#2A8958", handleMenuButtonClick, [screens.gateIntro, screens.game]);
+
+	// Function to restart the current level.
+	function handleRestartButtonClick(){
+		clearIntervals();
+		resetGameState();
+		startLevel(levelIdx);
+	}
+
+	// Creates the restart button.
+	clearInterval(restartHoverInterval);
+	restartHoverInterval = createTextButton(0.5*SC, 2*SC, "RESTART", SC+2, "left", "#2A8958", handleRestartButtonClick, [screens.gateIntro, screens.game]);
 }
 
 function createGateButton(x, y, gate){
