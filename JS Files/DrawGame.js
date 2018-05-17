@@ -94,7 +94,11 @@ function drawMenuBar(){
 	function handleRestartButtonClick(){
 		clearIntervals();
 		resetGameState();
-		startLevel(levelIdx);
+		if (level.tutorial){
+			startTutorial();
+		} else {
+			startLevel(levelIdx);
+		}
 	}
 
 	// Creates the restart button.

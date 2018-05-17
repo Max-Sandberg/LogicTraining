@@ -16,7 +16,7 @@ var currentScreen, screens = Object.freeze({"menu":0, "game":1, "gateIntro":2, "
 var devMode;
 
 function startGame(){
-	//enterDevMode();
+	// enterDevMode();
 	createCanvases();
 	document.body.onresize = handleResize;
 	loadFontAwesome(drawMenu, 200);
@@ -210,24 +210,24 @@ function createButton(drawButton, drawArgs, checkHover, handleClick, intendedScr
 		mouseHover,
 		oldMouseDown;
 	function updateButton(){
-		// If we return to the main menu, stop updating this button.
+		// If we leave the intended screen, stop updating this button.
 		if (intendedScreens.indexOf(currentScreen) == -1){
 			clearInterval(buttonInterval);
-		}
-
-		mouseHover = checkHover();
-		if (!highlight && mouseHover){
-			// If the mouse is over the button and it isn't highlighted, highlight it.
-			highlight = true;
-			drawButton(drawArgs, true);
-			oldMouseDown = cvs2.onmousedown;
-			cvs2.onmousedown = handleClick;
-		}
-		else if (highlight && !mouseHover){
-			// If the mouse isn't over the button and it's still highlighted, unhighlight it.
-			highlight = false;
-			drawButton(drawArgs, false);
-			cvs2.onmousedown = oldMouseDown;
+		} else {
+			mouseHover = checkHover();
+			if (!highlight && mouseHover){
+				// If the mouse is over the button and it isn't highlighted, highlight it.
+				highlight = true;
+				drawButton(drawArgs, true);
+				oldMouseDown = cvs2.onmousedown;
+				cvs2.onmousedown = handleClick;
+			}
+			else if (highlight && !mouseHover){
+				// If the mouse isn't over the button and it's still highlighted, unhighlight it.
+				highlight = false;
+				drawButton(drawArgs, false);
+				cvs2.onmousedown = oldMouseDown;
+			}
 		}
 	}
 
@@ -669,7 +669,11 @@ function drawMenuBar(){
 	function handleRestartButtonClick(){
 		clearIntervals();
 		resetGameState();
-		startLevel(levelIdx);
+		if (level.tutorial){
+			startTutorial();
+		} else {
+			startLevel(levelIdx);
+		}
 	}
 
 	// Creates the restart button.
@@ -1927,53 +1931,55 @@ var won;
 
 // Checks if the player won or lost, and how many stars they earned, then displays the relevant end dialogue.
 function endLevel(){
-	if (level.tutorial && circuitsSolved == 1){
-		// If this is the tutorial level, don't show the end screen, just continue the tutorial.
+	if (level.tutorial && circuits[0].gateSections[0][0].outputVal == 1){
+		// If in the tutorial level, don't show the endscreen, just continue the tutorial.
 		pause = true;
+		clearInterval(updateInterval);
+		updateInterval = undefined;
 		handleTestCircuit();
 	} else {
 		// Wait for the game to draw one more frame, just to make sure the last circuit has been updated.
-		currentScreen = screens.levelEnd;
 		window.requestAnimationFrame(function(){
 			window.requestAnimationFrame(function(){
 				callback();
 			})
 		});
+	}
 
-		function callback(){
-			// Clear all intervals.
-			clearIntervals();
+	function callback(){
+		// Clear all intervals.
+		clearIntervals();
+		currentScreen = screens.levelEnd;;
 
-			// Counts how many circuits the player got correct.
-			var circuitsSolved = 0;
-			for (var i = 0; i < circuits.length; i++){
-				var gateSections = circuits[i].gateSections,
-					bulb = gateSections[gateSections.length-1][0];
-				if (bulb.outputVal == 1){
-					circuitsSolved++;
-				}
+		// Counts how many circuits the player got correct.
+		circuitsSolved = 0;
+		for (var i = 0; i < circuits.length; i++){
+			var gateSections = circuits[i].gateSections,
+				bulb = gateSections[gateSections.length-1][0];
+			if (bulb.outputVal == 1){
+				circuitsSolved++;
 			}
-
-			// Calculate how many stars the player earned.
-			var starsEarned = (level.tutorial) ? 0 :
-							  (circuitsSolved == circuits.length) ? 3 :
-							  (circuitsSolved >= circuits.length - 2) ? 2 :
-							  (circuitsSolved >= circuits.length - 4) ? 1 : 0
-			won = (starsEarned > 0);
-
-			if (won){
-				// Unlock the next level if they won.
-				if (levelIdx < levels.length-1){
-					levels[levelIdx+1].unlocked = true;
-				}
-				// If they earned more stars than they had previously earned for this level, update the stars gained.
-				if (level.starsEarned < starsEarned){
-					level.starsEarned = starsEarned;
-				}
-			}
-
-			showEndScreen(circuitsSolved, starsEarned);
 		}
+
+		// Calculate how many stars the player earned.
+		var starsEarned = (level.tutorial) ? 0 :
+						  (circuitsSolved == circuits.length) ? 3 :
+						  (circuitsSolved >= circuits.length - 2) ? 2 :
+						  (circuitsSolved >= circuits.length - 4) ? 1 : 0
+		won = (starsEarned > 0);
+
+		if (won){
+			// Unlock the next level if they won.
+			if (levelIdx < levels.length-1){
+				levels[levelIdx+1].unlocked = true;
+			}
+			// If they earned more stars than they had previously earned for this level, update the stars gained.
+			if (level.starsEarned < starsEarned){
+				level.starsEarned = starsEarned;
+			}
+		}
+
+		showEndScreen(circuitsSolved, starsEarned);
 	}
 }
 
@@ -2248,8 +2254,7 @@ function resetGameState(){
 	ctx2.clearRect(0, 0, cvs1.width, cvs1.height);
 	ctx1.textAlign = "left";
 }
-var currentTutDialogue,
-	tutDialogues = [
+var tutDialogues = [
 	{
 		idx : 0,
 		topText : "Welcome to Logic Training! This tutorial will teach you what logic gates are, and how to play the game.",
@@ -2428,11 +2433,11 @@ function displayTutorialDialogue(dlgIdx){
 	}
 
 	// Function to call if the button is clicked.
-	var buttonInterval;
+	var btnInterval;
 	function handleClick(){
 		// Clear this dialogue box and the button interval.
+		clearInterval(btnInterval);
 		ctx1.clearRect(startx-3, starty-3, boxWidth+6, boxHeight+6);
-		clearInterval(buttonInterval);
 		cvs2.onmousedown = handleMouseDown;
 
 		if (dlgIdx+1 == 3){
@@ -2457,7 +2462,7 @@ function displayTutorialDialogue(dlgIdx){
 		btnY = starty + boxHeight - 30;
 
 	// Create the button.
-	buttonInterval = createTextButton(btnX, btnY, dlg.btnText, 18, "left", "#2A8958", handleClick, [screens.game]);
+	btnInterval = createTextButton(btnX, btnY, dlg.btnText, 18, "left", "#2A8958", handleClick, [screens.game]);
 }
 
 // Scroll a single test circuit across the screen, and show prompts for the player.

@@ -16,7 +16,7 @@ var currentScreen, screens = Object.freeze({"menu":0, "game":1, "gateIntro":2, "
 var devMode;
 
 function startGame(){
-	//enterDevMode();
+	// enterDevMode();
 	createCanvases();
 	document.body.onresize = handleResize;
 	loadFontAwesome(drawMenu, 200);
@@ -210,24 +210,24 @@ function createButton(drawButton, drawArgs, checkHover, handleClick, intendedScr
 		mouseHover,
 		oldMouseDown;
 	function updateButton(){
-		// If we return to the main menu, stop updating this button.
+		// If we leave the intended screen, stop updating this button.
 		if (intendedScreens.indexOf(currentScreen) == -1){
 			clearInterval(buttonInterval);
-		}
-
-		mouseHover = checkHover();
-		if (!highlight && mouseHover){
-			// If the mouse is over the button and it isn't highlighted, highlight it.
-			highlight = true;
-			drawButton(drawArgs, true);
-			oldMouseDown = cvs2.onmousedown;
-			cvs2.onmousedown = handleClick;
-		}
-		else if (highlight && !mouseHover){
-			// If the mouse isn't over the button and it's still highlighted, unhighlight it.
-			highlight = false;
-			drawButton(drawArgs, false);
-			cvs2.onmousedown = oldMouseDown;
+		} else {
+			mouseHover = checkHover();
+			if (!highlight && mouseHover){
+				// If the mouse is over the button and it isn't highlighted, highlight it.
+				highlight = true;
+				drawButton(drawArgs, true);
+				oldMouseDown = cvs2.onmousedown;
+				cvs2.onmousedown = handleClick;
+			}
+			else if (highlight && !mouseHover){
+				// If the mouse isn't over the button and it's still highlighted, unhighlight it.
+				highlight = false;
+				drawButton(drawArgs, false);
+				cvs2.onmousedown = oldMouseDown;
+			}
 		}
 	}
 

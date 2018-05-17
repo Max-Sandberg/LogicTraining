@@ -2,53 +2,55 @@ var won;
 
 // Checks if the player won or lost, and how many stars they earned, then displays the relevant end dialogue.
 function endLevel(){
-	if (level.tutorial && circuitsSolved == 1){
-		// If this is the tutorial level, don't show the end screen, just continue the tutorial.
+	if (level.tutorial && circuits[0].gateSections[0][0].outputVal == 1){
+		// If in the tutorial level, don't show the endscreen, just continue the tutorial.
 		pause = true;
+		clearInterval(updateInterval);
+		updateInterval = undefined;
 		handleTestCircuit();
 	} else {
 		// Wait for the game to draw one more frame, just to make sure the last circuit has been updated.
-		currentScreen = screens.levelEnd;
 		window.requestAnimationFrame(function(){
 			window.requestAnimationFrame(function(){
 				callback();
 			})
 		});
+	}
 
-		function callback(){
-			// Clear all intervals.
-			clearIntervals();
+	function callback(){
+		// Clear all intervals.
+		clearIntervals();
+		currentScreen = screens.levelEnd;;
 
-			// Counts how many circuits the player got correct.
-			var circuitsSolved = 0;
-			for (var i = 0; i < circuits.length; i++){
-				var gateSections = circuits[i].gateSections,
-					bulb = gateSections[gateSections.length-1][0];
-				if (bulb.outputVal == 1){
-					circuitsSolved++;
-				}
+		// Counts how many circuits the player got correct.
+		circuitsSolved = 0;
+		for (var i = 0; i < circuits.length; i++){
+			var gateSections = circuits[i].gateSections,
+				bulb = gateSections[gateSections.length-1][0];
+			if (bulb.outputVal == 1){
+				circuitsSolved++;
 			}
-
-			// Calculate how many stars the player earned.
-			var starsEarned = (level.tutorial) ? 0 :
-							  (circuitsSolved == circuits.length) ? 3 :
-							  (circuitsSolved >= circuits.length - 2) ? 2 :
-							  (circuitsSolved >= circuits.length - 4) ? 1 : 0
-			won = (starsEarned > 0);
-
-			if (won){
-				// Unlock the next level if they won.
-				if (levelIdx < levels.length-1){
-					levels[levelIdx+1].unlocked = true;
-				}
-				// If they earned more stars than they had previously earned for this level, update the stars gained.
-				if (level.starsEarned < starsEarned){
-					level.starsEarned = starsEarned;
-				}
-			}
-
-			showEndScreen(circuitsSolved, starsEarned);
 		}
+
+		// Calculate how many stars the player earned.
+		var starsEarned = (level.tutorial) ? 0 :
+						  (circuitsSolved == circuits.length) ? 3 :
+						  (circuitsSolved >= circuits.length - 2) ? 2 :
+						  (circuitsSolved >= circuits.length - 4) ? 1 : 0
+		won = (starsEarned > 0);
+
+		if (won){
+			// Unlock the next level if they won.
+			if (levelIdx < levels.length-1){
+				levels[levelIdx+1].unlocked = true;
+			}
+			// If they earned more stars than they had previously earned for this level, update the stars gained.
+			if (level.starsEarned < starsEarned){
+				level.starsEarned = starsEarned;
+			}
+		}
+
+		showEndScreen(circuitsSolved, starsEarned);
 	}
 }
 
